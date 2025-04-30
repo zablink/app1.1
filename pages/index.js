@@ -1,10 +1,10 @@
 import { useSession } from 'next-auth/react';
 import supabase from '../lib/supabase';
 import { useEffect, useState } from 'react';
-//import Chart from 'react-chartjs-2';
-//import { Chart as ChartJS, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import Chart from 'react-chartjs-2';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
-//ChartJS.register(BarElement, CategoryScale, LinearScale);
+ChartJS.register(BarElement, CategoryScale, LinearScale);
 
 export default function StoreDashboard() {
   const { data: session } = useSession();
