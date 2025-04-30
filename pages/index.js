@@ -105,16 +105,6 @@ export default function StoreDashboard() {
       <h1 className="text-2xl mb-4">Store Dashboard</h1>
 
       {/* แสดง stats */}
-      <div className="mb-4">
-        <h2 className="text-xl">สถิติ</h2>
-        <Chart
-          type="bar"
-          data={{
-            labels: ['Views', 'Clicks'],
-            datasets: [{ label: 'Stats', data: [stats.views, stats.clicks], backgroundColor: '#3b82f6' }],
-          }}
-        />
-      </div>
 
       {/* อัปเดตตำแหน่ง */}
       <div className="mb-4">
