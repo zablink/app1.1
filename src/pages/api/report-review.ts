@@ -1,22 +1,37 @@
-// pages/api/report-review.ts
+// src/pages/api/report-review.ts
+import { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]";
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
-
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
-  if (!session?.user) return res.status(401).json({ error: "Unauthorized" });
 
-  const { review_id } = req.body;
-  if (!review_id) return res.status(400).json({ error: "review_id is required" });
+  if (!session || !session.user?.email) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-  const { data, error } = await supabase
-    .from("review_reports")
-    .insert([{ review_id, user_id: session.user.id }]);
+  if (req.method === "POST") {
+    const { review_id, reason } = req.body;
 
-  if (error) return res.status(500).json({ error: error.message });
+    if (!review_id || !reason) {
+      return res.status(400).json({ message: "Missing review_id or reason" });
+    }
 
-  return res.status(200).json({ message: "แจ้งรีวิวเรียบร้อยแล้ว" });
+    const { error } = await supabase.from("reported_reviews").insert([
+      {
+        review_id,
+        reason,
+        reported_by: session.user.email,
+      },
+    ]);
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    return res.status(200).json({ message: "Reported successfully" });
+  } else {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
 }
