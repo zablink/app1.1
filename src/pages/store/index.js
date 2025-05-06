@@ -1,5 +1,5 @@
 import { useSession } from 'next-auth/react';
-import supabase from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import Chart from 'react-chartjs-2';
 
