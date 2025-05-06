@@ -1,7 +1,6 @@
 // pages/api/store-categories.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { createClient } from "@supabase/supabase-js";
-
+import { createClient } from "@/lib/supabase";
 const supabase = createClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

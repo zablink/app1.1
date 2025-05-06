@@ -13,13 +13,22 @@ import StoreReviews from "@/components/StoreReviews";
 
 const supabase = createClient();
 
+type Link = {
+  id: number;
+  title: string;
+  url: string;
+  created_at: string;
+};
+
 export default function StoreDashboard() {
   const { data: session, status } = useSession();
   const [storeId, setStoreId] = useState<number | null>(null);
-  const [links, setLinks] = useState<any[]>([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [newLink, setNewLink] = useState({ title: "", url: "" });
   const [loading, setLoading] = useState(true);
-  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
+  //const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
+
   const router = useRouter();
 
   const { isLoaded } = useJsApiLoader({
@@ -34,10 +43,11 @@ export default function StoreDashboard() {
     } else {
       fetchStoreIdAndLinks();
     }
-  }, [session, status]);
+  }, [session, status, fetchStoreIdAndLinks, router]);
 
   const fetchStoreIdAndLinks = async () => {
-    const { data, error } = await supabase
+    //const { data, error } = await supabase
+    const { data, error: _ } = await supabase
       .from("stores")
       .select("id, latitude, longitude")
       .eq("user_id", session?.user.id)

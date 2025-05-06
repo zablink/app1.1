@@ -99,7 +99,7 @@ export const authOptions = {
   ],
   
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user?.email) {
         // OAuth Login: ตรวจ email ใน Supabase
         const { data: existingUser, error } = await supabase
@@ -113,7 +113,7 @@ export const authOptions = {
           token.role = existingUser.role;
         } else {
           // ❗ ไม่พบ → สมัครใหม่เป็น enduser
-          const { data: newUser, error: insertError } = await supabase
+          const { data: insertedUser } = await supabase
             .from("users")
             .insert({
               email: user.email,

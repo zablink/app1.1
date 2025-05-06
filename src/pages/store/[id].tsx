@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
+interface Store {
+    id: string;
+    name: string;
+    description: string;
+    // เพิ่ม field อื่นๆ ถ้ามี
+  }
+  interface Review {
+    id: string;
+    rating: number;
+    comment: string;
+    user_email: string;
+    is_anonymous: boolean;
+}
+
 export default function StoreDetailPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [store, setStore] = useState<any>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
+
+
+  const [store, setStore] = useState<Store | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
 
   useEffect(() => {

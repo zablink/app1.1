@@ -1,12 +1,16 @@
-// components/StoreReviews.tsx
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
+import { createClient } from "@/lib/supabase";
 
 const supabase = createClient();
 
+type Review = {
+  rating: number;
+  comment: string;
+  created_at: string;
+};
+
 export default function StoreReviews({ storeId }: { storeId: number }) {
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     const fetchReviews = async () => {

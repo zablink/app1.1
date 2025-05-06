@@ -1,8 +1,16 @@
 // pages/nearby.tsx
 import { useEffect, useState } from "react";
 
+type Store = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+};
+
+
 export default function NearbyStoresPage() {
-  const [stores, setStores] = useState<any[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [radius, setRadius] = useState(5);
   const [category, setCategory] = useState("");
