@@ -1,7 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import Chart from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 
 export default function StoreDashboard() {
   const { data: session } = useSession();
@@ -25,8 +25,7 @@ export default function StoreDashboard() {
       <h1 className="text-2xl">Store Dashboard</h1>
       <div>
         <h2>Stats</h2>
-        <Chart
-          type="bar"
+        <Bar
           data={{
             labels: ['Views', 'Clicks'],
             datasets: [{ label: 'Stats', data: [stats.views, stats.clicks] }],
