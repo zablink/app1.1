@@ -1,154 +1,103 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import FacebookProvider from "next-auth/providers/facebook";
-import GoogleProvider from "next-auth/providers/google";
-import { createClient } from "@supabase/supabase-js";
+import NextAuth from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+import FacebookProvider from 'next-auth/providers/facebook';
+import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { AdapterUser } from 'next-auth/adapters';
 
-const supabase = createClient();
-/*
-const handler = NextAuth({
-  providers: [
-    // Credentials Login
-    CredentialsProvider({ / * (เหมือนเดิม) * / }),
+async function refreshAccessToken(token: any) {
+  try {
+    const url = 'https://graph.facebook.com/oauth/access_token' +
+      `?grant_type=fb_exchange_token&client_id=${process.env.FACEBOOK_ID}` +
+      `&client_secret=${process.env.FACEBOOK_SECRET}` +
+      `&fb_exchange_token=${token.accessToken}`;
 
-    // Google Login
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'GET',
+    });
 
-    // Facebook Login
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user, account }) {
-      if (user?.email) {
-        // OAuth Login: ตรวจ email ใน Supabase
-        const { data: existingUser, error } = await supabase
-          .from("users")
-          .select("id, role")
-          .eq("email", user.email)
-          .single();
+    const refreshedTokens = await response.json();
 
-        if (existingUser) {
-          token.id = existingUser.id;
-          token.role = existingUser.role;
-        } else {
-          // ❗ ไม่พบ → สมัครใหม่เป็น enduser
-          const { data: newUser, error: insertError } = await supabase
-            .from("users")
-            .insert({
-              email: user.email,
-              role: "enduser",
-              created_at: new Date().toISOString(),
-            })
-            .select("id, role")
-            .single();
+    if (!response.ok) {
+      throw refreshedTokens;
+    }
 
-          token.id = newUser?.id;
-          token.role = newUser?.role ?? "enduser";
-        }
-      }
-
-      // Credentials Login: มี user.role แล้ว
-      if (user?.role) {
-        token.role = user.role;
-        token.id = user.id;
-      }
-
-      return token;
-    },
-
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-});
-
-export { handler as GET, handler as POST };
-*/
-
-//////////////////////////
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+    };
+  } catch (error) {
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+    };
+  }
+}
 
 export const authOptions = {
   providers: [
-    // Credentials Login
-    CredentialsProvider({ /* (เหมือนเดิม) */ }),
-
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-
-    // Facebook Login
     FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+      clientId: process.env.FACEBOOK_ID!,
+      clientSecret: process.env.FACEBOOK_SECRET!,
     }),
   ],
-  
   callbacks: {
-    async jwt({ token, user }) {
-      if (user?.email) {
-        // OAuth Login: ตรวจ email ใน Supabase
-        const { data: existingUser, error } = await supabase
-          .from("users")
-          .select("id, role")
-          .eq("email", user.email)
-          .single();
-
-        if (existingUser) {
-          token.id = existingUser.id;
-          token.role = existingUser.role;
-        } else {
-          // ❗ ไม่พบ → สมัครใหม่เป็น enduser
-          const { data: insertedUser } = await supabase
-            .from("users")
-            .insert({
-              email: user.email,
-              role: "enduser",
-              created_at: new Date().toISOString(),
-            })
-            .select("id, role")
-            .single();
-
-          token.id = newUser?.id;
-          token.role = newUser?.role ?? "enduser";
-        }
-      }
-
-      // Credentials Login: มี user.role แล้ว
-      if (user?.role) {
-        token.role = user.role;
+    async signIn({ user }) {
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
         token.id = user.id;
       }
 
-      return token;
-    },
+      if (Date.now() < (token.accessTokenExpires as number)) {
+        return token;
+      }
 
+      return await refreshAccessToken(token);
+    },
     async session({ session, token }) {
-      if (token && session.user) {
+      if (token) {
         session.user.id = token.id;
-        session.user.role = token.role;
+        session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
       }
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
+  events: {
+    async signIn({ user }) {
+      const supabase = createPagesServerClient({ req: {} as NextApiRequest, res: {} as NextApiResponse });
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', user.email)
+        .single();
+
+      if (!existingUser) {
+        await supabase.from('users').insert([
+          {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: 'user',
+          },
+        ]);
+      }
+    },
   },
-  secret: process.env.NEXTAUTH_SECRET,
 };
 
 export default NextAuth(authOptions);
