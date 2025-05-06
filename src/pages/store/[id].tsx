@@ -7,13 +7,17 @@ interface Store {
     description: string;
     // เพิ่ม field อื่นๆ ถ้ามี
   }
-  interface Review {
+  type Review = {
     id: string;
+    store_id: number;
     rating: number;
     comment: string;
-    user_email: string;
+    created_at: string; // หรือ Date ถ้าแปลงเป็น Date แล้ว
+    anonymous: boolean;
+    user_id: string;
     is_anonymous: boolean;
-}
+  };
+
 
 export default function StoreDetailPage() {
   const router = useRouter();
