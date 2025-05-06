@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
-import { SupabaseAdapter } from '@next-auth/supabase-adapter'
+import { SupabaseAdapter } from '@auth/supabase-adapter'
 import { createPagesServerClient } from '@supabase/auth-helpers-nextjs'
 import type { AdapterUser } from 'next-auth/adapters'
 import type { JWT } from 'next-auth/jwt'
