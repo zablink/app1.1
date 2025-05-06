@@ -1,4 +1,5 @@
-// pages/login.tsx
+// src/pages/login.tsx
+'use client'; //✅ สำหรับ Next 13+ และบังคับให้ treat เป็น client 
 import { getCsrfToken, signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
