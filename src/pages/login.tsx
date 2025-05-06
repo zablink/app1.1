@@ -1,12 +1,21 @@
-// src/pages/login.tsx
-'use client'; //✅ สำหรับ Next 13+ และบังคับให้ treat เป็น client 
-import { getCsrfToken, signIn } from "next-auth/react";
-import { useState } from "react";
+'use client';
+
+import { useEffect, useState } from "react";
+import { signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
 
-export default function LoginPage({ csrfToken }: { csrfToken: string }) {
+export default function LoginPage() {
   const router = useRouter();
+  const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getCsrfToken();
+      if (token) setCsrfToken(token);
+    };
+    fetchToken();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,60 +34,57 @@ export default function LoginPage({ csrfToken }: { csrfToken: string }) {
     }
   };
 
+  const handleOAuthLogin = async (provider: "google" | "facebook") => {
+    await signIn(provider, { callbackUrl: "/" });
+  };
+
   return (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-      <form onSubmit={handleSubmit}>
-        <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h1 className="text-2xl font-bold mb-4 text-center">เข้าสู่ระบบ</h1>
 
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
-        <label className="block mb-2 text-sm">Email</label>
-        <input
-          name="email"
-          type="email"
-          className="w-full px-3 py-2 mb-4 border rounded"
-          required
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input name="csrfToken" type="hidden" value={csrfToken} />
 
-        <label className="block mb-2 text-sm">Password</label>
-        <input
-          name="password"
-          type="password"
-          className="w-full px-3 py-2 mb-4 border rounded"
-          required
-        />
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder="อีเมล"
+            className="w-full px-4 py-2 border rounded"
+          />
+          <input
+            name="password"
+            type="password"
+            required
+            placeholder="รหัสผ่าน"
+            className="w-full px-4 py-2 border rounded"
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            เข้าสู่ระบบ
+          </button>
+        </form>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          เข้าสู่ระบบ
-        </button>
-      </form>
-
-      <div className="mt-6 space-y-3">
-        <p className="text-center text-gray-500 text-sm">หรือเข้าสู่ระบบด้วย</p>
-        <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
-        >
-          Google
-        </button>
-        <button
-          onClick={() => signIn("facebook", { callbackUrl: "/" })}
-          className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-900"
-        >
-          Facebook
-        </button>
+        <div className="mt-6 space-y-2">
+          <button
+            onClick={() => handleOAuthLogin("google")}
+            className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
+          >
+            เข้าสู่ระบบด้วย Google
+          </button>
+          <button
+            onClick={() => handleOAuthLogin("facebook")}
+            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-900"
+          >
+            เข้าสู่ระบบด้วย Facebook
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
-
-
-export async function getServerSideProps(context: any) {
-  return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-    },
-  };
+  );
 }
