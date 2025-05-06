@@ -1,6 +1,7 @@
 // pages/store/location.tsx
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
 import { useSession } from "next-auth/react";
 
 const supabase = createClient();

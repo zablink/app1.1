@@ -1,6 +1,7 @@
 // pages/api/store/[id].ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
 
 const supabase = createClient();
 

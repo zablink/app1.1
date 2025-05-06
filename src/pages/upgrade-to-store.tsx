@@ -2,7 +2,8 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
 
 const supabase = createClient();
 

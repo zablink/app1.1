@@ -1,6 +1,7 @@
 // components/StoreReviews.tsx
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
 
 const supabase = createClient();
 
