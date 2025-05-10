@@ -1,7 +1,8 @@
 // pages/_app.tsx
+import { AppProps } from "next/app";
 import Script from "next/script";
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Script
