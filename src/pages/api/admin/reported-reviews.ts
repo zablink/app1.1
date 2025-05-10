@@ -1,9 +1,9 @@
 // pages/api/admin/reported-reviews.ts
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
-export default async function handler(req, res) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") return res.status(405).end();
 
   const session = await getServerSession(req, res, authOptions);
