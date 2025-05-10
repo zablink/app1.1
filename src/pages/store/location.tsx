@@ -10,7 +10,7 @@
     const { data: session } = useSession();
     const mapRef = useRef<HTMLDivElement>(null);
     const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-    const [map, setMap] = useState<google.maps.Map | null>(null);
+    //const [map, setMap] = useState<google.maps.Map | null>(null);
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
     useEffect(() => {
@@ -43,7 +43,7 @@
         setMarker(newMarker);
       });
 
-      setMap(mapInstance);
+      //setMap(mapInstance);
     }, []);
 
     const saveLocation = async () => {
