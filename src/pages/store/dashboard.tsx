@@ -1,4 +1,3 @@
-// pages/store/dashboard.tsx
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -26,7 +25,6 @@ export default function StoreDashboard() {
   const [links, setLinks] = useState<Link[]>([]);
   const [newLink, setNewLink] = useState({ title: "", url: "" });
   const [loading, setLoading] = useState(true);
-  //const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(null);
 
   const router = useRouter();
@@ -38,32 +36,31 @@ export default function StoreDashboard() {
   useEffect(() => {
     if (status === "loading") return;
 
+    const fetchStoreIdAndLinks = async () => {
+      const { data } = await supabase
+        .from("stores")
+        .select("id, latitude, longitude")
+        .eq("user_id", session?.user.id)
+        .single();
+
+      if (!data) return;
+
+      setStoreId(data.id);
+      if (data.latitude && data.longitude) {
+        setMarker({ lat: data.latitude, lng: data.longitude });
+      }
+      fetchLinks(data.id);
+    };
+
     if (session?.user.role !== "store") {
       router.push("/unauthorized");
     } else {
       fetchStoreIdAndLinks();
     }
-  }, [session, status, fetchStoreIdAndLinks, router]);
-
-  const fetchStoreIdAndLinks = async () => {
-    //const { data, error } = await supabase
-    const { data, error: _ } = await supabase
-      .from("stores")
-      .select("id, latitude, longitude")
-      .eq("user_id", session?.user.id)
-      .single();
-
-    if (!data) return;
-
-    setStoreId(data.id);
-    if (data.latitude && data.longitude) {
-      setMarkerPosition({ lat: data.latitude, lng: data.longitude });
-    }
-    fetchLinks(data.id);
-  };
+  }, [session, status, router]);
 
   const fetchLinks = async (id: number) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("links")
       .select("*")
       .eq("store_id", id)
@@ -76,7 +73,7 @@ export default function StoreDashboard() {
   const handleAddLink = async () => {
     if (!storeId || !newLink.title || !newLink.url) return;
 
-    const { error } = await supabase.from("links").insert({
+    await supabase.from("links").insert({
       store_id: storeId,
       title: newLink.title,
       url: newLink.url,
@@ -97,7 +94,21 @@ export default function StoreDashboard() {
     fetchLinks(storeId!);
   };
 
-  if (loading) return <div className="p-8">กำลังโหลด...</div>;
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setMarker({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    if (!storeId || !marker) return;
+    await supabase
+      .from("stores")
+      .update({ latitude: marker.lat, longitude: marker.lng })
+      .eq("id", storeId);
+  };
+
+  if (loading || !isLoaded) return <div className="p-8">กำลังโหลด...</div>;
 
   return (
     <div className="min-h-screen p-6 bg-gray-50 space-y-6">
@@ -171,20 +182,31 @@ export default function StoreDashboard() {
         <div className="h-80 w-full">
           <GoogleMap
             mapContainerStyle={{ width: "100%", height: "100%" }}
-            center={marker}
+            center={marker!}
             zoom={15}
             onClick={handleMapClick}
           >
-            <Marker position={marker} draggable onDragEnd={(e) => {
-              setMarker({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
-            }} />
+            {marker && (
+              <Marker
+                position={marker}
+                draggable
+                onDragEnd={(e) => {
+                  setMarker({
+                    lat: e.latLng?.lat() || 0,
+                    lng: e.latLng?.lng() || 0,
+                  });
+                }}
+              />
+            )}
           </GoogleMap>
         </div>
 
         {/* พิกัด */}
-        <div className="text-sm text-gray-600 mt-2">
-          พิกัดร้าน: ละติจูด {marker.lat.toFixed(6)}, ลองจิจูด {marker.lng.toFixed(6)}
-        </div>
+        {marker && (
+          <div className="text-sm text-gray-600 mt-2">
+            พิกัดร้าน: ละติจูด {marker.lat.toFixed(6)}, ลองจิจูด {marker.lng.toFixed(6)}
+          </div>
+        )}
 
         <button
           className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -193,7 +215,6 @@ export default function StoreDashboard() {
           บันทึกตำแหน่ง
         </button>
       </div>
-
 
       {/* ส่วนแสดงรีวิว */}
       <div className="bg-white p-4 rounded shadow">
