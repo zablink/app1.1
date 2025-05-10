@@ -2,28 +2,31 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 interface Store {
-    id: string;
-    name: string;
-    description: string;
-    // เพิ่ม field อื่นๆ ถ้ามี
-  }
-  type Review = {
-    id: string;
-    store_id: number;
-    rating: number;
-    comment: string;
-    created_at: string; // หรือ Date ถ้าแปลงเป็น Date แล้ว
-    anonymous: boolean;
-    user_id: string;
-    is_anonymous: boolean;
-  };
+  id: string;
+  name: string;
+  description: string;
+}
 
+type Review = {
+  id: string;
+  store_id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  anonymous: boolean;
+  user_id: string;
+  is_anonymous: boolean;
+  user_profiles?: {
+    nickname?: string;
+  };
+  users?: {
+    email?: string;
+  };
+};
 
 export default function StoreDetailPage() {
   const router = useRouter();
   const { id } = router.query;
-
-
 
   const [store, setStore] = useState<Store | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -32,12 +35,12 @@ export default function StoreDetailPage() {
   useEffect(() => {
     if (id) {
       fetch(`/api/store/${id}`)
-        .then(res => res.json())
-        .then(data => setStore(data.store));
+        .then((res) => res.json())
+        .then((data) => setStore(data.store));
 
       fetch(`/api/store/${id}/reviews`)
-        .then(res => res.json())
-        .then(data => setReviews(data.reviews || []));
+        .then((res) => res.json())
+        .then((data) => setReviews(data.reviews || []));
     }
   }, [id]);
 
@@ -81,12 +84,14 @@ export default function StoreDetailPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold mt-8">รีวิวจากลูกค้า</h2>
         {reviews.length === 0 && <p>ยังไม่มีรีวิว</p>}
-        {reviews.map((review: any) => (
+        {reviews.map((review) => (
           <div key={review.id} className="border rounded p-4 space-y-2">
             <p><strong>ให้คะแนน:</strong> {review.rating} ดาว</p>
             <p>{review.comment}</p>
             <p className="text-sm text-gray-500">
-              โดย: {review.is_anonymous ? "ไม่เปิดเผยตัวตน" : review.user_email}
+              โดย: {review.is_anonymous
+                ? "ไม่เปิดเผยตัวตน"
+                : review.user_profiles?.nickname || review.users?.email || "ผู้ใช้ทั่วไป"}
             </p>
             <button
               onClick={() => handleReportReview(review.id)}

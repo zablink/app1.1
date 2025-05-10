@@ -1,28 +1,64 @@
+import { supabase } from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
-import { createClient } from "@supabase/supabase-js";
-
-
-const supabase = createClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const storeId = req.query.id;
+  const {
+    query: { id },
+    method,
+  } = req;
 
-  const { data: reviews, error } = await supabase
-    .from("reviews")
-    .select("id, rating, comment, anonymous, created_at, users(name)")
-    .eq("store_id", storeId)
-    .order("created_at", { ascending: false });
+  if (!id || typeof id !== "string") {
+    return res.status(400).json({ error: "Missing or invalid store ID" });
+  }
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (method === "GET") {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(`
+        *,
+        user_profiles(nickname),
+        users(email)
+      `)
+      .eq("store_id", id)
+      .order("created_at", { ascending: false });
 
-  const formatted = reviews.map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    comment: r.comment,
-    anonymous: r.anonymous,
-    created_at: r.created_at,
-    user_name: r.users?.name || null,
-  }));
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
 
-  res.status(200).json({ reviews: formatted });
+    return res.status(200).json({ reviews: data });
+  }
+
+  if (method === "POST") {
+    const { rating, comment, isAnonymous } = req.body;
+
+    const { user } = await supabase.auth.getUser();
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert([
+        {
+          store_id: id,
+          rating,
+          comment,
+          is_anonymous: isAnonymous,
+          user_id: user.id,
+        },
+      ])
+      .select(`
+        *,
+        user_profiles(nickname),
+        users(email)
+      `)
+      .single();
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ review: data });
+  }
+
+  return res.setHeader("Allow", ["GET", "POST"]).status(405).end(`Method ${method} Not Allowed`);
 }
