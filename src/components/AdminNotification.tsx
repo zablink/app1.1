@@ -1,33 +1,34 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { MembershipHistory } from "@/types/membership";
 
 export default function AdminNotification() {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [history, setHistory] = useState<MembershipHistory[]>([]);
 
   useEffect(() => {
-    const subscription = supabase
-      .channel("public:membership_history")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "membership_history" },
-        (payload) => {
-          setNotifications((prev) => [payload.new, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/admin/membership-history");
+        const json = await res.json();
+        setHistory(json.history || []);
+      } catch (err) {
+        console.error("Failed to fetch membership history", err);
+      }
     };
+
+    fetchHistory();
   }, []);
 
+  if (!history.length) return null;
+
   return (
-    <div>
-      <h2>การแจ้งเตือน</h2>
-      <ul>
-        {notifications.map((notification, index) => (
-          <li key={index}>
-            ร้านค้า {notification.user_id} เปลี่ยนแพ็กเกจเป็น {notification.to_type} เมื่อ {new Date(notification.changed_at).toLocaleString("th-TH")}
+    <div className="bg-yellow-100 text-yellow-800 p-4 rounded shadow mb-4">
+      <h2 className="font-semibold mb-2">การเปลี่ยนแพ็กเกจล่าสุด:</h2>
+      <ul className="space-y-1 text-sm">
+        {history.slice(0, 5).map((entry) => (
+          <li key={entry.id}>
+            <span className="font-medium">{entry.users?.email}</span>{" "}
+            เปลี่ยนจาก <b>{entry.from_type}</b> เป็น <b>{entry.to_type}</b>{" "}
+            เมื่อ {new Date(entry.changed_at).toLocaleString()}
           </li>
         ))}
       </ul>
