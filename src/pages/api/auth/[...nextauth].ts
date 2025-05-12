@@ -3,7 +3,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import { SupabaseAdapter } from '@auth/supabase-adapter';
 import type { AdapterUser } from 'next-auth/adapters';
-import type { JWT } from 'next-auth/jwt';
+//import type { JWT } from 'next-auth/jwt';
 
 const allowedRoles = ["user", "store", "admin"] as const;
 const allowedMembershipTypes = ["free", "pro1", "pro2", "pro3", "special"] as const;
