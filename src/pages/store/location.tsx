@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-
 import { useSession } from "next-auth/react";
 
 const supabase = createClient(
@@ -24,8 +23,8 @@ export default function StoreLocation() {
       zoom: 13,
     });
 
-    mapInstance.addListener("click", (e) => {
-      const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+    mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
+      const pos = { lat: e.latLng!.lat(), lng: e.latLng!.lng() };
       setLocation(pos);
 
       if (marker) marker.setMap(null);
