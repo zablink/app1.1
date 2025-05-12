@@ -65,6 +65,7 @@ export default function StoreDetailPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newReview),
+      credentials: "include", // ✅ เพิ่มตรงนี้
     });
     const json = await res.json();
     if (res.ok) {
@@ -74,6 +75,7 @@ export default function StoreDetailPage() {
       alert(json.error);
     }
   };
+
 
   const handleReportReview = async (reviewId: string) => {
     const res = await fetch("/api/report-review", {

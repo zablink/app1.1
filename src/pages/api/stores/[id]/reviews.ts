@@ -1,5 +1,5 @@
-import { supabase } from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
+import { createPagesServerClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const {
@@ -10,6 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!id || typeof id !== "string") {
     return res.status(400).json({ error: "Missing or invalid store ID" });
   }
+
+  const supabase = createPagesServerClient({ req, res }); // ✅ ใช้ตัวนี้แทน
 
   if (method === "GET") {
     const { data, error } = await supabase
@@ -30,12 +32,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (method === "POST") {
-    const { rating, comment, isAnonymous } = req.body;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const { user } = await supabase.auth.getUser();
     if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-    const { data, error } = await supabase
+    const { rating, comment, isAnonymous } = req.body;
+
+    const { data, error } = await supabase // ✅ ใช้ client ที่มี session
       .from("reviews")
       .insert([
         {
