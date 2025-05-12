@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MembershipHistory } from "@/types/membership";
+//import { MembershipHistory } from "@/types/membership";
 import { User } from "@/types/user";
 
 export default function ChangeMembership() {
