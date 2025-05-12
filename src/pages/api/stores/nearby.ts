@@ -1,11 +1,8 @@
 // pages/api/stores/nearby.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase"; // ใช้ supabase ที่ import จาก lib
 
-
-const supabase = createClient();
-
-// ฟังก์ชันคำนวณระยะทาง (Haversine formula)
+// ฟังก์ชันคำนวณระยะทาง
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371; // Radius of earth in KM
   const toRad = (x: number) => (x * Math.PI) / 180;
