@@ -1,12 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next"; // เปลี่ยนการ import
+import { getServerSession } from "next-auth/next"; // import getServerSession from next-auth/next
 import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // ตรวจสอบ session
   const session = await getServerSession(req, res, authOptions);
-  if (!session || session.user.role !== "admin") {
+  
+  // ใช้ Type assertion เพื่อบอก TypeScript ว่า session มี user
+  if (!session || (session as { user: { role: string } }).user.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
   }
 
