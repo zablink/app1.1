@@ -1,44 +1,57 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
-import { SupabaseAdapter } from "@auth/supabase-adapter";
+import NextAuth, { type NextAuthOptions } from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+import FacebookProvider from 'next-auth/providers/facebook';
+import { SupabaseAdapter } from '@auth/supabase-adapter';
+import type { AdapterUser } from 'next-auth/adapters';
+import type { JWT } from 'next-auth/jwt';
+
+const allowedRoles = ["user", "store", "admin"] as const;
+const allowedMembershipTypes = ["free", "pro1", "pro2", "pro3", "special"] as const;
+
+type Role = (typeof allowedRoles)[number];
+type MembershipType = (typeof allowedMembershipTypes)[number];
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
     FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID ?? "",
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? "",
+      clientId: process.env.FACEBOOK_CLIENT_ID ?? '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? '',
     }),
   ],
   adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
   }),
   callbacks: {
-    //async jwt({ token, user, account }) {
-    async jwt({ token, user }) {  
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-        token.membershipType = user.membershipType;
+        token.role = (user as AdapterUser & { role?: string }).role;
+        token.membershipType = (user as AdapterUser & { membershipType?: string }).membershipType;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.membershipType = token.membershipType as string;
+
+        if (allowedRoles.includes(token.role as Role)) {
+          session.user.role = token.role as Role;
+        }
+
+        if (allowedMembershipTypes.includes(token.membershipType as MembershipType)) {
+          session.user.membershipType = token.membershipType as MembershipType;
+        }
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
