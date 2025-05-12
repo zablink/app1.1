@@ -2,17 +2,20 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { supabase } from "@/lib/supabase";
+import { Session } from "next-auth"; // Import type Session
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
 
   const session = await getServerSession(req, res, authOptions);
-  if (!session || session.user?.role !== "admin") {
+  
+  // Type assertion: บอก TypeScript ว่า session เป็น Session
+  if (!session || !(session as Session).user?.role || (session as Session).user.role !== "admin") {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
   const { userId, toType } = req.body as { userId: string; toType: string };
-  const adminId = session.user.id;
+  const adminId = (session as Session).user.id; // ใช้ session ที่เป็น type แล้ว
 
   const { error: updateError } = await supabase
     .from("users")
