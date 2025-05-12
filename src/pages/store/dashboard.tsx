@@ -1,8 +1,8 @@
-export const dynamic = "force-dynamic"; // ✅ สำคัญมาก
+export const dynamic = "force-dynamic";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { createBrowserClient } from "@supabase/ssr"; // หรือ import ที่คุณใช้จริง
+import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 
 const supabase = createBrowserClient(
@@ -10,9 +10,18 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+type Store = {
+  id: string;
+  name: string;
+  email: string;
+  membership_status: string;
+  latitude?: number;
+  longitude?: number;
+};
+
 export default function StoreDashboard() {
   const { data: session } = useSession();
-  const [storeData, setStoreData] = useState<any>(null);
+  const [storeData, setStoreData] = useState<Store | null>(null);
 
   useEffect(() => {
     if (!session?.user?.email) return;
@@ -25,7 +34,7 @@ export default function StoreDashboard() {
         .single();
 
       if (error) console.error(error);
-      else setStoreData(data);
+      else setStoreData(data as Store);
     };
 
     fetchData();
@@ -40,7 +49,6 @@ export default function StoreDashboard() {
         <div className="space-y-2">
           <p>ชื่อร้าน: {storeData.name}</p>
           <p>สถานะสมาชิก: {storeData.membership_status}</p>
-          {/* เพิ่มข้อมูลอื่น ๆ ตามต้องการ */}
           <Link href="/store/location" className="text-blue-600 underline">
             จัดการพิกัดร้าน
           </Link>
