@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { createClient } from "@supabase/supabase-js";
 
-
-const supabase = createClient();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function UpgradeToStore() {
   const { data: session } = useSession();
@@ -19,10 +21,12 @@ export default function UpgradeToStore() {
   }, [session]);
 
   const handleUpgrade = async () => {
+    if (!session?.user.email) return;
+
     const { error } = await supabase
       .from("users")
       .update({ role: "store" })
-      .eq("email", session?.user.email);
+      .eq("email", session.user.email);
 
     if (error) {
       setMessage("มีข้อผิดพลาดในการอัปเกรด");
