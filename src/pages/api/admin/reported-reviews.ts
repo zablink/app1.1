@@ -1,16 +1,19 @@
 // pages/api/admin/reported-reviews.ts
 import { supabase } from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next"; // แก้ไขจาก next-auth เป็น next-auth/next
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") return res.status(405).end();
 
+  // ตรวจสอบ session และกำหนด type ให้ session
   const session = await getServerSession(req, res, authOptions);
-  if (session?.user?.role !== "admin")
+  if (!session || session.user?.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
+  }
 
+  // ดึงข้อมูลรีวิวที่ถูกแจ้งจากฐานข้อมูล Supabase
   const { data, error } = await supabase
     .from("review_reports_view") // อาจใช้ view ที่ join review + user + store แล้ว
     .select("*")
