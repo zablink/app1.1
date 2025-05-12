@@ -9,13 +9,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const session = await getServerSession(req, res, authOptions);
   
-  // Type assertion: บอก TypeScript ว่า session เป็น Session
+  // ตรวจสอบ session และ role
   if (!session || !(session as Session).user?.role || (session as Session).user.role !== "admin") {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
   const { userId, toType } = req.body as { userId: string; toType: string };
-  const adminId = (session as Session).user.id; // ใช้ session ที่เป็น type แล้ว
+  
+  // ใช้ session ที่เป็น type แล้ว
+  const adminId = (session as Session).user.id;
 
   const { error: updateError } = await supabase
     .from("users")
