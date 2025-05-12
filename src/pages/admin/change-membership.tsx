@@ -1,60 +1,66 @@
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { MembershipHistory } from "@/types/membership";
+import { User } from "@/types/user";
 
-export default function AdminChangeMembership() {
-  const { data: session } = useSession();
-  const [users, setUsers] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState("");
-  const [selectedType, setSelectedType] = useState("free");
-  const [message, setMessage] = useState("");
+export default function ChangeMembership() {
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // ดึงรายชื่อร้านค้า
-    fetch("/api/admin/store-users").then(res => res.json()).then(data => {
-      setUsers(data.users || []);
-    });
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("/api/admin/users");
+        const json = await res.json();
+        setUsers(json.users || []);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
-  const handleSubmit = async () => {
-    const res = await fetch("/api/admin/change-membership", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: selectedUser, toType: selectedType }),
-    });
-    const result = await res.json();
-    setMessage(result.message || result.error);
+  const handleChangeMembership = async (userId: string, newType: string) => {
+    try {
+      await fetch("/api/stores/change-membership", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, toType: newType }),
+      });
+      alert("เปลี่ยนสถานะสำเร็จ");
+    } catch (err) {
+      console.error("Error changing membership", err);
+    }
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>เปลี่ยนสถานะสมาชิกของร้านค้า</h1>
-
-      <label>
-        เลือกร้านค้า:
-        <select onChange={e => setSelectedUser(e.target.value)} value={selectedUser}>
-          <option value="">-- เลือก --</option>
-          {users.map(user => (
-            <option key={user.id} value={user.id}>
-              {user.email}
-            </option>
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">เปลี่ยนแพ็กเกจสมาชิก</h1>
+      <table className="min-w-full border">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="p-2 border">Email</th>
+            <th className="p-2 border">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td className="p-2 border">{user.email}</td>
+              <td className="p-2 border space-x-2">
+                {["free", "pro1", "pro2", "pro3", "special"].map((type) => (
+                  <button
+                    key={type}
+                    className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+                    onClick={() => handleChangeMembership(user.id, type)}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </td>
+            </tr>
           ))}
-        </select>
-      </label>
-
-      <label style={{ marginLeft: 16 }}>
-        เลือกแพ็กเกจ:
-        <select onChange={e => setSelectedType(e.target.value)} value={selectedType}>
-          <option value="free">ฟรี</option>
-          <option value="pro1">โปร 1</option>
-          <option value="pro2">โปร 2</option>
-          <option value="pro3">โปร 3</option>
-          <option value="special">พิเศษ</option>
-        </select>
-      </label>
-
-      <button onClick={handleSubmit} style={{ marginLeft: 16 }}>เปลี่ยนแพ็กเกจ</button>
-
-      <p style={{ marginTop: 20 }}>{message}</p>
+        </tbody>
+      </table>
     </div>
   );
 }

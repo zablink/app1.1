@@ -1,39 +1,46 @@
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { MembershipHistory } from "@/types/membership";
 
 export default function MembershipHistoryPage() {
-  const { data: session } = useSession();
-  const [logs, setLogs] = useState<any[]>([]);
+  const [history, setHistory] = useState<MembershipHistory[]>([]);
 
   useEffect(() => {
-    fetch("/api/admin/membership-history")
-      .then(res => res.json())
-      .then(data => {
-        if (data.history) setLogs(data.history);
-      });
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/admin/membership-history");
+        const json = await res.json();
+        setHistory(json.history || []);
+      } catch (err) {
+        console.error("Failed to fetch history", err);
+      }
+    };
+
+    fetchHistory();
   }, []);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>ประวัติการเปลี่ยนแพ็กเกจ</h1>
-      <table border={1} cellPadding={6}>
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">ประวัติการเปลี่ยนแพ็กเกจ</h1>
+      <table className="min-w-full border">
         <thead>
-          <tr>
-            <th>ร้านค้า (User ID)</th>
-            <th>จาก</th>
-            <th>เป็น</th>
-            <th>เปลี่ยนโดย</th>
-            <th>เมื่อ</th>
+          <tr className="bg-gray-200">
+            <th className="p-2 border">Email</th>
+            <th className="p-2 border">จาก</th>
+            <th className="p-2 border">เป็น</th>
+            <th className="p-2 border">โดย</th>
+            <th className="p-2 border">เมื่อ</th>
           </tr>
         </thead>
         <tbody>
-          {logs.map((log) => (
-            <tr key={log.id}>
-              <td>{log.user_id}</td>
-              <td>{log.from_type}</td>
-              <td>{log.to_type}</td>
-              <td>{log.changed_by_admin_id}</td>
-              <td>{new Date(log.changed_at).toLocaleString("th-TH")}</td>
+          {history.map((entry) => (
+            <tr key={entry.id}>
+              <td className="p-2 border">{entry.users?.email}</td>
+              <td className="p-2 border">{entry.from_type}</td>
+              <td className="p-2 border">{entry.to_type}</td>
+              <td className="p-2 border">{entry.changed_by_admin_id}</td>
+              <td className="p-2 border">
+                {new Date(entry.changed_at).toLocaleString()}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -41,3 +48,4 @@ export default function MembershipHistoryPage() {
     </div>
   );
 }
+  
