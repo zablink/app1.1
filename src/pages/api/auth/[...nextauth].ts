@@ -19,7 +19,8 @@ export const authOptions: NextAuthOptions = {
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   }),
   callbacks: {
-    async jwt({ token, user, account }) {
+    //async jwt({ token, user, account }) {
+    async jwt({ token, user }) {  
       if (user) {
         token.id = user.id;
         token.role = user.role;
