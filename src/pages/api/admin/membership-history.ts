@@ -2,13 +2,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/lib/supabase";
 import { getServerSession } from "next-auth/next"; // import getServerSession from next-auth/next
 import { authOptions } from "../auth/[...nextauth]";
+import { Session } from "next-auth"; // Import Session type
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // ตรวจสอบ session
-  const session = await getServerSession(req, res, authOptions);
-  
-  // ใช้ Type assertion เพื่อบอก TypeScript ว่า session มี user
-  if (!session || (session as { user: { role: string } }).user.role !== "admin") {
+  // ตรวจสอบ session และกำหนด type ให้ session
+  const session = await getServerSession(req, res, authOptions) as Session;
+
+  if (!session || session.user.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
   }
 
@@ -32,11 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .order("changed_at", { ascending: false });
 
   // เพิ่ม filter ถ้ามี
-  if (email) {
-    // ต้องใช้ PostgREST RPC หรือ Supabase View ถ้าจะ filter ด้วย nested select
-    // ทางออกชั่วคราวคือ filter แบบ client-side ด้านล่าง
-  }
-
   if (startDate && endDate) {
     query = query
       .gte("changed_at", startDate as string)
@@ -49,10 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: error.message });
   }
 
-  // filter email ที่ฝั่ง client (เนื่องจาก Supabase ไม่รองรับ ilike กับ nested field โดยตรง)
+  // แก้ไขการกรอง email ถ้าผลลัพธ์เป็น array ของ users
   const filtered = email
     ? data.filter((item) =>
-        item.users?.email?.toLowerCase().includes((email as string).toLowerCase())
+        item.users?.some((user) => user.email?.toLowerCase().includes((email as string).toLowerCase()))
       )
     : data;
 
