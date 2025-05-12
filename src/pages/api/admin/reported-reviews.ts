@@ -1,15 +1,18 @@
 // pages/api/admin/reported-reviews.ts
 import { supabase } from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next"; // แก้ไขจาก next-auth เป็น next-auth/next
+import { getServerSession } from "next-auth/next"; // ใช้ getServerSession จาก next-auth/next
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { Session } from "next-auth"; // นำเข้า Session จาก next-auth
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") return res.status(405).end();
 
-  // ตรวจสอบ session และกำหนด type ให้ session
+  // ตรวจสอบ session และบอก TypeScript ว่า session เป็นประเภท Session
   const session = await getServerSession(req, res, authOptions);
-  if (!session || session.user?.role !== "admin") {
+  
+  // ตรวจสอบว่ามี session และ role เป็น admin หรือไม่
+  if (!session || !(session as Session).user?.role || (session as Session).user.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
   }
 
