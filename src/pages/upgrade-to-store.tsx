@@ -15,7 +15,7 @@ export default function UpgradeToStore() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (session?.user.role !== "enduser") {
+    if (session?.user.role !== "user") {
       router.push("/unauthorized");
     }
   }, [session]);
