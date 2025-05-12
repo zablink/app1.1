@@ -1,7 +1,8 @@
+// src/pages/store/dashboard.tsx
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase"; // import supabase จาก /lib/supabase
 
 import {
   GoogleMap,
@@ -9,8 +10,6 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 import StoreReviews from "@/components/StoreReviews";
-
-const supabase = createClient();
 
 type Link = {
   id: number;
