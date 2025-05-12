@@ -1,20 +1,24 @@
 // pages/api/admin/reported-reviews/action.ts
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth/next"; // แก้ไขมาใช้ getServerSession จาก next-auth/next
 import { authOptions } from "../../auth/[...nextauth]";
 
-export default async function handler(req, res) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
 
+  // ตรวจสอบ session และ role ของ user
   const session = await getServerSession(req, res, authOptions);
-  if (session?.user?.role !== "admin")
+  if (!session || session.user?.role !== "admin") {
     return res.status(403).json({ error: "Admin only" });
+  }
 
   const { review_id, action } = req.body;
-  if (!review_id || !["delete", "ignore"].includes(action))
+  if (!review_id || !["delete", "ignore"].includes(action)) {
     return res.status(400).json({ error: "Invalid input" });
+  }
 
-  // ดึงผู้แจ้งก่อน
+  // ดึงข้อมูลผู้แจ้งรายงาน
   const { data: reporters, error: fetchError } = await supabase
     .from("review_reports")
     .select("user_id")
