@@ -1,0 +1,59 @@
+.
+├── app
+│   ├── --page.temp.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   └── layout.tsx
+├── components
+│   ├── AdminNotification.tsx
+│   ├── StoreDashboard.tsx
+│   └── StoreReviews.tsx
+├── lib
+│   └── supabase.ts
+├── pages
+│   ├── _app.tsx
+│   ├── admin
+│   │   ├── change-membership.tsx
+│   │   ├── index.js
+│   │   ├── index.tsx
+│   │   └── membership-history.tsx
+│   ├── api
+│   │   ├── :: pages:api:store.ts
+│   │   ├── admin
+│   │   │   ├── change-membership.ts
+│   │   │   ├── membership-history.ts
+│   │   │   ├── reported-reviews
+│   │   │   │   └── action.ts
+│   │   │   ├── reported-reviews.ts
+│   │   │   └── store-users.ts
+│   │   ├── auth
+│   │   │   └── [...nextauth].ts
+│   │   ├── nearby-stores.ts
+│   │   ├── report-review.ts
+│   │   ├── store-categories.ts
+│   │   └── stores
+│   │       ├── [id]
+│   │       │   ├── related.ts
+│   │       │   └── reviews.ts
+│   │       ├── [id].ts
+│   │       ├── change-membership.ts
+│   │       └── nearby.ts
+│   ├── index.js
+│   ├── login.tsx
+│   ├── nearby.tsx
+│   ├── store
+│   │   ├── [id].tsx
+│   │   ├── dashboard.tsx
+│   │   ├── index.js
+│   │   ├── index.tsx
+│   │   ├── location.tsx
+│   │   └── membership.tsx
+│   ├── unauthorized.tsx
+│   └── upgrade-to-store.tsx
+└── types
+    ├── db.ts
+    ├── membership.ts
+    ├── next-auth.d.ts
+    └── user.ts
+
+14 directories, 43 files
