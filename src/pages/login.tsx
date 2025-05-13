@@ -19,11 +19,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
+    //const form = e.currentTarget;
+    const data = new FormData(form);
     const res = await signIn("credentials", {
       redirect: false,
-      email: form.email.value,
-      password: form.password.value,
+      email: data.get("email"), 
+      password: data.get("password"),
       callbackUrl: "/",
     });
 

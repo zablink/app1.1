@@ -9,3 +9,7 @@ export type MembershipHistory = {
   changed_at: string;
   users?: Pick<User, "email" | "name">; // เอาเฉพาะ email กับ name
 };
+
+export type Membership = {
+  Membership: "free" | "pro1" | "pro2" | "pro3" | "special";
+}

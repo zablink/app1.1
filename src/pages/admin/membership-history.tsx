@@ -12,6 +12,7 @@ export default function MembershipHistoryPage() {
         setHistory(json.history || []);
       } catch (err) {
         console.error("Failed to fetch history", err);
+        return;
       }
     };
 
@@ -39,7 +40,7 @@ export default function MembershipHistoryPage() {
               <td className="p-2 border">{entry.to_type}</td>
               <td className="p-2 border">{entry.changed_by_admin_id}</td>
               <td className="p-2 border">
-                {new Date(entry.changed_at).toLocaleString()}
+                {new Date(entry.changed_at).toLocaleString("th-TH")}
               </td>
             </tr>
           ))}
