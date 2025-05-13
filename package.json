@@ -9,14 +9,13 @@
     "lint": "next lint"
   },
 
-
   "dependencies": {
-    "next": "^14.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "next": "13.5.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "@auth/core": "^0.10.0",
     "@auth/nextjs": "^0.0.0-380f8d56",
-    "@auth/supabase-adapter": "^0.3.2",
+    "@auth/supabase-adapter": "^1.9.0",
     "@headlessui/react": "^2.2.2",
     "@react-google-maps/api": "^2.20.6",
     "@stripe/stripe-js": "^7.2.0",
