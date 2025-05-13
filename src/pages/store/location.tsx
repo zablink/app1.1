@@ -1,24 +1,25 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function StoreLocation() {
-  const { data: session } = useSession();
+// 👇 แยกส่วนนี้เป็น Client-only component
+function StoreLocationInner() {
+  const { data: session, status } = useSession();
   const mapRef = useRef<HTMLDivElement>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
+    if (status !== "authenticated") return;
     if (!window.google || !mapRef.current) return;
 
-    const defaultCenter = { lat: 13.7563, lng: 100.5018 }; // Bangkok
+    const defaultCenter = { lat: 13.7563, lng: 100.5018 };
 
     const mapInstance = new google.maps.Map(mapRef.current, {
       center: defaultCenter,
@@ -44,19 +45,22 @@ export default function StoreLocation() {
 
       setMarker(newMarker);
     });
-  }, [marker]);
+  }, [marker, status]);
 
   const saveLocation = async () => {
-    if (!location || !session?.user?.email) return alert("กรุณาเลือกพิกัดก่อน");
+    if (!location || !session?.user?.id) return alert("กรุณาเลือกพิกัดก่อน");
 
     const { error } = await supabase
       .from("stores")
       .update({ latitude: location.lat, longitude: location.lng })
-      .eq("email", session.user.email); // ใช้ email เป็น key
+      .eq("user_id", session.user.id); // ใช้ user_id แทน email
 
     if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
     else alert("บันทึกพิกัดเรียบร้อยแล้ว");
   };
+
+  if (status === "loading") return <p>กำลังโหลด...</p>;
+  if (status === "unauthenticated") return <p>กรุณาเข้าสู่ระบบ</p>;
 
   return (
     <div className="p-4">
@@ -76,3 +80,8 @@ export default function StoreLocation() {
     </div>
   );
 }
+
+// 👇 แก้ปัญหา SSR โดยโหลด component แบบ client-only ด้วย dynamic import
+export default dynamic(() => Promise.resolve(StoreLocationInner), {
+  ssr: false,
+});
