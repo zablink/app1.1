@@ -15,10 +15,16 @@ export default function UpgradeToStore() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (session?.user.role !== "user") {
-      router.push("/unauthorized");
+    if (!session) {
+      router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login ถ้าไม่มี session
+      return;
     }
-  }, [session]);
+
+    if (session.user.role !== "user") {
+      router.push("/unauthorized"); // หากไม่ใช่ผู้ใช้ทั่วไป ให้ไปหน้า unauthorized
+    }
+  }, [session, router]);
+
 
   const handleUpgrade = async () => {
     if (!session?.user.email) return;
@@ -32,20 +38,30 @@ export default function UpgradeToStore() {
       setMessage("มีข้อผิดพลาดในการอัปเกรด");
     } else {
       setMessage("อัปเกรดเป็นร้านค้าเรียบร้อย! ออกจากระบบแล้ว login ใหม่");
+      
+      // รีเฟรช session หลังจากอัปเกรดสำเร็จ
+      await router.push("/logout"); // สามารถเปลี่ยนเส้นทางไปที่หน้า logout แล้วให้ผู้ใช้ login ใหม่
     }
   };
 
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-2xl font-bold mb-4">อัปเกรดเป็นร้านค้า</h1>
-      <p className="mb-4">คุณสามารถอัปเกรดบัญชี enduser ของคุณเป็นร้านค้าได้ที่นี่</p>
-      <button
-        onClick={handleUpgrade}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        อัปเกรดเป็นร้านค้า
-      </button>
-      {message && <p className="mt-4 text-blue-600">{message}</p>}
-    </div>
-  );
-}
+  <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <h1 className="text-2xl font-bold mb-4">อัปเกรดเป็นร้านค้า</h1>
+    <p className="mb-4">คุณสามารถอัปเกรดบัญชี enduser ของคุณเป็นร้านค้าได้ที่นี่</p>
+    
+    {session ? (
+      <>
+        <button
+          onClick={handleUpgrade}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          อัปเกรดเป็นร้านค้า
+        </button>
+        {message && <p className="mt-4 text-blue-600">{message}</p>}
+      </>
+    ) : (
+      <p>กำลังโหลดข้อมูลผู้ใช้...</p>
+    )}
+  </div>
+);
