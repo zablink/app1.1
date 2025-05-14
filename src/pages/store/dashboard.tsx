@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+'use client'; // <-- สำคัญ
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -20,17 +20,17 @@ type Store = {
 };
 
 export default function StoreDashboard() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [storeData, setStoreData] = useState<Store | null>(null);
 
   useEffect(() => {
-    if (!session?.user?.email) return;
+    if (status !== "authenticated") return;
 
     const fetchData = async () => {
       const { data, error } = await supabase
         .from("stores")
         .select("*")
-        .eq("email", session.user.email)
+        .eq("email", session?.user?.email || "")
         .single();
 
       if (error) console.error(error);
@@ -38,9 +38,10 @@ export default function StoreDashboard() {
     };
 
     fetchData();
-  }, [session]);
+  }, [session, status]);
 
-  if (!session) return <p>กำลังโหลดข้อมูล...</p>;
+  if (status === "loading") return <p>กำลังโหลดข้อมูล...</p>;
+  if (status === "unauthenticated") return <p>กรุณาเข้าสู่ระบบ</p>;
 
   return (
     <div className="p-4">
