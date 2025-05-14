@@ -1,92 +1,50 @@
-// pages/nearby.tsx
 import { useEffect, useState } from "react";
 
-type Store = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  subdistrict?: string;
-  district?: string;
-  province?: string;
-  distance?: number;
-};
-
-type NearbyResult = {
-  level: "radius" | "subdistrict" | "district" | "province" | "all";
-  stores: Store[];
-};
-
-const levelMap = {
-  radius: "ร้านค้าที่อยู่ในรัศมี 5 กม.",
-  subdistrict: "ร้านในตำบลเดียวกัน",
-  district: "ร้านในอำเภอเดียวกัน",
-  province: "ร้านในจังหวัดเดียวกัน",
-  all: "ร้านค้าทั้งหมด",
-};
-
-export default function NearbyPage() {
-  const [loading, setLoading] = useState(true);
-  const [stores, setStores] = useState<Store[]>([]);
-  const [level, setLevel] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export default function Nearby() {
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [stores, setStores] = useState([]);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("ไม่สามารถเข้าถึงตำแหน่งของอุปกรณ์ได้");
-      setLoading(false);
-      return;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setLatitude(lat);
+          setLongitude(lng);
+
+          // เรียก API หลังได้พิกัด
+          fetch(`/api/stores/nearby?lat=${lat}&lng=${lng}`)
+            .then((res) => res.json())
+            .then((data) => setStores(data));
+        },
+        (err) => console.error("Geolocation error:", err)
+      );
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        try {
-          const res = await fetch(`/api/stores/nearby?lat=${lat}&lng=${lng}`);
-          const data: NearbyResult = await res.json();
-          setStores(data.stores);
-          setLevel(data.level);
-        } catch (err) {
-          console.error(err);
-          setError("เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า");
-        } finally {
-          setLoading(false);
-        }
-      },
-      (err) => {
-        setError("ไม่สามารถดึงตำแหน่งจากอุปกรณ์ได้");
-        setLoading(false);
-      }
-    );
   }, []);
-
-  if (loading) return <p className="p-4">กำลังค้นหาร้านค้าใกล้คุณ...</p>;
-  if (error) return <p className="p-4 text-red-600">{error}</p>;
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">ร้านค้าใกล้คุณ</h1>
-      {level && <p className="mb-2 text-gray-700">🔍 {levelMap[level as keyof typeof levelMap]}</p>}
+      <h1 className="text-xl font-bold mb-2">ร้านค้าใกล้คุณ</h1>
 
-      {stores.length === 0 ? (
-        <p>ไม่พบร้านค้าในพื้นที่</p>
-      ) : (
-        <ul className="space-y-2">
-          {stores.map((store) => (
-            <li key={store.id} className="p-2 border rounded">
-              <p className="font-semibold">{store.name}</p>
-              {store.distance && (
-                <p className="text-sm text-gray-500">ห่าง {store.distance.toFixed(2)} กม.</p>
-              )}
-              <p className="text-sm text-gray-600">
-                {store.subdistrict} {store.district} {store.province}
-              </p>
-            </li>
-          ))}
-        </ul>
+      {/* 👇 Debug: แสดงพิกัดของผู้ใช้ */}
+      {latitude && longitude && (
+        <p className="mb-4 text-sm text-gray-500">
+          Your Location: {latitude.toFixed(6)}, {longitude.toFixed(6)}
+        </p>
       )}
+
+      <ul className="space-y-4">
+        {stores.map((store: any) => (
+          <li key={store.id} className="border p-3 rounded">
+            <h2 className="text-lg font-semibold">{store.name}</h2>
+            <p className="text-sm text-gray-600">
+              อยู่ห่าง: {store.distance.toFixed(2)} กม.
+            </p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
