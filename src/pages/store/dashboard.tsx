@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
-//import { useSession } from "next-auth/react";
-import { useSession } from '@auth/nextjs';
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";

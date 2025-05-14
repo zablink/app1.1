@@ -1,7 +1,6 @@
 // components/StoreMembership.tsx
 "use client";
-//import { useSession } from "next-auth/react";
-import { useSession } from '@auth/nextjs';
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 const membershipOptions = [

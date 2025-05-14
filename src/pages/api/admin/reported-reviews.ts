@@ -1,8 +1,7 @@
 // pages/api/admin/reported-reviews.ts
 import { supabase } from "@/lib/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
-//import { getServerSession } from "next-auth/next"; // ใช้ getServerSession จาก next-auth/next
-import { getServerSession } from "@auth/nextjs";
+import { getServerSession } from "next-auth/next"; // ใช้ getServerSession จาก next-auth/next
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { Session } from "next-auth"; // นำเข้า Session จาก next-auth
 

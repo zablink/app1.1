@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-//import { signIn, getCsrfToken } from "next-auth/react";
-import { signIn } from "@auth/nextjs";
+import { signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
 
 export default function LoginPage() {
