@@ -46,22 +46,24 @@ export default function UpgradeToStore() {
 
 
   return (
-  <div className="min-h-screen flex flex-col items-center justify-center p-6">
-    <h1 className="text-2xl font-bold mb-4">อัปเกรดเป็นร้านค้า</h1>
-    <p className="mb-4">คุณสามารถอัปเกรดบัญชี enduser ของคุณเป็นร้านค้าได้ที่นี่</p>
-    
-    {session ? (
-      <>
-        <button
-          onClick={handleUpgrade}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          อัปเกรดเป็นร้านค้า
-        </button>
-        {message && <p className="mt-4 text-blue-600">{message}</p>}
-      </>
-    ) : (
-      <p>กำลังโหลดข้อมูลผู้ใช้...</p>
-    )}
-  </div>
-);
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <h1 className="text-2xl font-bold mb-4">อัปเกรดเป็นร้านค้า</h1>
+      <p className="mb-4">คุณสามารถอัปเกรดบัญชี enduser ของคุณเป็นร้านค้าได้ที่นี่</p>
+      
+      {session ? (
+        <>
+          <button
+            onClick={handleUpgrade}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            อัปเกรดเป็นร้านค้า
+          </button>
+          {message && <p className="mt-4 text-blue-600">{message}</p>}
+        </>
+      ) : (
+        <p>กำลังโหลดข้อมูลผู้ใช้...</p>
+      )}
+    </div>
+  );
+
+}
