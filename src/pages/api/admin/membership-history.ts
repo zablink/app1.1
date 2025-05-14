@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/lib/supabase";
-import { getServerSession } from "next-auth/next"; // import getServerSession from next-auth/next
+//import { getServerSession } from "next-auth/next"; // import getServerSession from next-auth/next
+import { useSession } from "@auth/nextjs";
 import { authOptions } from "../auth/[...nextauth]";
 import { Session } from "next-auth"; // Import Session type
 
