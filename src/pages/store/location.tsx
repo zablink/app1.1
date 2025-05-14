@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
+import { useSession } from '@auth/nextjs'
 import dynamic from "next/dynamic";
 
 const supabase = createClient(

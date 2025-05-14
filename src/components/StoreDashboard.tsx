@@ -1,6 +1,7 @@
 // components/StoreDashboard.tsx
 
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
+import { useSession } from '@auth/nextjs';
 import { useEffect, useState } from "react";
 import { Store } from "../types/store"; // ← import type ที่แยกไว้
 
