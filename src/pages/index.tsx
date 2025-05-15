@@ -1,13 +1,13 @@
 // pages/index.tsx
-export const dynamic = "force-dynamic"; // ✅ ป้องกัน SSR error
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import axios from "axios";
 
 export default function HomePage() {
-  const sessionResult = useSession(); // ✅ ไม่ destructure ตรง ๆ
+  const sessionResult = useSession();
   const session = sessionResult?.data;
   const status = sessionResult?.status ?? "loading";
 
@@ -45,7 +45,6 @@ export default function HomePage() {
             if (res.data.length > 0) {
               setStores(res.data);
             } else {
-              // ดึงร้านทั้งหมดในจังหวัดสำรอง
               axios.get("/api/stores/by-province", { params: { lat: latitude, lng: longitude } }).then((r) => {
                 setProvinceStores(r.data);
               });
@@ -68,16 +67,34 @@ export default function HomePage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">หน้าแรก</h1>
+    <div className="p-6 space-y-6 relative">
+      {/* มุมขวาบน: Login/Logout */}
+      <div className="absolute top-4 right-6 flex items-center space-x-4">
+        {status === "loading" && <span className="text-gray-500">กำลังตรวจสอบ...</span>}
 
-      {status === "unauthenticated" && (
-        <div className="space-x-4">
-          <button onClick={() => signIn()} className="bg-blue-600 text-white px-4 py-2 rounded">
+        {status === "unauthenticated" && (
+          <button
+            onClick={() => signIn()}
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+          >
             เข้าสู่ระบบ
           </button>
-        </div>
-      )}
+        )}
+
+        {status === "authenticated" && (
+          <>
+            <span className="text-green-700">ยินดีต้อนรับ, {session?.user?.name || "ผู้ใช้"}</span>
+            <button
+              onClick={() => signOut()}
+              className="bg-red-600 text-white px-4 py-2 rounded shadow"
+            >
+              ออกจากระบบ
+            </button>
+          </>
+        )}
+      </div>
+
+      <h1 className="text-2xl font-bold">หน้าแรก</h1>
 
       {locationError && (
         <div className="text-red-600">
@@ -93,9 +110,11 @@ export default function HomePage() {
               <option value="เชียงใหม่">เชียงใหม่</option>
               <option value="ขอนแก่น">ขอนแก่น</option>
               <option value="ภูเก็ต">ภูเก็ต</option>
-              {/* เพิ่มจังหวัดอื่น ๆ ตามต้องการ */}
             </select>
-            <button onClick={handleProvinceSelect} className="ml-2 bg-gray-600 text-white px-4 py-1 rounded">
+            <button
+              onClick={handleProvinceSelect}
+              className="ml-2 bg-gray-600 text-white px-4 py-1 rounded"
+            >
               ค้นหา
             </button>
           </div>
