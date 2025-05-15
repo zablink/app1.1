@@ -1,11 +1,16 @@
 // pages/index.tsx
+export const dynamic = "force-dynamic"; // ✅ ป้องกัน SSR error
+
 import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import axios from "axios";
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession(); // ✅ ไม่ destructure ตรง ๆ
+  const session = sessionResult?.data;
+  const status = sessionResult?.status ?? "loading";
+
   const router = useRouter();
 
   const [lat, setLat] = useState<number | null>(null);
