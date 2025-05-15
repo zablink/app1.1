@@ -21,10 +21,18 @@ export default function LoginPage() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    const email = data.get("email")?.toString();
+    const password = data.get("password")?.toString();
+
+    if (!email || !password) {
+      setError("กรุณากรอกอีเมลและรหัสผ่าน");
+      return;
+    }
+
     const res = await signIn("credentials", {
       redirect: false,
-      email: data.get("email"), 
-      password: data.get("password"),
+      email,
+      password,
       callbackUrl: "/",
     });
 
