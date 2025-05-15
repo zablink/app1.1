@@ -67,7 +67,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <div className="p-6 space-y-6 relative  justtest">
       {/* มุมขวาบน: Login/Logout */}
       <div className="absolute top-4 right-6 flex items-center space-x-4">
         {status === "loading" && <span className="text-gray-500">กำลังตรวจสอบ...</span>}
