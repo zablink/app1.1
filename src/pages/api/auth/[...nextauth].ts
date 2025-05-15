@@ -1,9 +1,9 @@
+
 import NextAuth, { type NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import { SupabaseAdapter } from '@next-auth/supabase-adapter';
 import type { AdapterUser } from 'next-auth/adapters';
-//import type { JWT } from 'next-auth/jwt';
 
 const allowedRoles = ["user", "store", "admin"] as const;
 const allowedMembershipTypes = ["free", "pro1", "pro2", "pro3", "special"] as const;
@@ -27,12 +27,17 @@ export const authOptions: NextAuthOptions = {
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
   }),
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.role = (user as AdapterUser & { role?: string }).role;
         token.membershipType = (user as AdapterUser & { membershipType?: string }).membershipType;
       }
+
+      if (account) {
+        token.provider = account.provider;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -46,7 +51,10 @@ export const authOptions: NextAuthOptions = {
         if (allowedMembershipTypes.includes(token.membershipType as MembershipType)) {
           session.user.membershipType = token.membershipType as MembershipType;
         }
+
+        session.user.provider = token.provider as string;
       }
+
       return session;
     },
   },
