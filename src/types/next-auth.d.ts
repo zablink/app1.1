@@ -8,6 +8,7 @@ declare module "next-auth" {
       role: "user" | "store" | "admin";
       membershipType: "free" | "pro1" | "pro2" | "pro3" | "special";
       provider?: string;
+      isNewUser?: boolean;
     } & DefaultSession["user"];
   }
 
