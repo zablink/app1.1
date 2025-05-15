@@ -5,7 +5,15 @@ import { useSession } from "next-auth/react";
 
 export default function CompleteProfilePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  //const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status ?? "loading";
+
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status ?? "loading";
+
   const [formData, setFormData] = useState({
     full_name: "",
     nickname: "",
