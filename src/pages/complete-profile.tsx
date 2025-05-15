@@ -10,9 +10,6 @@ export default function CompleteProfilePage() {
   const session = sessionResult?.data;
   const status = sessionResult?.status ?? "loading";
 
-  const sessionResult = useSession();
-  const session = sessionResult?.data;
-  const status = sessionResult?.status ?? "loading";
 
   const [formData, setFormData] = useState({
     full_name: "",
