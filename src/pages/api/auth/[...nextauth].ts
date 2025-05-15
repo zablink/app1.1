@@ -36,7 +36,9 @@ export const authOptions: NextAuthOptions = {
 
       if (account) {
         token.provider = account.provider;
+        token.isNewUser = true; // ✅ เพิ่มตรงนี้เพื่อให้รู้ว่ามาจาก social login ใหม่
       }
+
 
       return token;
     },
@@ -52,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           session.user.membershipType = token.membershipType as MembershipType;
         }
 
+        session.user.isNewUser = token.isNewUser as boolean; // ✅ เพิ่มบรรทัดนี้
         session.user.provider = token.provider as string;
       }
 
