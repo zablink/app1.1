@@ -11,8 +11,15 @@ const allowedMembershipTypes = ["free", "pro1", "pro2", "pro3", "special"] as co
 type Role = (typeof allowedRoles)[number];
 type MembershipType = (typeof allowedMembershipTypes)[number];
 
-console.log('🔐 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log('🔐 SUPABASE SERVICE ROLE KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 5)); // แสดงแค่ 5 ตัวแรก
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  if(!supabaseUrl){console.log('SP URL')}
+  if(!supabaseKey){console.log('SP KEY')}
+  throw new Error("❌ Missing Supabase credentials");
+}
+
 
 export const authOptions: NextAuthOptions = {
   
