@@ -12,6 +12,10 @@ type Role = (typeof allowedRoles)[number];
 type MembershipType = (typeof allowedMembershipTypes)[number];
 
 export const authOptions: NextAuthOptions = {
+  console.log('🔐 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('🔐 SUPABASE SERVICE ROLE KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 5)); // แสดงแค่ 5 ตัวแรก
+
+
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
