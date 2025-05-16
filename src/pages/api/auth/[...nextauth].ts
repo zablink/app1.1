@@ -11,9 +11,11 @@ const allowedMembershipTypes = ["free", "pro1", "pro2", "pro3", "special"] as co
 type Role = (typeof allowedRoles)[number];
 type MembershipType = (typeof allowedMembershipTypes)[number];
 
+console.log('🔐 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+console.log('🔐 SUPABASE SERVICE ROLE KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 5)); // แสดงแค่ 5 ตัวแรก
+
 export const authOptions: NextAuthOptions = {
-  console.log('🔐 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log('🔐 SUPABASE SERVICE ROLE KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 5)); // แสดงแค่ 5 ตัวแรก
+  
 
 
   providers: [
