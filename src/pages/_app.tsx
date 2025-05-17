@@ -1,6 +1,7 @@
 // pages/_app.tsx
+import "@/styles/globals.css"; // 👈 เพิ่มบรรทัดนี้
 import { AppProps } from "next/app";
-import { SessionProvider } from "next-auth/react"; // 👈 เพิ่ม
+import { SessionProvider } from "next-auth/react";
 import Script from "next/script";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function UnderConstruction() {
   return (
     <main className="min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
