@@ -7,6 +7,10 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = req.nextUrl.pathname;
 
+  if (process.env.VERCEL_ENV === "production") {
+    console.log("🛠 Production mode detected"); // จะเห็นใน log ตอน deploy
+  }
+
   // ✅ กำหนดเงื่อนไข under construction จาก ENV
   const isUnderConstruction = process.env.UNDER_CONSTRUCTION === "true";
   const isBypassUnderConstruction =
@@ -19,6 +23,8 @@ export async function middleware(req: NextRequest) {
   if (isUnderConstruction && !isBypassUnderConstruction) {
     url.pathname = "/underconstruction";
     return NextResponse.redirect(url);
+  }else{
+    console.log("SO SAD Not underconstruction!!!! T_T ");
   }
 
   // ❌ ไม่ login → redirect ไป /login
