@@ -1,23 +1,35 @@
-// src/app/underconstruction/page.tsx หรือ pages/underconstruction.tsx
 export default function UnderConstruction() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-blue-100 dark:from-gray-900 dark:to-gray-800 px-6 text-center">
-      <img
-        src="/images/undercon.svg" // 
-        alt="Under Construction"
-        className="w-64 h-auto mb-6"
-      />
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
-        🌟 เว็บไซต์นี้กำลังจะเปิดให้บริการเร็ว ๆ นี้!
-      </h1>
-      <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl mb-6">
-        ตอนนี้เรากำลังเตรียมพื้นที่สำหรับร้านค้าทั่วไทย ให้สามารถแสดงสินค้าและบริการได้อย่างมืออาชีพ
-        <br />
-        ไม่ว่าคุณจะเป็น <strong>พ่อค้าแม่ค้า</strong> หรือ <strong>ลูกค้าที่มองหาร้านค้าใกล้บ้าน</strong> — ที่นี่คือแหล่งรวมลิงก์ร้านค้าที่สะดวก ใช้งานง่าย และฟรี!
-      </p>
-      <p className="text-md text-gray-500 dark:text-gray-400">
-        <a href="https://storyset.com/online">Image from Online illustrations by Storyset</a>
-      </p>
-    </div>
+    <main className="min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
+      <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl w-full">
+        {/* Image */}
+        <div className="flex justify-center">
+          <img
+            src="/images/undercon.svg"
+            alt="Under Construction"
+            className="w-80 md:w-[400px] drop-shadow-xl"
+          />
+        </div>
+
+        {/* Text */}
+        <div className="text-center md:text-left space-y-6">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+            🚧 เว็บไซต์กำลังจะเปิดให้บริการเร็ว ๆ นี้!
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+            ตอนนี้เรากำลังเตรียมพื้นที่สำหรับร้านค้าทั่วไทย ให้สามารถแสดงสินค้าและบริการได้อย่างมืออาชีพ
+            <br />
+            ไม่ว่าคุณจะเป็น <strong>พ่อค้าแม่ค้า</strong> หรือ <strong>ลูกค้าที่มองหาร้านค้าใกล้บ้าน</strong> — 
+            ที่นี่คือแหล่งรวมลิงก์ร้านค้าที่สะดวก ใช้งานง่าย และฟรี!
+          </p>
+
+          <div>
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition">
+              📬 แจ้งเตือนฉันเมื่อเปิดให้บริการ
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
