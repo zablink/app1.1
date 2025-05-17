@@ -10,6 +10,7 @@ export async function middleware(req: NextRequest) {
   const isApiRoute = pathname.startsWith("/api");
   const isStaticAsset =
     pathname.startsWith("/_next") ||
+    pathname.startsWith('/images') ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt";
 
