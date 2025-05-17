@@ -34,6 +34,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th">
+      <head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+      </head>
       <body className={`${notoSansThai.variable} ${kanit.variable}`}>
         {children}
       </body>
