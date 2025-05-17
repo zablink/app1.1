@@ -27,9 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th">
-      <body className={`${notoSansThai.variable} ${kanit.variable}`}>
+      <body className={`${notoSansThai.variable} ${kanit.variable} font-sans`}>
         {children}
       </body>
     </html>
   );
 }
+
