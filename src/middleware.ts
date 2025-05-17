@@ -7,66 +7,49 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = req.nextUrl.pathname;
 
-  console.log("⛳ pathname =", pathname);
-  console.log("🔧 VERCEL_ENV =", process.env.VERCEL_ENV);
+  const isApiRoute = pathname.startsWith("/api");
+  const isStaticAsset =
+    pathname.startsWith("/_next") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/robots.txt";
 
+  const isBypassRoute = [
+    "/login",
+    "/underconstruction",
+  ].includes(pathname);
 
+  // ✅ UNDERCONSTRUCTION MODE (เฉพาะ production)
   if (process.env.VERCEL_ENV === "production") {
-    const isBypass =
-      pathname.startsWith("/api") ||
-      pathname === "/underconstruction" ||
-      pathname.startsWith("/_next") || 
-      pathname === "/login" ||
-      pathname === "/favicon.ico";
-
-    if (!isBypass) {
-
-      console.log("🚧 Redirecting to /underconstruction");
+    if (!isApiRoute && !isStaticAsset && !isBypassRoute) {
       url.pathname = "/underconstruction";
       return NextResponse.redirect(url);
     }
   }
 
-  // ✅ กำหนดเงื่อนไข under construction จาก ENV
-  const isUnderConstruction = process.env.UNDER_CONSTRUCTION === "true";
-  const isBypassUnderConstruction =
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/underconstruction" ||
-    pathname === "/login";
-
-  if (isUnderConstruction && !isBypassUnderConstruction) {
-    url.pathname = "/underconstruction";
-    return NextResponse.redirect(url);
-  }else{
-    console.log("SO SAD Not underconstruction!!!! T_T ");
-  }
-
-  // ❌ ไม่ login → redirect ไป /login
-  const isProtectedPage =
-    pathname.startsWith("/store") ||
-    pathname.startsWith("/admin") ||
-    (pathname !== "/login" && pathname !== "/complete-profile");
-
-  if (!token && isProtectedPage) {
+  // ✅ LOGIN CHECK
+  if (
+    !token &&
+    !isApiRoute &&
+    !isStaticAsset &&
+    !["/login", "/complete-profile", "/underconstruction"].includes(pathname)
+  ) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // ❌ enduser พยายามเข้า /store หรือ /admin
+  // ✅ BLOCK enduser เข้า store/admin
   if (token?.role === "enduser" && (pathname.startsWith("/store") || pathname.startsWith("/admin"))) {
     url.pathname = "/unauthorized";
     return NextResponse.redirect(url);
   }
 
-  // ❌ store เข้าหน้า admin
+  // ✅ BLOCK store เข้า admin
   if (token?.role === "store" && pathname.startsWith("/admin")) {
     url.pathname = "/unauthorized";
     return NextResponse.redirect(url);
   }
 
-  // ❌ admin เข้าหน้า store
+  // ✅ BLOCK admin เข้า store
   if (token?.role === "admin" && pathname.startsWith("/store")) {
     url.pathname = "/unauthorized";
     return NextResponse.redirect(url);
@@ -102,8 +85,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/store/:path*",
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt).*)",
   ],
 };
