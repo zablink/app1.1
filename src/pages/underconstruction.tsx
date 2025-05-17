@@ -18,10 +18,10 @@ export default function UnderConstruction() {
           <img
             src="/images/zablink-logo-1024.png"
             alt="Zablink Logo"
-            className="w-80 md:w-[120px]"
+            className="w-80 md:w-[80px]"
           />
           <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
-            Zablink กำลังจะเปิดให้บริการเร็ว ๆ นี้!.
+            Zablink เร็ว ๆ นี้!
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
             ตอนนี้เรากำลังเตรียมพื้นที่สำหรับร้านค้าทั่วไทย ให้สามารถแสดงสินค้าและบริการได้อย่างมืออาชีพ
