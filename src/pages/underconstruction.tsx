@@ -18,7 +18,7 @@ export default function UnderConstruction() {
           <img
             src="/images/zablink-logo-1024.png"
             alt="Zablink Logo"
-            className="w-1/3 sm:w-1/2 mx-auto"
+            className="w-1/3 sm:w-1/6 mx-auto"
           />
           <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
             Zablink เร็ว ๆ นี้!

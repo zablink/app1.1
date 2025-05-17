@@ -11,6 +11,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
         strategy="beforeInteractive"
       />
+      <Head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+      </Head>
       <Component {...pageProps} />
     </SessionProvider>
   );
