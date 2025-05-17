@@ -18,6 +18,9 @@ const kanit = Kanit({
 export const metadata: Metadata = {
   title: "ZabLink",
   description: "รวมร้านค้า",
+  icons: {
+    icon: "/favicon.png", // จะถูกสร้างเป็น <link rel="icon" href="/favicon.png" />
+  },
 };
 
 export default function RootLayout({
@@ -27,9 +30,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th">
-      <Head>
-        <link rel="icon" type="image/png" href="/favicon.png" />
-      </Head>
       <body className={`${notoSansThai.variable} ${kanit.variable}`}>
         {children}
       </body>
