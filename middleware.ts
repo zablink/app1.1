@@ -9,12 +9,14 @@ export async function middleware(req: NextRequest) {
 
   // ✅ แสดง underconstruction บน production เท่านั้น
   if (process.env.VERCEL_ENV === "production") {
-    const isBypass = pathname.startsWith("/api") || pathname === "/underconstruction";
-    if (!isBypass) {
-      url.pathname = "/underconstruction";  //
-      return NextResponse.redirect(url);
-    }
+  console.log("🛠 Production mode detected");
+  const isBypass = pathname.startsWith("/api") || pathname === "/underconstruction";
+  if (!isBypass) {
+    url.pathname = "/underconstruction";
+    return NextResponse.redirect(url);
   }
+}
+
 
   // ❌ ไม่ login → redirect ไป /login
   if (!token && (pathname.startsWith("/store") || pathname.startsWith("/admin") || pathname !== "/complete-profile")) {
