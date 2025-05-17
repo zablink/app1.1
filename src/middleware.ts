@@ -10,11 +10,16 @@ export async function middleware(req: NextRequest) {
   console.log("⛳ pathname =", pathname);
   console.log("🔧 VERCEL_ENV =", process.env.VERCEL_ENV);
 
+
   if (process.env.VERCEL_ENV === "production") {
-    console.log("🛠 Production mode detected");
-    const isBypass = pathname.startsWith("/api") || pathname === "/underconstruction";
+    const isBypass =
+      pathname.startsWith("/api") ||
+      pathname === "/underconstruction" ||
+      pathname.startsWith("/_next") || 
+      pathname === "/favicon.ico";
 
     if (!isBypass) {
+
       console.log("🚧 Redirecting to /underconstruction");
       url.pathname = "/underconstruction";
       return NextResponse.redirect(url);
