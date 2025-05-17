@@ -6,7 +6,7 @@ export default function UnderConstruction() {
       <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl w-full">
         {/* Image */}
         <div className="flex justify-center">
-          <img
+          <Image
             src="/images/undercon.svg"
             alt="Under Construction"
             className="w-80 md:w-[400px] drop-shadow-xl"
