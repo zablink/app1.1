@@ -19,7 +19,9 @@ export const metadata: Metadata = {
   title: "ZabLink",
   description: "รวมร้านค้า",
   icons: {
+    rel: "icon",
     icon: "/favicon.png", // จะถูกสร้างเป็น <link rel="icon" href="/favicon.png" />
+    type: "image/png",
   },
 };
 
