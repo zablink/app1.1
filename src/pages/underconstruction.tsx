@@ -1,28 +1,23 @@
-// pages/underconstruction.tsx
-import Head from 'next/head';
-
+// src/app/underconstruction/page.tsx หรือ pages/underconstruction.tsx
 export default function UnderConstruction() {
   return (
-    <>
-      <Head>
-        <meta name="robots" content="noindex" />
-        <title>Zablink กำลังจัดทำเว็บไซต์</title>
-      </Head>
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-yellow-100 to-orange-200 px-4">
-        <div className="text-center p-8 bg-white shadow-2xl rounded-2xl max-w-xl w-full">
-          <h1 className="text-3xl sm:text-4xl font-bold text-orange-600 mb-4">
-            🚧 เว็บไซต์กำลังจัดทำ
-          </h1>
-          <p className="text-gray-700 text-base sm:text-lg mb-6">
-            เรากำลังเตรียมความพร้อมให้ดีที่สุด สำหรับร้านอาหาร เครื่องดื่ม และลูกค้าทุกๆ ท่าน
-          </p>
-          <div className="flex justify-center">
-            <span className="inline-block text-sm text-gray-500">
-              ขอบคุณที่แวะเข้ามานะครับ 🙏
-            </span>
-          </div>
-        </div>
-      </div>
-    </>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-blue-100 dark:from-gray-900 dark:to-gray-800 px-6 text-center">
+      <img
+        src="/images/undercon.svg" // 
+        alt="Under Construction"
+        className="w-64 h-auto mb-6"
+      />
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+        🌟 เว็บไซต์นี้กำลังจะเปิดให้บริการเร็ว ๆ นี้!
+      </h1>
+      <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl mb-6">
+        ตอนนี้เรากำลังเตรียมพื้นที่สำหรับร้านค้าทั่วไทย ให้สามารถแสดงสินค้าและบริการได้อย่างมืออาชีพ
+        <br />
+        ไม่ว่าคุณจะเป็น <strong>พ่อค้าแม่ค้า</strong> หรือ <strong>ลูกค้าที่มองหาร้านค้าใกล้บ้าน</strong> — ที่นี่คือแหล่งรวมลิงก์ร้านค้าที่สะดวก ใช้งานง่าย และฟรี!
+      </p>
+      <p className="text-md text-gray-500 dark:text-gray-400">
+        <a href="https://storyset.com/online">Image from Online illustrations by Storyset</a>
+      </p>
+    </div>
   );
 }
