@@ -18,11 +18,13 @@ const kanit = Kanit({
 export const metadata: Metadata = {
   title: "ZabLink",
   description: "รวมร้านค้า",
-  icons: {
-    rel: "icon",
-    icon: "/favicon.png", // จะถูกสร้างเป็น <link rel="icon" href="/favicon.png" />
-    type: "image/png",
-  },
+  icons: [
+    {
+      rel: "icon",
+      url: "/favicon.png", 
+      type: "image/png",
+    },
+  ],
 };
 
 export default function RootLayout({
