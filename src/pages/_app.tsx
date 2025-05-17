@@ -1,5 +1,5 @@
 // pages/_app.tsx
-import "@/styles/globals.css"; // 👈 เพิ่มบรรทัดนี้
+import '@/app/globals.css';  // ถ้า alias '@' ชี้ไปที่ src
 import { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import Script from "next/script";
