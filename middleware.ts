@@ -53,4 +53,35 @@ export async function middleware(req: NextRequest) {
   // ✅ enduser ต้องกรอก complete-profile
   if (
     token?.role === "enduser" &&
-    pathname !== "/complete-profile"
+    pathname !== "/complete-profile" &&
+    pathname !== "/login" &&
+    !pathname.startsWith("/api/check-profile")
+  ) {
+    const checkProfile = await fetch(`${req.nextUrl.origin}/api/check-profile`, {
+      headers: {
+        cookie: req.headers.get("cookie") ?? "",
+      },
+    });
+
+    if (checkProfile.status === 200) {
+      const { isComplete } = await checkProfile.json();
+      if (!isComplete) {
+        url.pathname = "/complete-profile";
+        return NextResponse.redirect(url);
+      }
+    } else {
+      url.pathname = "/complete-profile";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    "/store/:path*",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
+};
