@@ -1,4 +1,3 @@
-// middleware.ts
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -8,7 +7,16 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = req.nextUrl.pathname;
 
-  // ไม่ login → redirect ไป /login
+  // ✅ แสดง underconstruction บน production เท่านั้น
+  if (process.env.VERCEL_ENV === "production") {
+    const isBypass = pathname.startsWith("/api") || pathname === "/underconstruction";
+    if (!isBypass) {
+      url.pathname = "/underconstruction";  //
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // ❌ ไม่ login → redirect ไป /login
   if (!token && (pathname.startsWith("/store") || pathname.startsWith("/admin") || pathname !== "/complete-profile")) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -26,20 +34,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ❌ admin เข้าหน้า store (อนุญาตเฉพาะร้านค้า)
+  // ❌ admin เข้าหน้า store
   if (token?.role === "admin" && pathname.startsWith("/store")) {
     url.pathname = "/unauthorized";
     return NextResponse.redirect(url);
   }
 
-  // สำหรับ enduser บังคับกรอก complete-profile ก่อนเข้าหน้าอื่น ๆ (ยกเว้น /complete-profile, /api/check-profile, /login)
+  // ✅ enduser ต้องกรอก complete-profile
   if (
     token?.role === "enduser" &&
     pathname !== "/complete-profile" &&
     pathname !== "/login" &&
     !pathname.startsWith("/api/check-profile")
   ) {
-    // เช็คสถานะ complete-profile ผ่าน API (ใช้ fetch แบบ sync รอผลก่อน)
     const checkProfile = await fetch(`${req.nextUrl.origin}/api/check-profile`, {
       headers: {
         cookie: req.headers.get("cookie") ?? "",
@@ -53,7 +60,6 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(url);
       }
     } else {
-      // ถ้าเรียก API ไม่ผ่าน ก็ redirect ไป complete-profile ป้องกันบั๊ก
       url.pathname = "/complete-profile";
       return NextResponse.redirect(url);
     }
@@ -66,6 +72,6 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/store/:path*",
-    "/((?!_next/static|_next/image|favicon.ico).*)", // ตรวจทุกเส้นทาง ยกเว้นไฟล์ static
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
