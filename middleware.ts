@@ -7,8 +7,18 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = req.nextUrl.pathname;
 
+  console.log("⛳ pathname =", pathname);
+  console.log("🔧 VERCEL_ENV =", process.env.VERCEL_ENV);
+
   if (process.env.VERCEL_ENV === "production") {
-    console.log("🛠 Production mode detected"); // จะเห็นใน log ตอน deploy
+    console.log("🛠 Production mode detected");
+    const isBypass = pathname.startsWith("/api") || pathname === "/underconstruction";
+
+    if (!isBypass) {
+      console.log("🚧 Redirecting to /underconstruction");
+      url.pathname = "/underconstruction";
+      return NextResponse.redirect(url);
+    }
   }
 
   // ✅ กำหนดเงื่อนไข under construction จาก ENV
