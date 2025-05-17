@@ -16,6 +16,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/api") ||
       pathname === "/underconstruction" ||
       pathname.startsWith("/_next") || 
+      pathname === "/login" ||
       pathname === "/favicon.ico";
 
     if (!isBypass) {
