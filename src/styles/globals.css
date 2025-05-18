@@ -4,7 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
+  --font-body: 'Noto Sans Thai', sans-serif;
+  --font-header: 'Kanit', sans-serif;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -15,6 +18,8 @@
     --foreground: #ededed;
   }
 }
+
+
 
 body {
   font-family: var(--font-body);

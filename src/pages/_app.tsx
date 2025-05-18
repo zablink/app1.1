@@ -1,5 +1,5 @@
 // pages/_app.tsx
-import '@/app/globals.css';  // ถ้า alias '@' ชี้ไปที่ src
+import '@/styles/globals.css';
 import { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import Script from "next/script";
