@@ -12,7 +12,13 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith('/images') ||
     pathname === "/favicon.ico" ||
-    pathname === "/robots.txt";
+    pathname === "/robots.txt" ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".css") ||
+    pathname.endsWith(".woff2") ||  
+    pathname.endsWith(".ttf") ||
+    pathname.endsWith(".otf");
 
   const isBypassRoute = [
     "/login",
@@ -86,6 +92,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|.*\\.(png|jpg|css|woff2|ttf|otf)).*)",
   ],
 };
+
