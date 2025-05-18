@@ -90,9 +90,9 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
+
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|.*\\.(png|jpg|css|woff2|ttf|otf)).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt).*)",
   ],
 };
-
