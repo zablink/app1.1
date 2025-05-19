@@ -21,16 +21,16 @@ const kanit = Kanit({
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <main className={`${notoSansThai.variable} ${kanit.variable}`}>
-      <Component {...pageProps} />
-    </main>
-
     <SessionProvider session={session}>
+      {/* โหลด Google Maps */}
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
         strategy="beforeInteractive"
       />
-      <Component {...pageProps} />
+      {/* ใส่ font variable เข้า main */}
+      <main className={`${notoSansThai.variable} ${kanit.variable}`}>
+        <Component {...pageProps} />
+      </main>
     </SessionProvider>
   );
 }
