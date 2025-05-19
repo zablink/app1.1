@@ -1,6 +1,5 @@
 // pages/_document.tsx
 import { Html, Head, Main, NextScript } from 'next/document';
-import { Noto_Sans_Thai } from "next/font/google"
 
 
 export default function Document() {
