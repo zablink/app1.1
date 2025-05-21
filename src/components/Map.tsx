@@ -7,7 +7,8 @@ type MapProps = Location & {
 };
 
 const Map: React.FC<MapProps> = ({ lat, lng, onChange }) => {
-  // ...
+  return <div>Map Placeholder</div>;
+
 };
 
 export default Map;
