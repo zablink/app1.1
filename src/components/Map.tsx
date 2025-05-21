@@ -1,6 +1,13 @@
 // src/components/Map.tsx
 import React from "react";
+import { Location } from "@/types/location";
 
-export default function Map() {
-  return <div>Map component</div>;
-}
+type MapProps = Location & {
+  onChange: (lat: number, lng: number) => void;
+};
+
+const Map: React.FC<MapProps> = ({ lat, lng, onChange }) => {
+  // ...
+};
+
+export default Map;
