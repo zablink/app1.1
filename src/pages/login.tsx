@@ -79,6 +79,13 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <p className="mt-6 text-center text-sm text-gray-600">
+          ยังไม่มีบัญชี?{" "}
+          <Link href="/signup" className="text-blue-600 hover:underline">
+            สมัครสมาชิก
+          </Link>
+        </p>
+
         <div className="mt-6 space-y-2">
           <button
             onClick={() => handleOAuthLogin("google")}
