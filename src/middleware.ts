@@ -1,3 +1,5 @@
+// /src/middleware.ts
+
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -16,29 +18,22 @@ export async function middleware(req: NextRequest) {
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg") ||
     pathname.endsWith(".css") ||
-    pathname.endsWith(".woff2") ||  
+    pathname.endsWith(".woff2") ||
     pathname.endsWith(".ttf") ||
     pathname.endsWith(".otf");
 
-  const isBypassRoute = [
+  const isPublicRoute = [
+    "/", // ✅ เพิ่ม '/' ให้เปิดได้เสมอ
     "/login",
-    "/underconstruction",
-  ].includes(pathname);
+    "/complete-profile",
+  ];
 
-  // ✅ UNDERCONSTRUCTION MODE (เฉพาะ production)
-  if (process.env.VERCEL_ENV === "production") {
-    if (!isApiRoute && !isStaticAsset && !isBypassRoute) {
-      url.pathname = "/underconstruction";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // ✅ LOGIN CHECK
+  // ✅ CHECK login required
   if (
     !token &&
     !isApiRoute &&
     !isStaticAsset &&
-    !["/login", "/complete-profile", "/underconstruction"].includes(pathname)
+    !isPublicRoute.includes(pathname)
   ) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -62,11 +57,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ✅ enduser ต้องกรอก complete-profile
+  // ✅ enduser ต้องกรอก complete-profile ก่อน
   if (
     token?.role === "enduser" &&
     pathname !== "/complete-profile" &&
     pathname !== "/login" &&
+    pathname !== "/" && // ✅ ให้เข้า home ได้
     !pathname.startsWith("/api/check-profile")
   ) {
     const checkProfile = await fetch(`${req.nextUrl.origin}/api/check-profile`, {
@@ -89,7 +85,6 @@ export async function middleware(req: NextRequest) {
 
   return NextResponse.next();
 }
-
 
 export const config = {
   matcher: [
