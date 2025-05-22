@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
