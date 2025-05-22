@@ -29,6 +29,7 @@ export async function middleware(req: NextRequest) {
   ];
 
   // ✅ CHECK login required
+  /* Comment for not redirect every pages to LOGIN
   if (
     !token &&
     !isApiRoute &&
@@ -38,6 +39,7 @@ export async function middleware(req: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
+  */
 
   // ✅ BLOCK enduser เข้า store/admin
   if (token?.role === "enduser" && (pathname.startsWith("/store") || pathname.startsWith("/admin"))) {
