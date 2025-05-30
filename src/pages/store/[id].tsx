@@ -1,3 +1,5 @@
+/*
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -109,14 +111,14 @@ export default function StoreDetailPage() {
 
   return (
     <div className="p-6 space-y-8">
-      {/* Breadcrumb */}
-      <div>
+      {/ * Breadcrumb * /}
+      <div> 
         <Link href="/stores" className="text-blue-600 hover:underline">
           ← ย้อนกลับไปหน้าร้านทั้งหมด
         </Link>
       </div>
 
-      {/* ข้อมูลร้าน */}
+      {/ * ข้อมูลร้าน * /}
       <h1 className="text-2xl font-bold">รายละเอียดร้านค้า</h1>
       {store ? (
         <div className="space-y-2">
@@ -128,7 +130,7 @@ export default function StoreDetailPage() {
         <p>กำลังโหลดข้อมูลร้าน...</p>
       )}
 
-      {/* รีวิวลูกค้า */}
+      {/ * รีวิวลูกค้า * /}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold mt-8">รีวิวจากลูกค้า</h2>
         {reviews.length === 0 && <p>ยังไม่มีรีวิว</p>}
@@ -151,7 +153,7 @@ export default function StoreDetailPage() {
         ))}
       </div>
 
-      {/* เขียนรีวิวใหม่ */}
+      {/ * เขียนรีวิวใหม่ *  /}
       <div className="space-y-4 mt-10">
         <h2 className="text-xl font-semibold">เขียนรีวิวใหม่</h2>
         <label className="block">
@@ -190,7 +192,7 @@ export default function StoreDetailPage() {
         </button>
       </div>
 
-      {/* ร้านใกล้เคียง */}
+      {/ * ร้านใกล้เคียง * /}
       <div className="space-y-6 mt-10">
         <h2 className="text-xl font-semibold">ร้านค้าใกล้เคียง</h2>
         {[1, 2, 3, 4, 5].map((level) =>
@@ -212,6 +214,95 @@ export default function StoreDetailPage() {
             </div>
           ) : null
         )}
+      </div>
+    </div>
+  );
+}
+*/
+
+
+// pages/store/[id].tsx
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import axios from "axios";
+
+// สมมุติว่าคุณมี Card component ที่ทำไว้
+import StoreCard from "@/components/StoreCard";
+
+const fetcher = (url: string) => axios.get(url).then(res => res.data);
+
+export default function StorePage() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { data: storeData, error: storeError } = useSWR(
+    id ? `/api/store/${id}` : null,
+    fetcher
+  );
+
+  const { data: reviewsData } = useSWR(
+    id ? `/api/store/${id}/reviews` : null,
+    fetcher
+  );
+
+  const { data: relatedStores } = useSWR(
+    id ? `/api/store/${id}/related` : null,
+    fetcher
+  );
+
+  if (!storeData) return <div className="text-center py-10 text-gray-500">Loading...</div>;
+  if (storeError) return <div className="text-center py-10 text-red-500">Error loading store</div>;
+
+  const { store } = storeData;
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-primary">{store.name}</h1>
+        <p className="text-gray-600 mt-2">{store.description}</p>
+      </div>
+
+      {/* Store Info Card */}
+      <div className="mb-8">
+        <StoreCard store={store} />
+      </div>
+
+      {/* Contact / Social Links */}
+      <div className="mb-10">
+        <h2 className="text-xl font-semibold text-secondary mb-2">ช่องทางการติดต่อ</h2>
+        <div className="flex gap-4 text-blue-600 underline">
+          {store.line && <a href={store.line} target="_blank" rel="noopener noreferrer">LINE</a>}
+          {store.facebook && <a href={store.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>}
+          {store.website && <a href={store.website} target="_blank" rel="noopener noreferrer">Website</a>}
+        </div>
+      </div>
+
+      {/* Review Section */}
+      <div className="mb-12">
+        <h2 className="text-xl font-semibold text-secondary mb-4">รีวิวจากลูกค้า</h2>
+        {reviewsData?.reviews?.length > 0 ? (
+          <div className="space-y-4">
+            {reviewsData.reviews.map((review: any) => (
+              <div key={review.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                <p className="font-medium text-gray-800">{review.user_name}</p>
+                <p className="text-gray-600">{review.comment}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">ยังไม่มีรีวิว</p>
+        )}
+      </div>
+
+      {/* Related Stores */}
+      <div className="mb-12">
+        <h2 className="text-xl font-semibold text-secondary mb-4">ร้านใกล้เคียง</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {relatedStores?.related?.map((s: any) => (
+            <StoreCard key={s.id} store={s} />
+          ))}
+        </div>
       </div>
     </div>
   );
