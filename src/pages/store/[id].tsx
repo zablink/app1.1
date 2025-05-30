@@ -46,6 +46,8 @@ export default function StoreDetailPage() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
 
   useEffect(() => {
+    console.log("storeId:", storeId); // Debug ค่า storeId
+
     if (typeof storeId === "string") {
       fetch(`/api/store/${storeId}`)
         .then((res) => res.json())
@@ -63,6 +65,15 @@ export default function StoreDetailPage() {
         .catch((err) => console.error("Related stores fetch error:", err));
     }
   }, [storeId]);
+
+  useEffect(() => {
+    if (store) {
+      console.log("Current store state:", store);
+    }else{
+      console.log("Cant get store state");
+    }
+  }, [store]);
+
 
   const handleSubmitReview = async () => {
     try {
@@ -281,7 +292,6 @@ export default function StoreDetailPage() {
           </div>
         ) : (
           <p>กำลังโหลดข้อมูลร้าน...</p>
-          console.log('Store > '+ store);
         )}
 
         {/* รีวิวลูกค้า */}
