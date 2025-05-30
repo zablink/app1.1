@@ -72,4 +72,67 @@ export default function HomePage() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="animate-pulse spac
+                className="animate-pulse space-y-4 rounded-xl bg-white shadow-md p-4"
+              >
+                <div className="h-32 bg-gray-200 rounded-lg shimmer" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-100 rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {stores.map((store) => {
+              const imageUrl = store.coverUrl || `/store-images/${store.id}.jpg` || "/default-cover.jpg";
+              return (
+                <div
+                  key={store.id}
+                  className="group rounded-xl bg-white shadow-md hover:shadow-xl transition duration-300 cursor-pointer"
+                  onClick={() => router.push(`/store/${store.id}`)}
+                >
+                  <div className="h-32 bg-gray-100 rounded-t-xl overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt={store.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4 space-y-1">
+                    <h2 className="text-lg font-medium text-primary group-hover:underline">
+                      {store.name}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {store.description || store.category || "ไม่มีคำอธิบาย"}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// fallback ร้านตัวอย่าง หากไม่สามารถดึงข้อมูลจริงได้
+const dummyStores = [
+  {
+    id: "dummy1",
+    name: "ร้านตัวอย่าง A",
+    description: "ร้านอาหารญี่ปุ่นแนะนำ",
+    coverUrl: "/store-images/store1.jpg",
+  },
+  {
+    id: "dummy2",
+    name: "ร้านตัวอย่าง B",
+    description: "ร้านชานมไข่มุกยอดฮิต",
+    coverUrl: "/store-images/store2.jpg",
+  },
+  {
+    id: "dummy3",
+    name: "ร้านตัวอย่าง C",
+    description: "อาหารตามสั่งอร่อยๆ",
+    coverUrl: "/store-images/store3.jpg",
+  },
+];
