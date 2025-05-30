@@ -221,6 +221,7 @@ export default function StoreDetailPage() {
 */
 
 
+/******************
 // pages/store/[id].tsx
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -257,18 +258,18 @@ export default function StorePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header Section */}
+      {/ * Header Section * /}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-primary">{store.name}</h1>
         <p className="text-gray-600 mt-2">{store.description}</p>
       </div>
 
-      {/* Store Info Card */}
+      {/ * Store Info Card * /}
       <div className="mb-8">
         <StoreCard store={store} />
       </div>
 
-      {/* Contact / Social Links */}
+      {/ * Contact / Social Links * /}
       <div className="mb-10">
         <h2 className="text-xl font-semibold text-secondary mb-2">ช่องทางการติดต่อ</h2>
         <div className="flex gap-4 text-blue-600 underline">
@@ -278,7 +279,7 @@ export default function StorePage() {
         </div>
       </div>
 
-      {/* Review Section */}
+      {/ * Review Section * /}
       <div className="mb-12">
         <h2 className="text-xl font-semibold text-secondary mb-4">รีวิวจากลูกค้า</h2>
         {reviewsData?.reviews?.length > 0 ? (
@@ -295,7 +296,7 @@ export default function StorePage() {
         )}
       </div>
 
-      {/* Related Stores */}
+      {/ * Related Stores * /}
       <div className="mb-12">
         <h2 className="text-xl font-semibold text-secondary mb-4">ร้านใกล้เคียง</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -303,6 +304,46 @@ export default function StorePage() {
             <StoreCard key={s.id} store={s} />
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+**************/
+
+
+
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import axios from "axios";
+import StoreCard from "@/components/StoreCard";
+
+const fetcher = (url: string) => axios.get(url).then(res => res.data);
+
+export default function StorePage() {
+  const router = useRouter();
+  const storeId = typeof router.query.id === "string" ? router.query.id : null;
+
+  const { data: storeData, error: storeError } = useSWR(
+    storeId ? `/api/store/${storeId}` : null,
+    fetcher
+  );
+
+  console.log("storeData:", storeData); // ✅ ดูว่าได้อะไรกลับมาจริง
+
+  if (storeError) return <div className="text-center py-10 text-red-500">Error loading store</div>;
+  if (!storeData) return <div className="text-center py-10 text-gray-500">Loading...</div>;
+
+  const store = storeData?.store || storeData; // เผื่อว่า store อยู่ root level
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-primary">{store.name}</h1>
+        <p className="text-gray-600 mt-2">{store.description}</p>
+      </div>
+
+      <div className="mb-8">
+        <StoreCard store={store} />
       </div>
     </div>
   );
