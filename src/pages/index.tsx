@@ -67,7 +67,6 @@ export default function HomePage() {
   };
 
   return (
-    return (
       <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
         <div className="max-w-5xl mx-auto space-y-8">
           <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ</h1>
@@ -115,5 +114,4 @@ export default function HomePage() {
         </div>
       </div>
     );
-  );
 }
