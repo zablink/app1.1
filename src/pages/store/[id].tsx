@@ -46,6 +46,7 @@ export default function StoreDetailPage() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
 
   useEffect(() => {
+    console.log("StoreID :: " , storeId);
     if (typeof storeId === "string") {
       fetch(`/api/store/${storeId}`)
         .then((res) => res.json())
