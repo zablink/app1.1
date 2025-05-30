@@ -83,7 +83,7 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {stores.map((store) => {
-              const imageUrl = store.coverUrl || `/store-images/${store.id}.jpg` || "/default-cover.jpg";
+              const imageUrl = store.cover_url || `/store-images/${store.id}.jpg` || "/default-cover.jpg";
               return (
                 <div
                   key={store.id}
