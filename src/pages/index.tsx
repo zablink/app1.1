@@ -26,6 +26,7 @@ export default function HomePage() {
     }
   }, [session, status, router]);
 
+  /*
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError(true);
@@ -56,6 +57,102 @@ export default function HomePage() {
       }
     );
   }, []);
+  */
+
+    useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLat(latitude);
+        setLng(longitude);
+
+        axios
+          .get("/api/stores/nearby", {
+            params: { lat: latitude, lng: longitude },
+          })
+          .then((res) => {
+            if (res.data.length > 0) {
+              setStores(res.data);
+            } else {
+              // ถ้าไม่เจอร้านใกล้เลย → ใช้ dummy แทน
+              setStores([
+                {
+                  id: "dummy1",
+                  name: "ร้านตัวอย่าง A",
+                  description: "ร้านอาหารญี่ปุ่นแนะนำ",
+                  coverUrl: "/mock/store1.jpg",
+                },
+                {
+                  id: "dummy2",
+                  name: "ร้านตัวอย่าง B",
+                  description: "ร้านชานมไข่มุกยอดฮิต",
+                  coverUrl: "/mock/store2.jpg",
+                },
+                {
+                  id: "dummy3",
+                  name: "ร้านตัวอย่าง C",
+                  description: "อาหารตามสั่งอร่อยๆ",
+                  coverUrl: "/mock/store3.jpg",
+                },
+              ]);
+            }
+          })
+          .catch(() => {
+            // ถ้า error → ใช้ dummy
+            setStores([
+              {
+                id: "dummy1",
+                name: "ร้านตัวอย่าง A",
+                description: "ร้านอาหารญี่ปุ่นแนะนำ",
+                coverUrl: "/mock/store1.jpg",
+              },
+              {
+                id: "dummy2",
+                name: "ร้านตัวอย่าง B",
+                description: "ร้านชานมไข่มุกยอดฮิต",
+                coverUrl: "/mock/store2.jpg",
+              },
+              {
+                id: "dummy3",
+                name: "ร้านตัวอย่าง C",
+                description: "อาหารตามสั่งอร่อยๆ",
+                coverUrl: "/mock/store3.jpg",
+              },
+            ]);
+          });
+      },
+      () => {
+        setLocationError(true);
+        // ถ้าระบุตำแหน่งไม่ได้เลย → แสดง dummy เช่นกัน
+        setStores([
+          {
+            id: "dummy1",
+            name: "ร้านตัวอย่าง A",
+            description: "ร้านอาหารญี่ปุ่นแนะนำ",
+            coverUrl: "/mock/store1.jpg",
+          },
+          {
+            id: "dummy2",
+            name: "ร้านตัวอย่าง B",
+            description: "ร้านชานมไข่มุกยอดฮิต",
+            coverUrl: "/mock/store2.jpg",
+          },
+          {
+            id: "dummy3",
+            name: "ร้านตัวอย่าง C",
+            description: "อาหารตามสั่งอร่อยๆ",
+            coverUrl: "/mock/store3.jpg",
+          },
+        ]);
+      }
+    );
+  }, []);
+
 
   const handleProvinceSelect = async () => {
     if (selectedProvince) {
