@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
+  console.log('Hit store related:', req.query);
+
   if (!id) return res.status(400).json({ error: "Missing store ID" });
 
   const { data, error } = await supabase.rpc("find_related_stores", {

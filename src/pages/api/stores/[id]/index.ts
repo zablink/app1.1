@@ -14,6 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq("id", id)
     .single();
 
+  console.log('Hit store index:', req.query);
+
   if (error && error.code !== "PGRST116") {
     // รหัสนี้หมายถึง "No rows found", ถือว่าไม่ใช่ error ร้ายแรง
     return res.status(500).json({ error: error.message });

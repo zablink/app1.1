@@ -7,6 +7,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     method,
   } = req;
 
+  console.log('Hit store reviews:', req.query);
+
   if (!id || typeof id !== "string") {
     return res.status(400).json({ error: "Missing or invalid store ID" });
   }
