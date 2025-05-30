@@ -26,6 +26,7 @@ export default function VerifyOtpPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-2xl font-bold">ยืนยัน OTP</h1>
+      <h3>ตรวจสอบที่ Email ที่ลงทะเบียน</h3>
       <input
         value={otp}
         onChange={(e) => setOtp(e.target.value)}

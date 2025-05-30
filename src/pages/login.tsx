@@ -44,16 +44,20 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: "google" | "facebook") => {
+  const handleOAuthLogin = async (provider: "google" | "facebook" | "tiktok") => {
     await signIn(provider, { callbackUrl: "/" });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-4 text-center">เข้าสู่ระบบ</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-4">
+      <div className="w-full max-w-md bg-white/70 backdrop-blur-sm border border-gray-200 shadow-xl rounded-2xl p-8">
+        <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6 tracking-tight">
+          เข้าสู่ระบบ
+        </h1>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input name="csrfToken" type="hidden" value={csrfToken} />
@@ -63,18 +67,20 @@ export default function LoginPage() {
             type="email"
             required
             placeholder="อีเมล"
-            className="w-full px-4 py-2 border rounded"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-600 transition"
           />
+
           <input
             name="password"
             type="password"
             required
             placeholder="รหัสผ่าน"
-            className="w-full px-4 py-2 border rounded"
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-600 transition"
           />
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            className="w-full py-3 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-all font-medium"
           >
             เข้าสู่ระบบ
           </button>
@@ -82,23 +88,30 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           ยังไม่มีบัญชี?{" "}
-          <Link href="/signup" className="text-blue-600 hover:underline">
+          <Link href="/signup" className="text-gray-800 underline hover:text-black font-medium">
             สมัครสมาชิก
           </Link>
         </p>
 
-        <div className="mt-6 space-y-2">
+        <div className="mt-6 space-y-3">
           <button
             onClick={() => handleOAuthLogin("google")}
-            className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
+            className="w-full flex items-center justify-center py-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
           >
             เข้าสู่ระบบด้วย Google
           </button>
           <button
             onClick={() => handleOAuthLogin("facebook")}
-            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-900"
+            className="w-full flex items-center justify-center py-3 rounded-lg bg-blue-800 text-white hover:bg-blue-900 transition"
           >
             เข้าสู่ระบบด้วย Facebook
+          </button>
+          <button
+            onClick={() => handleOAuthLogin("tiktok")}
+            disabled
+            className="w-full flex items-center justify-center py-3 rounded-lg bg-black text-white opacity-50 cursor-not-allowed"
+          >
+            เข้าสู่ระบบด้วย TikTok (เร็ว ๆ นี้)
           </button>
         </div>
       </div>
