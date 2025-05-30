@@ -129,10 +129,6 @@ export default function StoreDetailPage() {
           </Link>
         </div>
 
-{
-  console.log('store is ..'); 
-  console.log(store);} 
-
         {/* ข้อมูลร้าน */}
         <h1 className="text-3xl md:text-4xl font-semibold text-primary">รายละเอียดร้านค้า</h1>
         {store ? (
