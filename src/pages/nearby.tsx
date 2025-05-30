@@ -15,7 +15,7 @@ export default function Nearby() {
           setLongitude(lng);
 
           // เรียก API หลังได้พิกัด
-          fetch(`/api/stores/nearby?lat=${lat}&lng=${lng}`)
+          fetch(`/pages/api/stores/nearby?lat=${lat}&lng=${lng}`)
             .then((res) => res.json())
             .then((data) => setStores(data));
         },

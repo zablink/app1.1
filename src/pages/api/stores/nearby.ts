@@ -1,3 +1,32 @@
+// lib/nearby.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export async function getNearestSubdistrict({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}) {
+  const { data, error } = await supabase.rpc('get_nearest_subdistrict', {
+    user_lat: lat,
+    user_lng: lng,
+  });
+
+  if (error) {
+    console.error('Error fetching nearest subdistrict:', error.message);
+    return null;
+  }
+
+  return data;
+}
+
+/*
 // pages/api/stores/nearby.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "@/lib/supabase";
@@ -90,3 +119,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // ขั้นที่ 5: default - ร้านทั้งหมด
   return res.status(200).json(stores);
 }
+*/

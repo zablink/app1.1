@@ -1,146 +1,54 @@
 // pages/index.tsx
-export const dynamic = "force-dynamic";
-
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import axios from "axios";
+import { useEffect, useState } from 'react';
+import { getNearestSubdistrict } from '@/lib/nearby';
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  const [lat, setLat] = useState<number | null>(null);
-  const [lng, setLng] = useState<number | null>(null);
-  const [stores, setStores] = useState<any[]>([]);
-  const [locationError, setLocationError] = useState(false);
-  const [provinceStores, setProvinceStores] = useState<any[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [location, setLocation] = useState<GeolocationCoordinates | null>(null);
+  const [nearest, setNearest] = useState<any>(null);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.provider && session.user.isNewUser) {
-      router.push("/complete-profile");
-    }
-  }, [session, status, router]);
-
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationError(true);
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLat(latitude);
-        setLng(longitude);
+      async (pos) => {
+        const coords = pos.coords;
+        setLocation(coords);
 
-        axios
-          .get("/api/stores/nearby", {
-            params: { lat: latitude, lng: longitude },
-          })
-          .then((res) => {
-            if (res.data.length > 0) {
-              setStores(res.data);
-            } else {
-              setStores(dummyStores); // fallback ถ้าไม่เจอร้านใกล้
-            }
-          })
-          .catch(() => {
-            setStores(dummyStores); // fallback ถ้า API error
-          });
+        const nearestSubdistrict = await getNearestSubdistrict({
+          lat: coords.latitude,
+          lng: coords.longitude,
+        });
+
+        setNearest(nearestSubdistrict);
       },
-      () => {
-        setLocationError(true);
-        setStores(dummyStores); // fallback ถ้าระบุตำแหน่งไม่ได้
+      (err) => {
+        console.error('Geolocation error:', err);
       }
     );
   }, []);
 
-  const handleProvinceSelect = async () => {
-    if (selectedProvince) {
-      const { data } = await axios.get("/api/stores/by-province-name", {
-        params: { province: selectedProvince },
-      });
-      setProvinceStores(data);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ</h1>
+    <main className="p-4">
+      <h1 className="text-2xl font-bold mb-4">ตำบลใกล้เคียงที่สุด</h1>
 
-        {locationError && (
-          <p className="text-red-600">ไม่สามารถเข้าถึงตำแหน่งของคุณได้</p>
-        )}
+      {location && (
+        <p>
+          พิกัดของคุณ: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+        </p>
+      )}
 
-        {stores.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="animate-pulse space-y-4 rounded-xl bg-white shadow-md p-4"
-              >
-                <div className="h-32 bg-gray-200 rounded-lg shimmer" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-100 rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {stores.map((store) => {
-              const imageUrl = store.coverUrl || `/store-images/${store.id}.jpg` || "/default-cover.jpg";
-              return (
-                <div
-                  key={store.id}
-                  className="group rounded-xl bg-white shadow-md hover:shadow-xl transition duration-300 cursor-pointer"
-                  onClick={() => router.push(`/store/${store.id}`)}
-                >
-                  <div className="h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={store.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4 space-y-1">
-                    <h2 className="text-lg font-medium text-primary group-hover:underline">
-                      {store.name}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {store.description || store.category || "ไม่มีคำอธิบาย"}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+      {nearest ? (
+        <div className="mt-4">
+          <p>
+            <strong>ตำบล:</strong> {nearest.name}
+          </p>
+          <p>
+            <strong>อำเภอ:</strong> {nearest.districts.name}
+          </p>
+        </div>
+      ) : (
+        <p className="mt-4">กำลังค้นหาตำบลใกล้เคียง...</p>
+      )}
+    </main>
   );
 }
-
-// fallback ร้านตัวอย่าง หากไม่สามารถดึงข้อมูลจริงได้
-const dummyStores = [
-  {
-    id: "dummy1",
-    name: "ร้านตัวอย่าง A",
-    description: "ร้านอาหารญี่ปุ่นแนะนำ",
-    coverUrl: "/store-images/store1.jpg",
-  },
-  {
-    id: "dummy2",
-    name: "ร้านตัวอย่าง B",
-    description: "ร้านชานมไข่มุกยอดฮิต",
-    coverUrl: "/store-images/store2.jpg",
-  },
-  {
-    id: "dummy3",
-    name: "ร้านตัวอย่าง C",
-    description: "อาหารตามสั่งอร่อยๆ",
-    coverUrl: "/store-images/store3.jpg",
-  },
-];
