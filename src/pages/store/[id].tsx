@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -39,6 +38,7 @@ type NearbyStore = {
 export default function StoreDetailPage() {
   const router = useRouter();
   const { id } = router.query;
+  const storeId = Array.isArray(id) ? id[0] : id;
 
   const [store, setStore] = useState<Store | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -46,46 +46,56 @@ export default function StoreDetailPage() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
 
   useEffect(() => {
-    if (id) {
-      fetch(`/api/store/${id}`)
+    if (typeof storeId === "string") {
+      fetch(`/api/store/${storeId}`)
         .then((res) => res.json())
-        .then((data) => setStore(data.store));
+        .then((data) => setStore(data.store))
+        .catch((err) => console.error("Store fetch error:", err));
 
-      fetch(`/api/store/${id}/reviews`)
+      fetch(`/api/store/${storeId}/reviews`)
         .then((res) => res.json())
-        .then((data) => setReviews(data.reviews || []));
+        .then((data) => setReviews(data.reviews || []))
+        .catch((err) => console.error("Reviews fetch error:", err));
 
-      fetch(`/api/store/${id}/related`)
+      fetch(`/api/store/${storeId}/related`)
         .then((res) => res.json())
-        .then((data) => setRelatedStores(data.relatedStores || []));
+        .then((data) => setRelatedStores(data.relatedStores || []))
+        .catch((err) => console.error("Related stores fetch error:", err));
     }
-  }, [id]);
+  }, [storeId]);
 
   const handleSubmitReview = async () => {
-    const res = await fetch(`/api/store/${id}/reviews`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newReview),
-      credentials: "include", // ✅ เพิ่มตรงนี้
-    });
-    const json = await res.json();
-    if (res.ok) {
-      setNewReview({ rating: 5, comment: "", isAnonymous: false });
-      setReviews([json.review, ...reviews]);
-    } else {
-      alert(json.error);
+    try {
+      const res = await fetch(`/api/store/${storeId}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReview),
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setNewReview({ rating: 5, comment: "", isAnonymous: false });
+        setReviews([json.review, ...reviews]);
+      } else {
+        alert(json.error);
+      }
+    } catch (error) {
+      console.error("Submit review error:", error);
     }
   };
 
-
   const handleReportReview = async (reviewId: string) => {
-    const res = await fetch("/api/report-review", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ review_id: reviewId }),
-    });
-    const json = await res.json();
-    alert(json.message || "แจ้งเรียบร้อยแล้ว");
+    try {
+      const res = await fetch("/api/report-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review_id: reviewId }),
+      });
+      const json = await res.json();
+      alert(json.message || "แจ้งเรียบร้อยแล้ว");
+    } catch (error) {
+      console.error("Report review error:", error);
+    }
   };
 
   const groupedStores: Record<number, NearbyStore[]> = {
@@ -157,8 +167,35 @@ export default function StoreDetailPage() {
         {/* เขียนรีวิวใหม่ */}
         <div className="space-y-4 mt-10">
           <h2 className="text-2xl font-semibold">เขียนรีวิวใหม่</h2>
-          {/* ฟอร์มเดิมคงไว้ */}
-          ...
+          {/* สามารถเพิ่ม form input ที่นี่ตามต้องการ */}
+          {/* ตัวอย่าง */}
+          <div className="space-y-2">
+            <textarea
+              className="w-full border rounded p-2"
+              rows={4}
+              placeholder="แสดงความคิดเห็น..."
+              value={newReview.comment}
+              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+            />
+            <div className="flex items-center space-x-4">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={newReview.isAnonymous}
+                  onChange={(e) =>
+                    setNewReview({ ...newReview, isAnonymous: e.target.checked })
+                  }
+                />
+                <span className="ml-2">ไม่เปิดเผยตัวตน</span>
+              </label>
+              <button
+                onClick={handleSubmitReview}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                ส่งรีวิว
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ร้านใกล้เคียง */}
@@ -188,5 +225,4 @@ export default function StoreDetailPage() {
       </div>
     </div>
   );
-
 }
