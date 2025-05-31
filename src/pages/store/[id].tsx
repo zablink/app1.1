@@ -50,7 +50,7 @@ export default function StoreDetailPage() {
     if (typeof storeId === "string") {
       fetch(`/api/stores/${storeId}`)
         .then((res) => res.json())
-        .then((data) => setStore(data.store))
+        .then((data) => setStore(data.store as Store))
         .catch((err) => console.error("Store fetch error:", err));
 
       fetch(`/api/stores/${storeId}/reviews`)
@@ -138,7 +138,7 @@ export default function StoreDetailPage() {
             <img
               src={store.cover_url.startsWith('/') ? store.cover_url : `/store-images/${store.cover_url}`}
               alt="รูปภาพหน้าปกร้าน"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover"  
             />
           </div>
         )}
