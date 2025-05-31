@@ -134,6 +134,13 @@ export default function StoreDetailPage() {
         <h1 className="text-3xl md:text-4xl font-semibold text-primary">รายละเอียดร้านค้า</h1>
         {store ? (
           <div className="space-y-2">
+            {store?.cover_url && (
+              <img
+                src={store.cover_url}
+                alt={store.name}
+                className="w-full h-64 object-cover rounded-lg mb-4"
+              />
+            )}
             <p><strong>ชื่อร้าน:</strong> {store.name}</p>
             {store.category && <p><strong>หมวดหมู่:</strong> {store.category}</p>}
             <p><strong>คำอธิบาย:</strong> {store.description}</p>
