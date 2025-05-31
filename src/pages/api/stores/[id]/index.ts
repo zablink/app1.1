@@ -18,7 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (error && error.code !== "PGRST116") {
     // รหัสนี้หมายถึง "No rows found", ถือว่าไม่ใช่ error ร้ายแรง
-    return res.status(500).json({ error: error.message });
+    //return res.status(500).json({ error: error.message });
+
+    return res.status(200).json({ store:null });
   }
 
   return res.status(200).json({ store: store ?? null });
