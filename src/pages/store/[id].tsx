@@ -48,17 +48,17 @@ export default function StoreDetailPage() {
   useEffect(() => {
     console.log("StoreID :: " , storeId);
     if (typeof storeId === "string") {
-      fetch(`/api/store/${storeId}`)
+      fetch(`/api/stores/${storeId}`)
         .then((res) => res.json())
         .then((data) => setStore(data.store))
         .catch((err) => console.error("Store fetch error:", err));
 
-      fetch(`/api/store/${storeId}/reviews`)
+      fetch(`/api/stores/${storeId}/reviews`)
         .then((res) => res.json())
         .then((data) => setReviews(data.reviews || []))
         .catch((err) => console.error("Reviews fetch error:", err));
 
-      fetch(`/api/store/${storeId}/related`)
+      fetch(`/api/stores/${storeId}/related`)
         .then((res) => res.json())
         .then((data) => setRelatedStores(data.relatedStores || []))
         .catch((err) => console.error("Related stores fetch error:", err));
@@ -67,7 +67,7 @@ export default function StoreDetailPage() {
 
   const handleSubmitReview = async () => {
     try {
-      const res = await fetch(`/api/store/${storeId}/reviews`, {
+      const res = await fetch(`/api/stores/${storeId}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newReview),
