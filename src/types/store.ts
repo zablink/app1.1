@@ -1,6 +1,6 @@
 // types/store.ts
 
-export type StoreV2 = {
+export type Store = {
   id: string;
   user_id: string;
   name: string;
