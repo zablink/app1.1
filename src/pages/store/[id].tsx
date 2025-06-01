@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { store } from "@/types/Store";
+import { Store } from "@/types/store";
 //import { Review } from "@/types/reviews";
   
 
@@ -37,7 +37,7 @@ export default function StoreDetailPage() {
   const { id } = router.query;
   const storeId = Array.isArray(id) ? id[0] : id;
 
-  const [store, setStore] = useState<StoreV2 | null>(null);
+  const [store, setStore] = useState<Store | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [relatedStores, setRelatedStores] = useState<NearbyStore[]>([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
