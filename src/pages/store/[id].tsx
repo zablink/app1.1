@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { store } from "@/types/store";
-import { Review } from "@/types/reviews";
+import { store } from "@/types/Store";
+//import { Review } from "@/types/reviews";
   
-/*
+
 type Review = {
   id: string;
   store_id: number;
@@ -21,7 +21,7 @@ type Review = {
     email?: string;
   };
 };
-*/
+
 
 type NearbyStore = {
   id: number;
