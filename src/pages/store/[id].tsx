@@ -131,7 +131,7 @@ export default function StoreDetailPage() {
         {/* ข้อมูลร้าน */}
         {store ? (
         <h1 className="text-3xl md:text-4xl font-semibold text-primary">${store.name}</h1>
-        )}
+        ):(<p>กำลังโหลดข้อมูลร้าน...</p>)}
 
         {store?.cover_url && (
           <div className="w-full aspect-[16/9] relative overflow-hidden rounded-lg">
