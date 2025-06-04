@@ -128,9 +128,10 @@ export default function StoreDetailPage() {
         </div>
 
         {/* ข้อมูลร้าน */}
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">รายละเอียดร้านค้า</h1>
-
         {store?.cover_url && (
+        <h1 className="text-3xl md:text-4xl font-semibold text-primary">${store.name}</h1>
+
+        
           <div className="w-full aspect-[16/9] relative overflow-hidden rounded-lg">
             <img
               src={store.cover_url.startsWith('/') ? store.cover_url : `/store-images/${store.cover_url}`}
@@ -142,7 +143,7 @@ export default function StoreDetailPage() {
 
         {store ? (
           <div className="space-y-2">
-            <p><strong>ชื่อร้าน:</strong> {store.name}</p>
+            <!--<p><strong>ชื่อร้าน:</strong> {store.name}</p>-->
             {store.category && <p><strong>หมวดหมู่:</strong> {store.category}</p>}
             <p><strong>คำอธิบาย:</strong> {store.description}</p>
           </div>
