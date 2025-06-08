@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Store } from "@/types/store";
 //import { Review } from "@/types/reviews";
-  
+import { Link as StoreLink } from "@/types/link";  
 
 type Review = {
   id: string;
@@ -41,6 +41,7 @@ export default function StoreDetailPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [relatedStores, setRelatedStores] = useState<NearbyStore[]>([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "", isAnonymous: false });
+  const [links, setLinks] = useState<StoreLink[]>([]);
 
   useEffect(() => {
     console.log("StoreID :: " , storeId);
@@ -49,6 +50,11 @@ export default function StoreDetailPage() {
         .then((res) => res.json())
         .then((data) => setStore(data.store as Store))
         .catch((err) => console.error("Store fetch error:", err));
+
+      fetch(`/api/stores/${storeId}/links`)
+        .then((res) => res.json())
+        .then((data) => setLinks(data.links || []))
+        .catch((err) => console.error("Links fetch error:", err));  
 
       fetch(`/api/stores/${storeId}/reviews`)
         .then((res) => res.json())
@@ -153,6 +159,23 @@ export default function StoreDetailPage() {
           <p>กำลังโหลดข้อมูลร้าน...</p>
            
         )}
+
+        <div>
+          {/* ตัวอย่างแสดงลิงก์ */}
+          {links.length > 0 ? (
+            <ul>
+              {links.map((link) => (
+                <li key={link.id}>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    {link.title || link.url}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>ไม่มีลิงก์</p>
+          )}
+        </div>
 
         {/* รีวิวลูกค้า */}
         <div className="space-y-4">
