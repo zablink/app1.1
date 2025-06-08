@@ -126,7 +126,7 @@ export default function StoreDetailPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
+      <div className="pt-16 min-h-screen bg-neutral px-4 py-8 text-gray-800">
         <div className="max-w-5xl mx-auto space-y-8">
 
           {/* Breadcrumb */}
