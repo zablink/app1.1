@@ -63,6 +63,7 @@ module.exports = {
   				'5': 'hsl(var(--chart-5))'
   			},
             primary: '#111111', // ดำเท่
+            primary-dark: "#1e40af",
             accent: '#c5a880',   // ทองอ่อน
             neutral: '#f5f5f4',  // เทาอ่อน
   		}

@@ -61,6 +61,19 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
+
+        {status === "authenticated" && session?.user?.role === "store_admin" && (
+          <div className="flex justify-end">
+            <Link 
+              href="/store/dashboard"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+            >
+              ไปที่แดชบอร์ด
+            </Link>
+          </div>
+        )}
+
+
         <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ</h1>
 
         {locationError && (

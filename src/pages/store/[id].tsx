@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Store } from "@/types/store";
 //import { Review } from "@/types/reviews";
 import { Link as StoreLink } from "@/types/link";  
+import Navbar from "@/components/Navbar";
 
 type Review = {
   id: string;
@@ -123,13 +124,15 @@ export default function StoreDetailPage() {
   };
 
   return (
+    <Navbar />
+    
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
 
         {/* Breadcrumb */}
         <div>
-          <Link href="/stores" className="text-blue-600 hover:underline">
-            ← ย้อนกลับไปหน้าร้านทั้งหมด
+          <Link href="/" className="text-blue-600 hover:underline">
+            ← กลับไปหน้าแรก
           </Link>
         </div>
 
