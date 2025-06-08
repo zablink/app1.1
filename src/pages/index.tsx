@@ -62,7 +62,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
 
-        {status === "authenticated" && session?.user?.role === "store_admin" && (
+        {status === "authenticated" && session?.user?.role === "store" && (
           <div className="flex justify-end">
             <Link 
               href="/store/dashboard"
