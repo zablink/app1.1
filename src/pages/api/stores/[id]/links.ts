@@ -1,6 +1,8 @@
 // pages/api/stores/[id]/links.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase";
+
+const supabase = createClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
