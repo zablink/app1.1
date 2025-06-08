@@ -125,145 +125,144 @@ export default function StoreDetailPage() {
 
   return (
     <>
-    <Navbar />
-    </>
+      <Navbar />
+      <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
+        <div className="max-w-5xl mx-auto space-y-8">
 
-    <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
-      <div className="max-w-5xl mx-auto space-y-8">
-
-        {/* Breadcrumb */}
-        <div>
-          <Link href="/" className="text-blue-600 hover:underline">
-            ← กลับไปหน้าแรก
-          </Link>
-        </div>
-
-
-        {/* ข้อมูลร้าน */}
-        {store ? (
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">{store.name}</h1>
-        ):(<p>...</p>)}
-
-        {store?.cover_url && (
-          <div className="w-full aspect-[16/9] relative overflow-hidden rounded-lg">
-            <img
-              src={store.cover_url.startsWith('/') ? store.cover_url : `/store-images/${store.cover_url}`}
-              alt="รูปภาพหน้าปกร้าน"
-              className="w-full h-full object-cover"  
-            />
+          {/* Breadcrumb */}
+          <div>
+            <Link href="/" className="text-blue-600 hover:underline">
+              ← กลับไปหน้าแรก
+            </Link>
           </div>
-        )}
 
-        {store ? (
-          <div className="space-y-2">
-            <p><strong>ชื่อร้าน:</strong> {store.name}</p>
-            {store.category && <p><strong>หมวดหมู่:</strong> {store.category}</p>}
-            <p><strong>คำอธิบาย:</strong> {store.description}</p>
-          </div>
-        ) : (
-          <p>กำลังโหลดข้อมูลร้าน...</p>
-           
-        )}
 
-        <div>
-          {/* ตัวอย่างแสดงลิงก์ */}
-          {links.length > 0 ? (
-            <ul>
-              {links.map((link) => (
-                <li key={link.id}>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer">
-                    {link.title || link.url}
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {/* ข้อมูลร้าน */}
+          {store ? (
+          <h1 className="text-3xl md:text-4xl font-semibold text-primary">{store.name}</h1>
+          ):(<p>...</p>)}
+
+          {store?.cover_url && (
+            <div className="w-full aspect-[16/9] relative overflow-hidden rounded-lg">
+              <img
+                src={store.cover_url.startsWith('/') ? store.cover_url : `/store-images/${store.cover_url}`}
+                alt="รูปภาพหน้าปกร้าน"
+                className="w-full h-full object-cover"  
+              />
+            </div>
+          )}
+
+          {store ? (
+            <div className="space-y-2">
+              <p><strong>ชื่อร้าน:</strong> {store.name}</p>
+              {store.category && <p><strong>หมวดหมู่:</strong> {store.category}</p>}
+              <p><strong>คำอธิบาย:</strong> {store.description}</p>
+            </div>
           ) : (
-            <p>ไม่มีลิงก์</p>
+            <p>กำลังโหลดข้อมูลร้าน...</p>
+             
           )}
-        </div>
 
-        {/* รีวิวลูกค้า */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold mt-8">รีวิวจากลูกค้า</h2>
-          {reviews.length === 0 && <p>ยังไม่มีรีวิว</p>}
-          {reviews.map((review) => (
-            <div key={review.id} className="border rounded p-4 space-y-2 bg-white">
-              <p><strong>ให้คะแนน:</strong> {review.rating} ดาว</p>
-              <p>{review.comment}</p>
-              <p className="text-sm text-gray-500">
-                โดย: {review.is_anonymous
-                  ? "ไม่เปิดเผยตัวตน"
-                  : review.user_profiles?.nickname || review.users?.email || "ผู้ใช้ทั่วไป"}
-              </p>
-              <button
-                onClick={() => handleReportReview(review.id)}
-                className="text-red-600 hover:underline text-sm"
-              >
-                แจ้งรีวิวไม่เหมาะสม
-              </button>
-            </div>
-          ))}
-        </div>
+          <div>
+            {/* ตัวอย่างแสดงลิงก์ */}
+            {links.length > 0 ? (
+              <ul>
+                {links.map((link) => (
+                  <li key={link.id}>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                      {link.title || link.url}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>ไม่มีลิงก์</p>
+            )}
+          </div>
 
-        {/* เขียนรีวิวใหม่ */}
-        <div className="space-y-4 mt-10">
-          <h2 className="text-2xl font-semibold">เขียนรีวิวใหม่</h2>
-          {/* สามารถเพิ่ม form input ที่นี่ตามต้องการ */}
-          {/* ตัวอย่าง */}
-          <div className="space-y-2">
-            <textarea
-              className="w-full border rounded p-2"
-              rows={4}
-              placeholder="แสดงความคิดเห็น..."
-              value={newReview.comment}
-              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-            />
-            <div className="flex items-center space-x-4">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={newReview.isAnonymous}
-                  onChange={(e) =>
-                    setNewReview({ ...newReview, isAnonymous: e.target.checked })
-                  }
-                />
-                <span className="ml-2">ไม่เปิดเผยตัวตน</span>
-              </label>
-              <button
-                onClick={handleSubmitReview}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                ส่งรีวิว
-              </button>
+          {/* รีวิวลูกค้า */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold mt-8">รีวิวจากลูกค้า</h2>
+            {reviews.length === 0 && <p>ยังไม่มีรีวิว</p>}
+            {reviews.map((review) => (
+              <div key={review.id} className="border rounded p-4 space-y-2 bg-white">
+                <p><strong>ให้คะแนน:</strong> {review.rating} ดาว</p>
+                <p>{review.comment}</p>
+                <p className="text-sm text-gray-500">
+                  โดย: {review.is_anonymous
+                    ? "ไม่เปิดเผยตัวตน"
+                    : review.user_profiles?.nickname || review.users?.email || "ผู้ใช้ทั่วไป"}
+                </p>
+                <button
+                  onClick={() => handleReportReview(review.id)}
+                  className="text-red-600 hover:underline text-sm"
+                >
+                  แจ้งรีวิวไม่เหมาะสม
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* เขียนรีวิวใหม่ */}
+          <div className="space-y-4 mt-10">
+            <h2 className="text-2xl font-semibold">เขียนรีวิวใหม่</h2>
+            {/* สามารถเพิ่ม form input ที่นี่ตามต้องการ */}
+            {/* ตัวอย่าง */}
+            <div className="space-y-2">
+              <textarea
+                className="w-full border rounded p-2"
+                rows={4}
+                placeholder="แสดงความคิดเห็น..."
+                value={newReview.comment}
+                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+              />
+              <div className="flex items-center space-x-4">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newReview.isAnonymous}
+                    onChange={(e) =>
+                      setNewReview({ ...newReview, isAnonymous: e.target.checked })
+                    }
+                  />
+                  <span className="ml-2">ไม่เปิดเผยตัวตน</span>
+                </label>
+                <button
+                  onClick={handleSubmitReview}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  ส่งรีวิว
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ร้านใกล้เคียง */}
-        <div className="space-y-6 mt-10">
-          <h2 className="text-2xl font-semibold">ร้านค้าใกล้เคียง</h2>
-          {[1, 2, 3, 4, 5].map((level) =>
-            groupedStores[level].length > 0 ? (
-              <div key={level} className="space-y-2">
-                <h3 className="font-semibold">{proximityLabels[level]}</h3>
-                <ul className="space-y-2">
-                  {groupedStores[level].map((store) => (
-                    <li key={store.id} className="border p-3 rounded bg-white hover:bg-gray-50 transition">
-                      <Link href={`/store/${store.id}`} className="text-blue-600 font-semibold hover:underline">
-                        {store.name}
-                      </Link>
-                      <p className="text-sm text-gray-500">
-                        {store.subdistrict_name}, {store.district_name}, {store.province_name}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null
-          )}
-        </div>
+          {/* ร้านใกล้เคียง */}
+          <div className="space-y-6 mt-10">
+            <h2 className="text-2xl font-semibold">ร้านค้าใกล้เคียง</h2>
+            {[1, 2, 3, 4, 5].map((level) =>
+              groupedStores[level].length > 0 ? (
+                <div key={level} className="space-y-2">
+                  <h3 className="font-semibold">{proximityLabels[level]}</h3>
+                  <ul className="space-y-2">
+                    {groupedStores[level].map((store) => (
+                      <li key={store.id} className="border p-3 rounded bg-white hover:bg-gray-50 transition">
+                        <Link href={`/store/${store.id}`} className="text-blue-600 font-semibold hover:underline">
+                          {store.name}
+                        </Link>
+                        <p className="text-sm text-gray-500">
+                          {store.subdistrict_name}, {store.district_name}, {store.province_name}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null
+            )}
+          </div>
 
+        </div>
       </div>
-    </div>
+    </>
   );
 }
