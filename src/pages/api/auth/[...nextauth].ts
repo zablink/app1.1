@@ -20,7 +20,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error("❌ Missing Supabase credentials");
 }
 
-
+//
 export const authOptions: NextAuthOptions = {
   
 
