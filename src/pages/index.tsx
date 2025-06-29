@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getNearbyStores } from "@/lib/stores";
-import Navbar from "@/components/Navbar";
+
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -61,8 +61,6 @@ export default function HomePage() {
   };
 
   return (
-    <>
-    <Navbar />
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
 
