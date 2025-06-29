@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
 
 export default function Nearby() {
   const [latitude, setLatitude] = useState<number | null>(null);
@@ -25,6 +27,8 @@ export default function Nearby() {
   }, []);
 
   return (
+    <>
+    <Navbar />
     <div className="p-4">
       <h1 className="text-xl font-bold mb-2">ร้านค้าใกล้คุณ</h1>
 
