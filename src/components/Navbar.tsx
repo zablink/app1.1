@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession, signIn, signOut } from "next-auth/react";
+
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isLoggedIn = false; // เปลี่ยนตามสถานะ login จริงของคุณ
+
+  const { data: session } = useSession();
+  const isLoggedIn = !!session; // อัพเดทตามสถานะจริง
 
   // ตรวจจับการ scroll เพื่อเปลี่ยนสีพื้นหลัง navbar
   useEffect(() => {
@@ -16,6 +20,13 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogin = () => {
+    signIn("google", {
+      callbackUrl: window.location.href || "/", // กลับไปหน้าเดิม หรือ home
+    });
+  };
+
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -83,7 +94,7 @@ export default function Navbar() {
             {!isLoggedIn ? (
               <>
                 <Link href="/login">
-                  <a
+                  <a onClick={handleLogin}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       scrolled
                         ? "text-primary hover:bg-primary/10"
@@ -129,7 +140,10 @@ export default function Navbar() {
             <>
               <Link href="/login">
                 <a
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogin();
+                  }}
                   className="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 transition-colors duration-200"
                 >
                   Login
