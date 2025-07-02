@@ -15,10 +15,6 @@ export default function LoginPage() {
 
   const { data: session } = useSession();
 
-  useEffect(() => {
-    console.log("🔎 Session:", session);
-    console.log("🔁 Status:", status);
-  }, [session, status]);
 
   if (session) {
     router.push("/"); // Redirect ไปหน้า home เมื่อ login สำเร็จ
@@ -26,12 +22,15 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
+    console.log("🔎 Session:", session);
+    console.log("🔁 Status:", status);
+
     const fetchToken = async () => {
       const token = await getCsrfToken();
       if (token) setCsrfToken(token);
     };
     fetchToken();
-  }, []);
+  }, [session, status]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
