@@ -15,6 +15,11 @@ export default function LoginPage() {
 
   const { data: session } = useSession();
 
+  useEffect(() => {
+    console.log("🔎 Session:", session);
+    console.log("🔁 Status:", status);
+  }, [session, status]);
+
   if (session) {
     router.push("/"); // Redirect ไปหน้า home เมื่อ login สำเร็จ
     return null;
