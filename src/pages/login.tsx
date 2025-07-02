@@ -13,17 +13,16 @@ export default function LoginPage() {
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
-
-  if (session) {
-    router.push("/"); // Redirect ไปหน้า home เมื่อ login สำเร็จ
-    return null;
-  }
 
   useEffect(() => {
     console.log("🔎 Session:", session);
     console.log("🔁 Status:", status);
+
+    if (status === "authenticated") {
+      router.push("/"); // Redirect ไปหน้า home เมื่อ login สำเร็จ
+    }
 
     const fetchToken = async () => {
       const token = await getCsrfToken();
