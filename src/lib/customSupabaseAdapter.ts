@@ -133,13 +133,18 @@ export function CustomSupabaseAdapter({
       };
     },
 
-    async updateSession(session: Partial<AdapterSession> & { session_token: string }): Promise<AdapterSession | null> {
+    async updateSession(
+      session: Partial<AdapterSession> & { sessionToken: string }
+    ): Promise<AdapterSession | null> {
+      const { sessionToken, ...dataToUpdate } = session;
+
       const { data, error } = await client
         .from("nextauth_sessions")
-        .update(session)
-        .eq("session_token", session.session_token)
+        .update(dataToUpdate)
+        .eq("session_token", sessionToken) // 🛠 ใช้ snake_case ใน DB
         .select()
         .single();
+
       if (error || !data) return null;
       return data as AdapterSession;
     },
