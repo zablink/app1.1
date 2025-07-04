@@ -20,6 +20,8 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const authOptions: NextAuthOptions = {
+  useSecureCookies: true,
+  trustHost: true, 
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
