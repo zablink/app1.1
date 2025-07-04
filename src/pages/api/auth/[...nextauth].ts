@@ -1,8 +1,7 @@
 import NextAuth, { type NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
-// 🔁 import custom adapter
-import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter'; 
+import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter'; // 🔁 import custom adapter
 import type { AdapterUser } from 'next-auth/adapters';
 
 const allowedRoles = ["user", "store", "admin"] as const;
@@ -33,8 +32,8 @@ export const authOptions: NextAuthOptions = {
   ],
   // ✅ ใช้ custom adapter แทน
   adapter: CustomSupabaseAdapter({
-    url: supabaseUrl,
-    secret: supabaseKey,
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   }),
   callbacks: {
     async jwt({ token, user, account }) {
