@@ -1,3 +1,4 @@
+// /src/pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextAuthOptions } from "next-auth";
@@ -17,8 +18,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  if (!supabaseUrl) console.log('SP URL');
-  if (!supabaseKey) console.log('SP KEY');
+  if (!supabaseUrl) console.log('❌ Missing SUPABASE_URL');
+  if (!supabaseKey) console.log('❌ Missing SUPABASE_KEY');
   throw new Error("❌ Missing Supabase credentials");
 }
 
@@ -37,8 +38,16 @@ export const authOptions: NextAuthOptions = {
     url: supabaseUrl,
     secret: supabaseKey,
   }),
+  session: {
+    strategy: "jwt", // ✅ หรือใช้ "database" ถ้าต้องการให้ session เก็บใน DB
+  },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      console.log("✅ [signIn callback]", { user, account, profile });
+      return true;
+    },
     async jwt({ token, user, account }) {
+      console.log("🟨 [jwt callback - before]", { token, user, account });
       if (user) {
         token.id = user.id;
         token.role = (user as AdapterUser & { role?: string }).role;
@@ -48,9 +57,11 @@ export const authOptions: NextAuthOptions = {
         token.provider = account.provider;
         token.isNewUser = true;
       }
+      console.log("✅ [jwt callback - after]", token);
       return token;
     },
     async session({ session, token }) {
+      console.log("🟨 [session callback - before]", { session, token });
       if (session.user) {
         session.user.id = token.id as string;
         if (allowedRoles.includes(token.role as Role)) {
@@ -62,6 +73,7 @@ export const authOptions: NextAuthOptions = {
         session.user.isNewUser = token.isNewUser as boolean;
         session.user.provider = token.provider as string;
       }
+      console.log("✅ [session callback - after]", session);
       return session;
     },
   },
@@ -71,10 +83,10 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// ✅ ใส่ trustHost ที่นี่ และใช้ type `any` เพื่อหลบ TypeScript issue
+// ✅ ใช้ trustHost และ type-cast ด้วย as any
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   return NextAuth(req, res, {
     ...authOptions,
-    trustHost: true as any, // 👈 หลบ type error ได้ปลอดภัย
-  } as any); // 👈 อีกจุดที่จำเป็นเพราะ Type ยังไม่รองรับใน version ปัจจุบัน
+    trustHost: true as any,
+  } as any);
 }
