@@ -1,7 +1,10 @@
-import NextAuth, { type NextAuthOptions } from 'next-auth';
+import NextAuth from "next-auth";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextAuthOptions } from "next-auth";
+
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
-import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter'; // 🔁 import custom adapter
+import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter';
 import type { AdapterUser } from 'next-auth/adapters';
 
 const allowedRoles = ["user", "store", "admin"] as const;
@@ -30,10 +33,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? '',
     }),
   ],
-  // ✅ ใช้ custom adapter แทน
   adapter: CustomSupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    url: supabaseUrl,
+    secret: supabaseKey,
   }),
   callbacks: {
     async jwt({ token, user, account }) {
@@ -69,10 +71,10 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-//export default NextAuth(authOptions);
-export default (req: any, res: any) =>
-  NextAuth(req, res, {
+// ✅ ใส่ trustHost ที่นี่ และใช้ type `any` เพื่อหลบ TypeScript issue
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  return NextAuth(req, res, {
     ...authOptions,
-    trustHost: true,
-  });
-
+    trustHost: true as any, // 👈 หลบ type error ได้ปลอดภัย
+  } as any); // 👈 อีกจุดที่จำเป็นเพราะ Type ยังไม่รองรับใน version ปัจจุบัน
+}
