@@ -1,19 +1,19 @@
 // lib/customSupabaseAdapter.ts
-import { Adapter } from "next-auth/adapters";
+import { Adapter, AdapterUser } from "next-auth/adapters"; // 👈 import type
 import { createClient } from "@supabase/supabase-js";
 
 export function CustomSupabaseAdapter({ url, secret }: { url: string; secret: string }): Adapter {
   const client = createClient(url, secret);
 
   return {
-    async createUser(user) {
+    async createUser(user: Omit<AdapterUser, "id">) {
       const { data, error } = await client
         .from("nextauth_users")
         .insert(user)
         .select()
         .single();
       if (error) throw error;
-      return data;
+      return data as AdapterUser;
     },
 
     async getUser(id) {
