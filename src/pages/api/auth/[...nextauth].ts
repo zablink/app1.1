@@ -1,4 +1,3 @@
-// /src/pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextAuthOptions } from "next-auth";
