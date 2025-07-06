@@ -6,6 +6,8 @@ import { Store } from "@/types/store";
 import { Link as StoreLink } from "@/types/link";  
 import Navbar from "@/components/Navbar";
 
+import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
+
 type Review = {
   id: string;
   store_id: number;
@@ -34,6 +36,8 @@ type NearbyStore = {
 };
 
 export default function StoreDetailPage() {
+  useRequireCompleteProfile();
+  
   const router = useRouter();
   const { id } = router.query;
   const storeId = Array.isArray(id) ? id[0] : id;

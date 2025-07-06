@@ -60,6 +60,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // ✅ user ต้องกรอก complete-profile ก่อน
+  /*
   if (
     token?.role === "user" &&
     pathname !== "/complete-profile" &&
@@ -67,6 +68,7 @@ export async function middleware(req: NextRequest) {
     pathname !== "/" && // ✅ ให้เข้า home ได้
     !pathname.startsWith("/api/check-profile")
   ) {
+    
     const checkProfile = await fetch(`${req.nextUrl.origin}/api/check-profile`, {
       headers: {
         cookie: req.headers.get("cookie") ?? "",
@@ -86,7 +88,7 @@ export async function middleware(req: NextRequest) {
       url.pathname = '/complete-profile';
       return NextResponse.redirect(url);
     }
-  }
+  }*/
 
   return NextResponse.next();
 }
