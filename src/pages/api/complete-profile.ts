@@ -1,8 +1,9 @@
 // pages/api/complete-profile.ts
+
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/pages/api/auth/[...nextauth]"; 
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "@/lib/supabase"; // ✅ อย่าลืมตรวจว่าตรงกับที่คุณตั้ง client ไว้
+import { supabase } from "@/lib/supabase";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -11,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const session = await getServerSession(req, res, authOptions);
 
-  if (!session || !session.user || !session.user.email) {
+  if (!session?.user?.email) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
@@ -21,29 +22,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบ" });
   }
 
-  // ✅ ดึง user จากตาราง nextauth_users (ไม่ใช่ public.users อีกต่อไป)
+  // 🔍 หา user_id จากอีเมล
   const { data: userData, error: userError } = await supabase
-    .from("nextauth_users") // 👈 ชื่อตารางใหม่ที่อยู่ใน schema ที่ใช้งาน
+    .from("nextauth_users")
     .select("id")
     .eq("email", session.user.email)
-    .single();
+    .maybeSingle(); // ✅ ป้องกัน error ถ้าไม่เจอ
 
-  if (userError || !userData) {
-    console.error("User fetch error:", userError);
+  if (userError || !userData?.id) {
+    console.error("❌ ไม่พบผู้ใช้", userError);
     return res.status(500).json({ error: "ไม่พบผู้ใช้ในระบบ" });
   }
 
   const user_id = userData.id;
 
-  // ✅ เช็ค profile จากตาราง user_profile เช่นเดิม
-  const { data: existingProfile } = await supabase
+  // 🔍 เช็คว่ามี profile อยู่หรือยัง
+  const { data: existingProfile, error: profileError } = await supabase
     .from("user_profiles")
     .select("user_id")
     .eq("user_id", user_id)
-    .single();
+    .maybeSingle(); // ✅ ใช้ maybeSingle() แทน single()
+
+  if (profileError) {
+    console.error("❌ เช็คโปรไฟล์ล้มเหลว", profileError);
+    return res.status(500).json({ error: "เกิดข้อผิดพลาดในการตรวจสอบโปรไฟล์" });
+  }
 
   if (existingProfile) {
-    // update
+    // ✅ update
     const { error: updateError } = await supabase
       .from("user_profiles")
       .update({
@@ -55,10 +61,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq("user_id", user_id);
 
     if (updateError) {
+      console.error("❌ อัปเดตล้มเหลว", updateError);
       return res.status(500).json({ error: "ไม่สามารถอัปเดตข้อมูลได้" });
     }
   } else {
-    // insert
+    // ✅ insert พร้อม catch duplicate (409)
     const { error: insertError } = await supabase.from("user_profiles").insert([
       {
         user_id,
@@ -71,6 +78,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ]);
 
     if (insertError) {
+      console.error("❌ insert error", insertError);
+
+      // 🔁 ถ้า error เกิดจาก duplicate key (เช่น user_id ซ้ำ)
+      if (insertError.code === "23505" || insertError.message.includes("duplicate")) {
+        return res.status(409).json({ error: "มีข้อมูลผู้ใช้อยู่แล้ว" });
+      }
+
       return res.status(500).json({ error: "ไม่สามารถบันทึกข้อมูลได้" });
     }
   }
