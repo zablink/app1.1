@@ -62,6 +62,8 @@ export const authOptions: NextAuthOptions = {
           name: profile.data.user.display_name,
           email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
           image: profile.data.user.avatar_url,
+          role: "user", // ✅ default
+          membershipType: "free", // ✅ default
         };
       },
     }),
