@@ -65,6 +65,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: "ไม่สามารถอัปเดตข้อมูลได้" });
     }
   } else {
+    const { error: upsertError } = await supabase
+      .from("user_profiles")
+      .upsert({
+        user_id,
+        full_name,
+        nickname,
+        phone,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      }, {
+        onConflict: "user_id",
+      });
+
+    if (upsertError) {
+      return res.status(500).json({ error: "ไม่สามารถบันทึกข้อมูลได้: " + upsertError.message });
+    }
+
+    /*
     // ✅ insert พร้อม catch duplicate (409)
     const { error: insertError } = await supabase.from("user_profiles").insert([
       {
@@ -87,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(500).json({ error: "ไม่สามารถบันทึกข้อมูลได้" });
     }
+    */
   }
 
   return res.status(200).json({ message: "บันทึกข้อมูลเรียบร้อยแล้ว" });
