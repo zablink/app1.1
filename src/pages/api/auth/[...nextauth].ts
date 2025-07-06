@@ -6,7 +6,8 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 import LineProvider from "next-auth/providers/line";
-import TikTokProvider from "next-auth/providers/oauth";
+import TikTokProvider from "@/lib/tiktok-provider"; // ✅ เปลี่ยนจาก next-auth/providers/oauth
+
 
 import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter';
 import type { AdapterUser } from 'next-auth/adapters';
