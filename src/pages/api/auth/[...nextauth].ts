@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
           image: profile.data.user.avatar_url,
           role: "user",
           membershipType: "free",
-        };
+        } as User;
       },
     }),
   ],
