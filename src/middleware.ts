@@ -75,12 +75,15 @@ export async function middleware(req: NextRequest) {
 
     if (checkProfile.status === 200) {
       const { isComplete } = await checkProfile.json();
+      console.log("Check profile returned isComplete =", isComplete); // 🔍 ดูผลตรงนี้
       if (!isComplete) {
-        url.pathname = "/complete-profile/?ret=200";
+        console.log("Redirecting to /complete-profile");
+        url.pathname = "/complete-profile";
         return NextResponse.redirect(url);
       }
     } else {
-      url.pathname = '/complete-profile/?ret=${checkProfile.status}';
+      console.log("Check profile failed. Redirecting to /complete-profile");
+      url.pathname = '/complete-profile';
       return NextResponse.redirect(url);
     }
   }
