@@ -1,3 +1,5 @@
+// /pages/store/location.tsx
+
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useSession } from "next-auth/react";
@@ -8,7 +10,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// 👇 แยกส่วนนี้เป็น Client-only component
 function StoreLocationInner() {
   const { data: session, status } = useSession();
   const mapRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ function StoreLocationInner() {
     const { error } = await supabase
       .from("stores")
       .update({ latitude: location.lat, longitude: location.lng })
-      .eq("user_id", session.user.id); // ใช้ user_id แทน email
+      .eq("user_id", session.user.id);
 
     if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
     else alert("บันทึกพิกัดเรียบร้อยแล้ว");
@@ -81,7 +82,6 @@ function StoreLocationInner() {
   );
 }
 
-// 👇 แก้ปัญหา SSR โดยโหลด component แบบ client-only ด้วย dynamic import
 export default dynamic(() => Promise.resolve(StoreLocationInner), {
   ssr: false,
 });
