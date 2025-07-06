@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import Swal from "sweetalert2";
+
 
 export default function CompleteProfilePage() {
   const router = useRouter();
@@ -44,7 +46,14 @@ export default function CompleteProfilePage() {
     const data = await res.json();
 
     if (res.ok) {
-      router.push("/"); // หรือเส้นทางอื่นตาม flow
+      await Swal.fire({
+        title: "สำเร็จ!",
+        text: "ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว",
+        icon: "success",
+        confirmButtonText: "ไปหน้าหลัก",
+      });
+
+      router.push("/"); 
     } else {
       setErrorMsg(data.error || "เกิดข้อผิดพลาด");
     }
