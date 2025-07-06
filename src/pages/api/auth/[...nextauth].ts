@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
       },
       token: "https://open.tiktokapis.com/v2/oauth/token/",
       userinfo: "https://open.tiktokapis.com/v2/user/info/",
-      profile(profile, tokens) {
+      profile(profile: TikTokProfile): import("next-auth").User {
         return {
           id: profile.data.user.open_id,
           name: profile.data.user.display_name,
@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
           image: profile.data.user.avatar_url,
           role: "user",
           membershipType: "free",
-        } as const;
+        };
       },
     }),
   ],
