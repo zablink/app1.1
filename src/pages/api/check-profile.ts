@@ -24,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log("User ID:", session?.user?.id);
   console.log("Profile data:", profile);
   console.log("Error:", error);
-  console.log("isComplete:", isComplete);
 
 
   if (error) {
@@ -32,6 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const isComplete = profile?.is_active === true;
+
+  
+  console.log("isComplete:", isComplete);
 
   return res.status(200).json({ isComplete });
 }
