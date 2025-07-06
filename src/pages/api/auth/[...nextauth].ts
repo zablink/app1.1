@@ -56,14 +56,14 @@ export const authOptions: NextAuthOptions = {
       },
       token: "https://open.tiktokapis.com/v2/oauth/token/",
       userinfo: "https://open.tiktokapis.com/v2/user/info/",
-      profile(profile) {
+      profile(profile: any, tokens: any): User {
         return {
           id: profile.data.user.open_id,
           name: profile.data.user.display_name,
           email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
           image: profile.data.user.avatar_url,
-          role: "user", // ✅ default
-          membershipType: "free", // ✅ default
+          role: "user",
+          membershipType: "free",
         };
       },
     }),
