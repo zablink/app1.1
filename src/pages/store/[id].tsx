@@ -36,8 +36,8 @@ type NearbyStore = {
 };
 
 export default function StoreDetailPage() {
-  useRequireCompleteProfile();
-  
+  //useRequireCompleteProfile();
+
   const router = useRouter();
   const { id } = router.query;
   const storeId = Array.isArray(id) ? id[0] : id;

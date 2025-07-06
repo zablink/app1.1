@@ -11,7 +11,7 @@ import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
 
 export default function HomePage() {
-  useRequireCompleteProfile();
+  //useRequireCompleteProfile();
 
   const { data: session, status } = useSession();
   const router = useRouter();
