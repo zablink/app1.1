@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { data: profile, error } = await supabase
-    .from("user_profile")
+    .from("user_profiles")
     .select("is_active")
     .eq("user_id", session.user.id)
     .single();
