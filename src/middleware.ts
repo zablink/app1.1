@@ -41,8 +41,8 @@ export async function middleware(req: NextRequest) {
   }
   */
 
-  // ✅ BLOCK enduser เข้า store/admin
-  if (token?.role === "enduser" && (pathname.startsWith("/store") || pathname.startsWith("/admin"))) {
+  // ✅ BLOCK user เข้า store/admin
+  if (token?.role === "user" && (pathname.startsWith("/store") || pathname.startsWith("/admin"))) {
     url.pathname = "/unauthorized";
     return NextResponse.redirect(url);
   }
@@ -59,9 +59,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ✅ enduser ต้องกรอก complete-profile ก่อน
+  // ✅ user ต้องกรอก complete-profile ก่อน
   if (
-    token?.role === "enduser" &&
+    token?.role === "user" &&
     pathname !== "/complete-profile" &&
     pathname !== "/login" &&
     pathname !== "/" && // ✅ ให้เข้า home ได้
