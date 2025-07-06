@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
 export default function Nearby() {
+  useRequireCompleteProfile();
+
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [stores, setStores] = useState([]);
@@ -25,8 +29,10 @@ export default function Nearby() {
   }, []);
 
   return (
+    <>
+    <Navbar />
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-2">ร้านค้าใกล้คุณ</h1>
+      <h1 className="text-xl font-bold mb-2">ร้านค้าใกล้คุณ.......</h1>
 
       {/* 👇 Debug: แสดงพิกัดของผู้ใช้ */}
       {latitude && longitude && (
