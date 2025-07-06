@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ✅ เช็ค profile จากตาราง user_profile เช่นเดิม
   const { data: existingProfile } = await supabase
-    .from("user_profile")
+    .from("user_profiles")
     .select("user_id")
     .eq("user_id", user_id)
     .single();
@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (existingProfile) {
     // update
     const { error: updateError } = await supabase
-      .from("user_profile")
+      .from("user_profiles")
       .update({
         full_name,
         nickname,
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else {
     // insert
-    const { error: insertError } = await supabase.from("user_profile").insert([
+    const { error: insertError } = await supabase.from("user_profiles").insert([
       {
         user_id,
         full_name,
