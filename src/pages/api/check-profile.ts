@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
 
+  console.log("Check-profile before check Session");
+
   if (!session || !session.user) {
     return res.status(401).json({ isComplete: false });
   }
@@ -16,6 +18,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .select("is_active")
     .eq("user_id", session.user.id)
     .single();
+
+  console.log("✅ API check-profile called");
+  console.log("Session:", session);
+  console.log("User ID:", session?.user?.id);
+  console.log("Profile data:", profile);
+  console.log("Error:", error);
+  console.log("isComplete:", isComplete);
+
 
   if (error) {
     return res.status(500).json({ isComplete: false });
