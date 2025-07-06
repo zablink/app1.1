@@ -76,7 +76,7 @@ export default function HomePage() {
         )}
 
 
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ [[[</h1>
 
         {locationError && (
           <p className="text-red-600">ไม่สามารถเข้าถึงตำแหน่งของคุณได้</p>
