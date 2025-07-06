@@ -2,8 +2,12 @@ import NextAuth from "next-auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextAuthOptions } from "next-auth";
 
+/// Social Login Providers
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
+import LineProvider from "next-auth/providers/line";
+import TikTokProvider from "next-auth/providers/oauth";
+
 import { CustomSupabaseAdapter } from '@/lib/customSupabaseAdapter';
 import type { AdapterUser } from 'next-auth/adapters';
 
@@ -31,6 +35,34 @@ export const authOptions: NextAuthOptions = {
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID ?? '',
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? '',
+    }),
+    LineProvider({
+      clientId: process.env.LINE_CLIENT_ID!,
+      clientSecret: process.env.LINE_CLIENT_SECRET!,
+    }),
+    TikTokProvider({
+      id: "tiktok",
+      name: "TikTok",
+      type: "oauth",
+      clientId: process.env.TIKTOK_CLIENT_ID!,
+      clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
+      authorization: {
+        url: "https://www.tiktok.com/v2/auth/authorize/",
+        params: {
+          scope: "user.info.basic",
+          response_type: "code",
+        },
+      },
+      token: "https://open.tiktokapis.com/v2/oauth/token/",
+      userinfo: "https://open.tiktokapis.com/v2/user/info/",
+      profile(profile) {
+        return {
+          id: profile.data.user.open_id,
+          name: profile.data.user.display_name,
+          email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
+          image: profile.data.user.avatar_url,
+        };
+      },
     }),
   ],
   adapter: CustomSupabaseAdapter({
@@ -78,6 +110,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

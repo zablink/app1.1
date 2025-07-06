@@ -2,7 +2,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]"; 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase"; // ✅ อย่าลืมตรวจว่าตรงกับที่คุณตั้ง client ไว้
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -21,20 +21,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบ" });
   }
 
-  // ดึง user จาก email
+  // ✅ ดึง user จากตาราง nextauth_users (ไม่ใช่ public.users อีกต่อไป)
   const { data: userData, error: userError } = await supabase
-    .from("users")
+    .from("nextauth_users") // 👈 ชื่อตารางใหม่ที่อยู่ใน schema ที่ใช้งาน
     .select("id")
     .eq("email", session.user.email)
     .single();
 
   if (userError || !userData) {
+    console.error("User fetch error:", userError);
     return res.status(500).json({ error: "ไม่พบผู้ใช้ในระบบ" });
   }
 
   const user_id = userData.id;
 
-  // เช็คว่ามี profile แล้วหรือยัง
+  // ✅ เช็ค profile จากตาราง user_profile เช่นเดิม
   const { data: existingProfile } = await supabase
     .from("user_profile")
     .select("user_id")
