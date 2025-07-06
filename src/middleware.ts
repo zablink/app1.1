@@ -76,11 +76,11 @@ export async function middleware(req: NextRequest) {
     if (checkProfile.status === 200) {
       const { isComplete } = await checkProfile.json();
       if (!isComplete) {
-        url.pathname = "/complete-profile?ret=200";
+        url.pathname = "/complete-profile/?ret=200";
         return NextResponse.redirect(url);
       }
     } else {
-      url.pathname = "/complete-profile?ret=" . checkProfile.status;
+      url.pathname = "/complete-profile/?ret=" . checkProfile.status;
       return NextResponse.redirect(url);
     }
   }
