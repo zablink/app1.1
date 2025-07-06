@@ -80,7 +80,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(url);
       }
     } else {
-      url.pathname = "/complete-profile/?ret=" . checkProfile.status;
+      url.pathname = '/complete-profile/?ret=${checkProfile.status}';
       return NextResponse.redirect(url);
     }
   }
