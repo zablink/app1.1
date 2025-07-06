@@ -1,3 +1,5 @@
+// /pages/api/auth/[...nextauth].ts
+
 import NextAuth from "next-auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextAuthOptions } from "next-auth";
@@ -42,31 +44,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.LINE_CLIENT_SECRET!,
     }),
     TikTokProvider({
-      id: "tiktok",
-      name: "TikTok",
-      type: "oauth",
       clientId: process.env.TIKTOK_CLIENT_ID!,
       clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
-      authorization: {
-        url: "https://www.tiktok.com/v2/auth/authorize/",
-        params: {
-          scope: "user.info.basic",
-          response_type: "code",
-        },
-      },
-      token: "https://open.tiktokapis.com/v2/oauth/token/",
-      userinfo: "https://open.tiktokapis.com/v2/user/info/",
-      profile(profile: TikTokProfile): import("next-auth").User {
-        return {
-          id: profile.data.user.open_id,
-          name: profile.data.user.display_name,
-          email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
-          image: profile.data.user.avatar_url,
-          role: "user",
-          membershipType: "free",
-        } as User;
-      },
     }),
+
   ],
   adapter: CustomSupabaseAdapter({
     url: supabaseUrl,

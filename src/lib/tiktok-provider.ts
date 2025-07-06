@@ -1,5 +1,6 @@
 // src/lib/tiktok-provider.ts
 import { OAuthConfig, OAuthUserConfig } from "next-auth/providers";
+import type { User } from "next-auth";
 
 export interface TikTokProfile {
   data: {
@@ -12,9 +13,9 @@ export interface TikTokProfile {
   };
 }
 
-export default function TikTokProvider<P extends TikTokProfile>(
-  options: OAuthUserConfig<P>
-): OAuthConfig<P> {
+export default function TikTokProvider(
+  options: OAuthUserConfig<TikTokProfile>
+): OAuthConfig<TikTokProfile> {
   return {
     id: "tiktok",
     name: "TikTok",
@@ -29,13 +30,16 @@ export default function TikTokProvider<P extends TikTokProfile>(
     },
     token: "https://open.tiktokapis.com/v2/oauth/token/",
     userinfo: "https://open.tiktokapis.com/v2/user/info/",
-    profile(profile) {
+    // **กำหนด profile function ให้รับสอง parameter (profile, tokens)**
+    profile(profile: TikTokProfile, tokens) : User {
       return {
         id: profile.data.user.open_id,
         name: profile.data.user.display_name,
         email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
         image: profile.data.user.avatar_url,
-      };
+        role: "user",
+        membershipType: "free",
+      } as User;
     },
     ...options,
   };
