@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getNearbyStores } from "@/lib/stores";
-import Navbar from "@/components/Navbar";
+//import Navbar from "@/components/Navbar";
 //import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 import Layout from "@/components/Layout";
 
