@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FiSearch, FiLogIn, FiLogOut, FiSettings, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 
+
+
 const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"]; // ตัวอย่าง category ร้านค้า
 
 export default function Navbar() {
