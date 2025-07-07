@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getNearbyStores } from "@/lib/stores";
-//import Navbar from "@/components/Navbar";
+import Navbar from "@/components/Navbar";
 //import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 import Layout from "@/components/Layout";
 
@@ -30,6 +30,7 @@ export default function HomePage() {
     */
   }, [session, status, router]);
 
+  /*  not use 
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError(true);
@@ -56,6 +57,7 @@ export default function HomePage() {
       }
     );
   }, []);
+  */
 
   const handleProvinceSelect = async () => {
     if (selectedProvince) {
@@ -84,9 +86,7 @@ export default function HomePage() {
 
         <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ.</h1>
 
-        {locationError && (
-          <p className="text-red-600">ไม่สามารถเข้าถึงตำแหน่งของคุณได้</p>
-        )}
+
 
         {stores.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
