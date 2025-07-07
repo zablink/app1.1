@@ -79,7 +79,7 @@ export const authOptions: NextAuthOptions = {
       console.log("🟨 [session callback - before]", { session, token });
       if (session.user) {
         session.user.id = token.id as string;
-        if (allowedRoles.includes(token.role as Role)) {
+        if (allowedRoles.includes(token.role as Role)) { 
           session.user.role = token.role as Role;
         }
         if (allowedMembershipTypes.includes(token.membershipType as MembershipType)) {
