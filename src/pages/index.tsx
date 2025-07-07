@@ -24,9 +24,10 @@ export default function HomePage() {
   const [selectedProvince, setSelectedProvince] = useState<string>("");
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.provider && session.user.isNewUser) {
+    /*if (status === "authenticated" && session?.user?.provider && session.user.isNewUser) {
       router.push("/complete-profile");
     }
+    */
   }, [session, status, router]);
 
   useEffect(() => {
