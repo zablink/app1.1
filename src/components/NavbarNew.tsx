@@ -52,32 +52,27 @@ export default function Navbar() {
             {/* Desktop Menu */}
             <div className="hidden sm:flex items-center space-x-6">
               {/* ร้านค้า dropdown */}
-              <div className="relative">
-                <button
-                  onClick={toggleShopDropdown}
-                  className="inline-flex items-center text-white hover:text-primary focus:outline-none"
-                >
+              <div className="relative group">
+                <div className="inline-flex items-center text-white hover:text-primary cursor-pointer">
                   <span>ร้านค้า</span>
                   <FiChevronDown className="ml-1" />
-                </button>
+                </div>
 
-                {shopDropdownOpen && (
-                  <div
-                    onMouseLeave={() => setShopDropdownOpen(false)}
-                    className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
-                  >
-                    <ul>
-                      {categories.map((cat) => (
-                        <li key={cat}>
-                          <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
-                            <a className="block px-4 py-2 hover:bg-gray-100">{cat}</a>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <div
+                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200"
+                >
+                  <ul>
+                    {categories.map((cat) => (
+                      <li key={cat}>
+                        <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
+                          <a className="block px-4 py-2 hover:bg-gray-100">{cat}</a>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
+
 
               <Link href="/about">
                 <a className="text-white hover:text-primary">About</a>
