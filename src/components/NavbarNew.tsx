@@ -46,8 +46,15 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/">
-              <a className="text-white font-bold text-2xl">MyLogo</a>
+              <a className="flex items-center">
+                <img
+                  src="/images/zablink-logo.png"
+                  alt="Zablink Logo"
+                  className="h-8 w-auto sm:h-10"
+                />
+              </a>
             </Link>
+
 
             {/* Desktop Menu */}
             <div className="hidden sm:flex items-center space-x-6">
