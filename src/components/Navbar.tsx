@@ -1,17 +1,12 @@
 // /src/components/Navbar.tsx
 
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import Link from "next/link";
-import { useSession, signIn } from "next-auth/react";
-
-export type NavbarRef = {
-  getHeight: () => number;
-};
-
 const Navbar = forwardRef<NavbarRef>((_, ref) => {
   const navRef = useRef<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false); // ✅ ย้ายไว้ในนี้
   const [scrolled, setScrolled] = useState(false);
   const { data: session } = useSession();
+
+  const toggleMenu = () => setIsOpen(!isOpen); // ✅ ย้ายไว้ในนี้
 
   useImperativeHandle(ref, () => ({
     getHeight: () => navRef.current?.offsetHeight || 0,
