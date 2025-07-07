@@ -1,171 +1,276 @@
 // /src/components/Navbar.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { FiSearch, FiLogIn, FiLogOut, FiSettings, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
+
+const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"]; // ตัวอย่าง category ร้านค้า
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
   const { data: session } = useSession();
   const isLoggedIn = !!session;
 
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleLogin = () => {
-    signIn("google", {
-      callbackUrl: window.location.href || "/",
-    });
-  };
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const toggleShopDropdown = () => setShopDropdownOpen(!shopDropdownOpen);
+  const toggleSearch = () => setSearchOpen(!searchOpen);
+
+  const handleLogin = () => signIn("google", { callbackUrl: window.location.href || "/" });
+  const handleLogout = () => signOut();
 
   return (
-    <nav
-      className={`sticky top-0 w-full z-50 transition-colors duration-300 ${
-        scrolled ? "bg-white shadow-lg" : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/">
-              <a
-                className={`text-2xl font-bold transition-colors duration-300 ${
-                  scrolled ? "text-primary" : "text-white"
-                }`}
-              >
-                MyLogo
-              </a>
-            </Link>
-          </div>
-
-          {/* Hamburger (Mobile) */}
-          <div className="sm:hidden">
-            <button
-              onClick={toggleMenu}
-              type="button"
-              className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-300 ${
-                scrolled ? "text-primary hover:bg-primary/10" : "text-white hover:bg-white/20"
-              }`}
-              aria-controls="mobile-menu"
-              aria-expanded={isOpen}
-            >
-              <span className="sr-only">Toggle Menu</span>
-              {!isOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Desktop Menu */}
-          <div className="hidden sm:flex space-x-6 items-center">
-            {!isLoggedIn ? (
-              <>
-                <Link href="/login">
-                  <a
-                    onClick={handleLogin}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
-                      scrolled
-                        ? "text-primary hover:bg-primary/10"
-                        : "text-white hover:bg-white/20"
-                    }`}
-                  >
-                    Login
-                  </a>
-                </Link>
-                <Link href="/signup">
-                  <a className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary-dark transition-colors duration-300">
-                    Sign Up
-                  </a>
-                </Link>
-              </>
-            ) : (
-              <button
-                onClick={() => signOut()}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
-                  scrolled
-                    ? "text-primary hover:bg-primary/10"
-                    : "text-white hover:bg-white/20"
-                }`}
-              >
-                Logout
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={`sm:hidden overflow-hidden transition-[max-height] duration-300 ease-in-out ${
-          isOpen ? "max-h-60" : "max-h-0"
-        } bg-white shadow-md`}
-        id="mobile-menu"
+    <>
+      <nav
+        className={`sticky top-0 z-50 w-full transition-colors duration-300 bg-black bg-opacity-40 backdrop-blur-sm ${
+          scrolled ? "shadow-lg" : ""
+        }`}
       >
-        <div className="px-4 pt-2 pb-4 space-y-1">
-          {!isLoggedIn ? (
-            <>
-              <Link href="/login">
-                <a
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleLogin();
-                  }}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 transition-colors duration-200"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link href="/">
+              <a className="text-white font-bold text-2xl">MyLogo</a>
+            </Link>
+
+            {/* Desktop Menu */}
+            <div className="hidden sm:flex items-center space-x-6">
+              {/* ร้านค้า dropdown */}
+              <div className="relative">
+                <button
+                  onClick={toggleShopDropdown}
+                  className="inline-flex items-center text-white hover:text-primary focus:outline-none"
                 >
-                  Login
-                </a>
+                  <span>ร้านค้า</span>
+                  <FiChevronDown className="ml-1" />
+                </button>
+
+                {shopDropdownOpen && (
+                  <div
+                    onMouseLeave={() => setShopDropdownOpen(false)}
+                    className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5"
+                  >
+                    <ul>
+                      {categories.map((cat) => (
+                        <li key={cat}>
+                          <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
+                            <a className="block px-4 py-2 hover:bg-gray-100">{cat}</a>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <Link href="/about">
+                <a className="text-white hover:text-primary">About</a>
               </Link>
-              <Link href="/signup">
-                <a
-                  onClick={() => setIsOpen(false)}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-white bg-primary hover:bg-primary-dark transition-colors duration-200"
+              <Link href="/contact">
+                <a className="text-white hover:text-primary">Contact</a>
+              </Link>
+
+              {/* Search Icon */}
+              <button
+                onClick={toggleSearch}
+                aria-label="Search"
+                className="text-white hover:text-primary focus:outline-none"
+              >
+                <FiSearch size={20} />
+              </button>
+
+              {/* Auth Buttons */}
+              {!isLoggedIn ? (
+                <button
+                  onClick={handleLogin}
+                  aria-label="Login"
+                  className="text-white hover:text-primary focus:outline-none"
+                  title="Login"
                 >
-                  Sign Up
-                </a>
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                signOut();
-              }}
-              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 transition-colors duration-200"
-            >
-              Logout
-            </button>
-          )}
+                  <FiLogIn size={20} />
+                </button>
+              ) : (
+                <>
+                  {/* Settings icon */}
+                  <Link href="/dashboard">
+                    <a
+                      aria-label="Dashboard"
+                      className="text-white hover:text-primary focus:outline-none"
+                      title="Dashboard"
+                    >
+                      <FiSettings size={20} />
+                    </a>
+                  </Link>
+
+                  {/* Logout icon */}
+                  <button
+                    onClick={handleLogout}
+                    aria-label="Logout"
+                    className="text-white hover:text-primary focus:outline-none ml-4"
+                    title="Logout"
+                  >
+                    <FiLogOut size={20} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Hamburger */}
+            <div className="sm:hidden flex items-center space-x-3">
+              {/* Search Icon */}
+              <button
+                onClick={toggleSearch}
+                aria-label="Search"
+                className="text-white hover:text-primary focus:outline-none"
+              >
+                <FiSearch size={24} />
+              </button>
+
+              <button
+                onClick={toggleMobileMenu}
+                aria-label="Toggle menu"
+                className="text-white hover:text-primary focus:outline-none"
+              >
+                {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden bg-black bg-opacity-90 backdrop-blur-md shadow-lg">
+            <ul className="flex flex-col space-y-1 p-4 text-white">
+              {/* ร้านค้า expandable */}
+              <li>
+                <button
+                  onClick={toggleShopDropdown}
+                  className="flex justify-between w-full items-center px-3 py-2 hover:bg-gray-700 rounded"
+                >
+                  <span>ร้านค้า</span>
+                  <FiChevronDown />
+                </button>
+                {shopDropdownOpen && (
+                  <ul className="pl-4 mt-1 space-y-1">
+                    {categories.map((cat) => (
+                      <li key={cat}>
+                        <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
+                          <a
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block px-3 py-2 hover:bg-gray-700 rounded"
+                          >
+                            {cat}
+                          </a>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+              <li>
+                <Link href="/about">
+                  <a
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-gray-700 rounded"
+                  >
+                    About
+                  </a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact">
+                  <a
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-gray-700 rounded"
+                  >
+                    Contact
+                  </a>
+                </Link>
+              </li>
+
+              <li className="border-t border-gray-700 pt-2">
+                {!isLoggedIn ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogin();
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full"
+                  >
+                    <FiLogIn size={20} />
+                    <span>Login</span>
+                  </button>
+                ) : (
+                  <>
+                    <Link href="/dashboard">
+                      <a
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded"
+                      >
+                        <FiSettings size={20} />
+                        <span>Dashboard</span>
+                      </a>
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1"
+                    >
+                      <FiLogOut size={20} />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                )}
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {/* Search Overlay */}
+        {searchOpen && (
+          <div
+            onClick={() => setSearchOpen(false)}
+            className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-md p-4 w-11/12 max-w-md"
+            >
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                onClick={() => setSearchOpen(false)}
+                className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
+    </>
   );
 }
