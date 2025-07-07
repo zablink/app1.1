@@ -50,7 +50,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/">
-              <a className="text-white font-bold text-2xl">MyLogo</a>
+              <a className="text-white font-bold text-2xl">LOGO!!</a>
             </Link>
 
             {/* Desktop Menu */}
