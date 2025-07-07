@@ -224,7 +224,7 @@ export default function Navbar() {
                   </button>
                 ) : (
                   <>
-                    <Link href="/dashboard">
+                    <Link href="/settings/account">
                       <a
                         onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded"
