@@ -30,6 +30,7 @@ export default function HomePage() {
     */
   }, [session, status, router]);
 
+  /*
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError(true);
@@ -56,6 +57,7 @@ export default function HomePage() {
       }
     );
   }, []);
+  */
 
   const handleProvinceSelect = async () => {
     if (selectedProvince) {
@@ -66,8 +68,7 @@ export default function HomePage() {
   };
 
   return (
-    <>
-    <Navbar />
+    <Layout>
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
 
@@ -83,7 +84,7 @@ export default function HomePage() {
         )}
 
 
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ.</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ..</h1>
 
         {locationError && (
           <p className="text-red-600">ไม่สามารถเข้าถึงตำแหน่งของคุณได้</p>
@@ -134,7 +135,7 @@ export default function HomePage() {
         )}
       </div>
     </div>
-    </>
+    </Layout>
   );
 }
 

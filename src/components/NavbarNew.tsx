@@ -1,18 +1,15 @@
-// /src/components/Navbar.tsx
-
+// /src/components/NavbarNew.tsx
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const { data: session } = useSession();
-  const isLoggedIn = !!session; // อัพเดทตามสถานะจริง
+  const isLoggedIn = !!session;
 
-  // ตรวจจับการ scroll เพื่อเปลี่ยนสีพื้นหลัง navbar
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -23,18 +20,17 @@ export default function Navbar() {
 
   const handleLogin = () => {
     signIn("google", {
-      callbackUrl: window.location.href || "/", // กลับไปหน้าเดิม หรือ home
+      callbackUrl: window.location.href || "/",
     });
   };
-
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+      className={`sticky top-0 w-full z-50 transition-colors duration-300 ${
         scrolled ? "bg-white shadow-lg" : "bg-transparent"
-      }`} 
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
@@ -51,7 +47,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Hamburger button (mobile) */}
+          {/* Hamburger (Mobile) */}
           <div className="sm:hidden">
             <button
               onClick={toggleMenu}
@@ -62,7 +58,7 @@ export default function Navbar() {
               aria-controls="mobile-menu"
               aria-expanded={isOpen}
             >
-              <span className="sr-only">เปิดเมนูหลัก</span>
+              <span className="sr-only">Toggle Menu</span>
               {!isOpen ? (
                 <svg
                   className="block h-6 w-6"
@@ -89,12 +85,13 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Menu items desktop */}
+          {/* Desktop Menu */}
           <div className="hidden sm:flex space-x-6 items-center">
             {!isLoggedIn ? (
               <>
                 <Link href="/login">
-                  <a onClick={handleLogin}
+                  <a
+                    onClick={handleLogin}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       scrolled
                         ? "text-primary hover:bg-primary/10"
@@ -112,9 +109,7 @@ export default function Navbar() {
               </>
             ) : (
               <button
-                onClick={() => {
-                  /* ฟังก์ชัน logout */
-                }}
+                onClick={() => signOut()}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                   scrolled
                     ? "text-primary hover:bg-primary/10"
@@ -128,7 +123,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu with slide down/up animation */}
+      {/* Mobile Menu */}
       <div
         className={`sm:hidden overflow-hidden transition-[max-height] duration-300 ease-in-out ${
           isOpen ? "max-h-60" : "max-h-0"
@@ -162,7 +157,7 @@ export default function Navbar() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                /* ฟังก์ชัน logout */
+                signOut();
               }}
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 transition-colors duration-200"
             >
