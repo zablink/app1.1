@@ -1,18 +1,22 @@
 // /src/components/Navbar.tsx
 
-import { useState, useEffect } from "react";
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 
+export type NavbarRef = {
+  getHeight: () => number;
+};
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar = forwardRef<NavbarRef>((_, ref) => {
+  const navRef = useRef<HTMLElement | null>(null);
   const [scrolled, setScrolled] = useState(false);
-
   const { data: session } = useSession();
-  const isLoggedIn = !!session; // อัพเดทตามสถานะจริง
 
-  // ตรวจจับการ scroll เพื่อเปลี่ยนสีพื้นหลัง navbar
+  useImperativeHandle(ref, () => ({
+    getHeight: () => navRef.current?.offsetHeight || 0,
+  }));
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -21,17 +25,9 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogin = () => {
-    signIn("google", {
-      callbackUrl: window.location.href || "/", // กลับไปหน้าเดิม หรือ home
-    });
-  };
-
-
-  const toggleMenu = () => setIsOpen(!isOpen);
-
   return (
     <nav
+      ref={navRef}
       className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
         scrolled ? "bg-white shadow-lg" : "bg-transparent"
       }`}
@@ -173,4 +169,8 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+});
+
+Navbar.displayName = "Navbar";
+
+export default Navbar;
