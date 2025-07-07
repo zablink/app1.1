@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
+import Layout from "@/components/Layout";
 //import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
 export default function Nearby() {
@@ -29,8 +29,7 @@ export default function Nearby() {
   }, []);
 
   return (
-    <>
-    <Navbar />
+    <Layout>
     <div className="p-4">
       <h1 className="text-xl font-bold mb-2">ร้านค้าใกล้คุณ.......</h1>
 
@@ -52,6 +51,6 @@ export default function Nearby() {
         ))}
       </ul>
     </div>
-    </>
+    </Layout>
   );
 }

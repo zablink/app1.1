@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Store } from "@/types/store";
 //import { Review } from "@/types/reviews";
 import { Link as StoreLink } from "@/types/link";  
-import Navbar from "@/components/Navbar";
+import Layout from "@/components/Layout";
 
 //import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
@@ -128,8 +128,7 @@ export default function StoreDetailPage() {
   };
 
   return (
-    <>
-      <Navbar />
+      <Layout>
       <div className="pt-16 min-h-screen bg-neutral px-4 py-8 text-gray-800">
         <div className="max-w-5xl mx-auto space-y-8">
 
@@ -267,6 +266,6 @@ export default function StoreDetailPage() {
 
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
