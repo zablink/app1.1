@@ -1,13 +1,22 @@
 // /src/components/Navbar.tsx
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import Link from "next/link";
+import { useSession, signIn, signOut } from "next-auth/react";
+
+// 👇 export type สำหรับให้ Layout ใช้
+export type NavbarRef = {
+  getHeight: () => number;
+};
 
 const Navbar = forwardRef<NavbarRef>((_, ref) => {
   const navRef = useRef<HTMLElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false); // ✅ ย้ายไว้ในนี้
+  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
   const { data: session } = useSession();
+  const isLoggedIn = !!session;
 
-  const toggleMenu = () => setIsOpen(!isOpen); // ✅ ย้ายไว้ในนี้
-
+  // 👇 ส่งความสูง navbar ออกไปให้ Layout
   useImperativeHandle(ref, () => ({
     getHeight: () => navRef.current?.offsetHeight || 0,
   }));
@@ -19,6 +28,14 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogin = () => {
+    signIn("google", {
+      callbackUrl: window.location.href || "/",
+    });
+  };
+
+  const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
     <nav
@@ -42,7 +59,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
             </Link>
           </div>
 
-          {/* Hamburger button (mobile) */}
+          {/* Hamburger (Mobile) */}
           <div className="sm:hidden">
             <button
               onClick={toggleMenu}
@@ -53,7 +70,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
               aria-controls="mobile-menu"
               aria-expanded={isOpen}
             >
-              <span className="sr-only">เปิดเมนูหลัก</span>
+              <span className="sr-only">Toggle Menu</span>
               {!isOpen ? (
                 <svg
                   className="block h-6 w-6"
@@ -80,12 +97,13 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
             </button>
           </div>
 
-          {/* Menu items desktop */}
+          {/* Desktop Menu */}
           <div className="hidden sm:flex space-x-6 items-center">
             {!isLoggedIn ? (
               <>
                 <Link href="/login">
-                  <a onClick={handleLogin}
+                  <a
+                    onClick={handleLogin}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                       scrolled
                         ? "text-primary hover:bg-primary/10"
@@ -103,9 +121,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
               </>
             ) : (
               <button
-                onClick={() => {
-                  /* ฟังก์ชัน logout */
-                }}
+                onClick={() => signOut()}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300 ${
                   scrolled
                     ? "text-primary hover:bg-primary/10"
@@ -119,7 +135,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
         </div>
       </div>
 
-      {/* Mobile menu with slide down/up animation */}
+      {/* Mobile Menu */}
       <div
         className={`sm:hidden overflow-hidden transition-[max-height] duration-300 ease-in-out ${
           isOpen ? "max-h-60" : "max-h-0"
@@ -153,7 +169,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                /* ฟังก์ชัน logout */
+                signOut();
               }}
               className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 transition-colors duration-200"
             >
@@ -167,5 +183,4 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
 });
 
 Navbar.displayName = "Navbar";
-
 export default Navbar;

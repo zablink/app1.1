@@ -1,4 +1,4 @@
-// Layout.tsx
+// components/Layout.tsx
 import { useEffect, useRef, useState } from "react";
 import Navbar, { NavbarRef } from "./Navbar";
 
@@ -13,8 +13,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }
     };
 
-    updateHeight(); // ดึงตอนแรก
-    window.addEventListener("resize", updateHeight); // ถ้ามี resize
+    updateHeight(); // เรียกตอน mount
+    window.addEventListener("resize", updateHeight); // เรียกตอน resize
 
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
