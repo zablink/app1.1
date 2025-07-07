@@ -11,23 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { data, error } = await supabase
       .from("stores")
-      .select(`
-        *,
-        subdistricts (
-          id,
-          name_th,
-          district_id,
-          districts (
-            id,
-            name_th,
-            province_id,
-            provinces (
-              id,
-              name_th
-            )
-          )
-        )
-      `)
+      .select("*")
       .order("name", { ascending: true });
 
     if (error) {
