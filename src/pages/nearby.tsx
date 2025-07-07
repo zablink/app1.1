@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
+//import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
 export default function Nearby() {
-  useRequireCompleteProfile();
+  //useRequireCompleteProfile();
 
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);

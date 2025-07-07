@@ -6,7 +6,7 @@ import { Store } from "@/types/store";
 import { Link as StoreLink } from "@/types/link";  
 import Navbar from "@/components/Navbar";
 
-import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
+//import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
 
 type Review = {
   id: string;
