@@ -13,6 +13,9 @@ export default function CompleteProfilePage() {
   const status = sessionResult?.status ?? "loading";
 
 
+
+
+
   const [formData, setFormData] = useState({
     full_name: "",
     nickname: "",
@@ -22,6 +25,11 @@ export default function CompleteProfilePage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
+
+    const clientReferer = document.referrer;
+    setReferer(clientReferer);
+    console.log('Referer (Client-side):', clientReferer);
+    
     if (status === "unauthenticated") {
       router.push("/login");
     }
