@@ -50,7 +50,7 @@ export default function Navbar() {
                 <img
                   src="/images/zablink-logo.png"
                   alt="Zablink Logo"
-                  className="h-8 w-auto sm:h-10"
+                  className="h-8 w-auto sm:h-16"
                 />
               </a>
             </Link>
