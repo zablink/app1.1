@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { getNearbyStores } from "@/lib/stores";
 import Navbar from "@/components/Navbar";
 //import { useRequireCompleteProfile } from "@/hooks/useRequireCompleteProfile";
-
+import Layout from "@/components/Layout";
 
 export default function HomePage() {
   //useRequireCompleteProfile();
@@ -66,8 +66,7 @@ export default function HomePage() {
   };
 
   return (
-    <>
-    <Navbar />
+    <Layout>
     <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
       <div className="max-w-5xl mx-auto space-y-8">
 
@@ -134,7 +133,7 @@ export default function HomePage() {
         )}
       </div>
     </div>
-    </>
+    </Layout>
   );
 }
 
