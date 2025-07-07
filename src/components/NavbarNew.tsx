@@ -38,7 +38,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 w-full transition-colors duration-300 bg-black bg-opacity-40 backdrop-blur-sm ${
+        className={`sticky top-0 z-50 w-full transition-colors duration-300 bg-[#03A6A1] bg-opacity-30 backdrop-blur-sm ${
           scrolled ? "shadow-lg" : ""
         }`}
       >
@@ -48,7 +48,7 @@ export default function Navbar() {
             <Link href="/">
               <a className="flex items-center">
                 <img
-                  src="/images/zablink-logo.png"
+                  src="/images/zablink-logo-white.png"
                   alt="Zablink Logo"
                   className="h-8 w-auto sm:h-16"
                 />
