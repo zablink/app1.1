@@ -84,7 +84,7 @@ export default function HomePage() {
         )}
 
 
-        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านอาหารใกล้คุณ..</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-primary">ร้านใกล้คุณ!!</h1>
 
 
 
