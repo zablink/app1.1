@@ -1,25 +1,14 @@
 // /src/components/Navbar.tsx
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-// 👇 export type สำหรับให้ Layout ใช้
-export type NavbarRef = {
-  getHeight: () => number;
-};
-
-const Navbar = forwardRef<NavbarRef>((_, ref) => {
-  const navRef = useRef<HTMLElement | null>(null);
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const { data: session } = useSession();
   const isLoggedIn = !!session;
-
-  // 👇 ส่งความสูง navbar ออกไปให้ Layout
-  useImperativeHandle(ref, () => ({
-    getHeight: () => navRef.current?.offsetHeight || 0,
-  }));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,8 +28,7 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
 
   return (
     <nav
-      ref={navRef}
-      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+      className={`sticky top-0 w-full z-50 transition-colors duration-300 ${
         scrolled ? "bg-white shadow-lg" : "bg-transparent"
       }`}
     >
@@ -180,7 +168,4 @@ const Navbar = forwardRef<NavbarRef>((_, ref) => {
       </div>
     </nav>
   );
-});
-
-Navbar.displayName = "Navbar";
-export default Navbar;
+}
