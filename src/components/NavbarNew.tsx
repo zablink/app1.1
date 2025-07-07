@@ -53,13 +53,16 @@ export default function Navbar() {
             <div className="hidden sm:flex items-center space-x-6">
               {/* ร้านค้า dropdown */}
               <div className="relative group">
+                {/* ปุ่มเมนูหลัก */}
                 <div className="inline-flex items-center text-white hover:text-primary cursor-pointer">
                   <span>ร้านค้า</span>
                   <FiChevronDown className="ml-1" />
                 </div>
 
+                {/* เมนูย่อย */}
                 <div
-                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200"
+                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5
+                             opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
                 >
                   <ul>
                     {categories.map((cat) => (
@@ -72,6 +75,7 @@ export default function Navbar() {
                   </ul>
                 </div>
               </div>
+
 
 
               <Link href="/about">
