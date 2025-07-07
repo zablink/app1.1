@@ -1,5 +1,5 @@
-// components/Layout.tsx
-import { useEffect, useRef, useState } from "react";
+// /src/components/Layout.tsx
+import { useRef, useEffect, useState } from "react";
 import Navbar, { NavbarRef } from "./Navbar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -9,12 +9,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const updateHeight = () => {
       if (navRef.current) {
-        setPaddingTop(navRef.current.getHeight());
+        const height = navRef.current.getHeight();
+        setPaddingTop(height);
       }
     };
 
-    updateHeight(); // เรียกตอน mount
-    window.addEventListener("resize", updateHeight); // เรียกตอน resize
+    updateHeight(); // ดึงครั้งแรก
+    window.addEventListener("resize", updateHeight); // ปรับตอนจอเปลี่ยนขนาด
 
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
