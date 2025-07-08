@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { getNearbyStores } from "@/lib/stores";
 import Layout from "@/components/Layout";
+console.log('Hey! its Layout');
 
 export default function HomePage() {
   const { data: session, status } = useSession();
