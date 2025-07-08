@@ -1,4 +1,5 @@
 // /src/components/NavbarNew.tsx
+console.log("✅ Loaded NavbarNew");
 
 // Updated NavbarNew.tsx with shared role-based menu for desktop and mobile
 import { useState, useEffect, useRef } from "react";
