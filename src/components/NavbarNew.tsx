@@ -1,14 +1,17 @@
 // /src/components/NavbarNew.tsx
+
+// Updated NavbarNew.tsx with shared role-based menu for desktop and mobile
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FiSearch, FiLogIn, FiLogOut, FiSettings, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
+import { FiSearch, FiLogIn, FiLogOut, FiUser, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 
-const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"]; // ตัวอย่าง category ร้านค้า
+const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"];
 
 export default function Navbar() {
   const { data: session } = useSession();
   const isLoggedIn = !!session;
+  const role = session?.user?.role || "user"; // default to user if undefined
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,9 +34,44 @@ export default function Navbar() {
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const toggleShopDropdown = () => setShopDropdownOpen(!shopDropdownOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
-
   const handleLogin = () => signIn("google", { callbackUrl: window.location.href || "/" });
   const handleLogout = () => signOut();
+
+  const renderRoleMenus = (role: string, isMobile = false, onClick?: () => void) => {
+    const baseClass = isMobile
+      ? "block px-3 py-2 hover:bg-gray-700 rounded"
+      : "text-white hover:text-primary";
+
+    const wrap = (href: string, text: string) => (
+      <Link href={href} key={href}>
+        <a onClick={onClick} className={baseClass}>{text}</a>
+      </Link>
+    );
+
+    if (role === "shop") {
+      return (
+        <>
+          {wrap("/dashboard/shop", "จัดการร้าน")}
+          {wrap("/dashboard/menus", "เมนูสินค้า")}
+          {wrap("/dashboard/promotion", "โปรโมทร้าน")}
+          {wrap("/dashboard/reports", "รายงาน")}
+        </>
+      );
+    }
+
+    if (role === "admin") {
+      return (
+        <>
+          {wrap("/admin/shops", "จัดการร้านค้า")}
+          {wrap("/admin/users", "ผู้ใช้")}
+          {wrap("/admin/promotions", "เรทโปรโมท")}
+          {wrap("/admin/reports", "รายงานรวม")}
+        </>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <>
@@ -44,7 +82,6 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
             <Link href="/">
               <a className="flex items-center">
                 <img
@@ -55,22 +92,13 @@ export default function Navbar() {
               </a>
             </Link>
 
-
-            {/* Desktop Menu */}
             <div className="hidden sm:flex items-center space-x-6">
-              {/* ร้านค้า dropdown */}
               <div className="relative group">
-                {/* ปุ่มเมนูหลัก */}
                 <div className="inline-flex items-center text-white hover:text-primary cursor-pointer">
                   <span>ร้านค้า</span>
                   <FiChevronDown className="ml-1" />
                 </div>
-
-                {/* เมนูย่อย */}
-                <div
-                  className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5
-                             opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
-                >
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                   <ul>
                     {categories.map((cat) => (
                       <li key={cat}>
@@ -83,8 +111,6 @@ export default function Navbar() {
                 </div>
               </div>
 
-
-
               <Link href="/about">
                 <a className="text-white hover:text-primary">About</a>
               </Link>
@@ -92,83 +118,46 @@ export default function Navbar() {
                 <a className="text-white hover:text-primary">Contact</a>
               </Link>
 
-              {/* Search Icon */}
-              <button
-                onClick={toggleSearch}
-                aria-label="Search"
-                className="text-white hover:text-primary focus:outline-none"
-              >
+              {renderRoleMenus(role)}
+
+              <button onClick={toggleSearch} aria-label="Search" className="text-white hover:text-primary focus:outline-none">
                 <FiSearch size={20} />
               </button>
 
-              {/* Auth Buttons */}
               {!isLoggedIn ? (
-                <button
-                  onClick={handleLogin}
-                  aria-label="Login"
-                  className="text-white hover:text-primary focus:outline-none"
-                  title="Login"
-                >
+                <button onClick={handleLogin} aria-label="Login" className="text-white hover:text-primary focus:outline-none" title="Login">
                   <FiLogIn size={20} />
                 </button>
               ) : (
                 <>
-                  {/* Settings icon */}
                   <Link href="/dashboard">
-                    <a
-                      aria-label="Dashboard"
-                      className="text-white hover:text-primary focus:outline-none"
-                      title="Dashboard"
-                    >
-                      <FiSettings size={20} />
+                    <a aria-label="Dashboard" className="text-white hover:text-primary focus:outline-none" title="Dashboard">
+                      <FiUser size={20} />
                     </a>
                   </Link>
-
-                  {/* Logout icon */}
-                  <button
-                    onClick={handleLogout}
-                    aria-label="Logout"
-                    className="text-white hover:text-primary focus:outline-none ml-4"
-                    title="Logout"
-                  >
+                  <button onClick={handleLogout} aria-label="Logout" className="text-white hover:text-primary focus:outline-none ml-4" title="Logout">
                     <FiLogOut size={20} />
                   </button>
                 </>
               )}
             </div>
 
-            {/* Mobile Hamburger */}
             <div className="sm:hidden flex items-center space-x-3">
-              {/* Search Icon */}
-              <button
-                onClick={toggleSearch}
-                aria-label="Search"
-                className="text-white hover:text-primary focus:outline-none"
-              >
+              <button onClick={toggleSearch} aria-label="Search" className="text-white hover:text-primary focus:outline-none">
                 <FiSearch size={24} />
               </button>
-
-              <button
-                onClick={toggleMobileMenu}
-                aria-label="Toggle menu"
-                className="text-white hover:text-primary focus:outline-none"
-              >
+              <button onClick={toggleMobileMenu} aria-label="Toggle menu" className="text-white hover:text-primary focus:outline-none">
                 {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-black bg-opacity-90 backdrop-blur-md shadow-lg">
             <ul className="flex flex-col space-y-1 p-4 text-white">
-              {/* ร้านค้า expandable */}
               <li>
-                <button
-                  onClick={toggleShopDropdown}
-                  className="flex justify-between w-full items-center px-3 py-2 hover:bg-gray-700 rounded"
-                >
+                <button onClick={toggleShopDropdown} className="flex justify-between w-full items-center px-3 py-2 hover:bg-gray-700 rounded">
                   <span>ร้านค้า</span>
                   <FiChevronDown />
                 </button>
@@ -177,10 +166,7 @@ export default function Navbar() {
                     {categories.map((cat) => (
                       <li key={cat}>
                         <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
-                          <a
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block px-3 py-2 hover:bg-gray-700 rounded"
-                          >
+                          <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
                             {cat}
                           </a>
                         </Link>
@@ -191,56 +177,36 @@ export default function Navbar() {
               </li>
               <li>
                 <Link href="/about">
-                  <a
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 hover:bg-gray-700 rounded"
-                  >
+                  <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
                     About
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/contact">
-                  <a
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 hover:bg-gray-700 rounded"
-                  >
+                  <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
                     Contact
                   </a>
                 </Link>
               </li>
 
+              {renderRoleMenus(role, true, () => setMobileMenuOpen(false))}
+
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleLogin();
-                    }}
-                    className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full"
-                  >
+                  <button onClick={() => { setMobileMenuOpen(false); handleLogin(); }} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full">
                     <FiLogIn size={20} />
                     <span>Login</span>
                   </button>
                 ) : (
                   <>
-                    <Link href="/settings/account">
-                      <a
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded"
-                      >
-                        <FiSettings size={20} />
+                    <Link href="/dashboard">
+                      <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
+                        <FiUser size={20} />
                         <span>Dashboard</span>
                       </a>
                     </Link>
-
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1"
-                    >
+                    <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1">
                       <FiLogOut size={20} />
                       <span>Logout</span>
                     </button>
@@ -251,26 +217,11 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Search Overlay */}
         {searchOpen && (
-          <div
-            onClick={() => setSearchOpen(false)}
-            className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50"
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-md p-4 w-11/12 max-w-md"
-            >
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search..."
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-              >
+          <div onClick={() => setSearchOpen(false)} className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50">
+            <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-md p-4 w-11/12 max-w-md">
+              <input ref={searchInputRef} type="text" placeholder="Search..." className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+              <button onClick={() => setSearchOpen(false)} className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">
                 Search
               </button>
             </div>
