@@ -104,7 +104,7 @@ export default function Navbar() {
                       <li key={cat}>
                         <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
                           <a className="block px-4 py-2 hover:bg-gray-100">{cat}</a>
-                        </Link>
+                        </Link> 
                       </li>
                     ))}
                   </ul>
