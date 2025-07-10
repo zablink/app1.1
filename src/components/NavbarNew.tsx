@@ -195,9 +195,12 @@ export default function Navbar() {
 
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
-                  <button onClick={() => { setMobileMenuOpen(false); handleLogin(); }} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full">
-                    <FiLogIn size={20} />
-                    <span>Login</span>
+                  // ปุ่ม Login: ลบไอคอนและปรับ class
+                  <button 
+                    onClick={() => { setMobileMenuOpen(false); handleLogin(); }} 
+                    className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
+                  >
+                    Login
                   </button>
                 ) : (
                   <>
@@ -207,9 +210,12 @@ export default function Navbar() {
                         <span>Dashboard</span>
                       </a>
                     </Link>
-                    <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1">
-                      <FiLogOut size={20} />
-                      <span>Logout</span>
+                    {/* ปุ่ม Logout: ลบไอคอนและปรับ class */}
+                    <button 
+                      onClick={() => { setMobileMenuOpen(false); handleLogout(); }} 
+                      className="px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left"
+                    >
+                      Logout
                     </button>
                   </>
                 )}
