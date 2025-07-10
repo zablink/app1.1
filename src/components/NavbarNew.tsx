@@ -126,18 +126,36 @@ export default function Navbar() {
               </button>
 
               {!isLoggedIn ? (
-                <button onClick={handleLogin} aria-label="Login" className="text-white hover:text-primary focus:outline-none" title="Login">
-                  <FiLogIn size={20} />
+                // ปุ่ม Login
+                <button 
+                  onClick={handleLogin} 
+                  aria-label="Login" 
+                  className="text-white hover:text-primary focus:outline-none font-medium px-2" 
+                  title="Login"
+                >
+                  Login
                 </button>
               ) : (
                 <>
+                  {/* ลิงก์ Dashboard */}
                   <Link href="/dashboard">
-                    <a aria-label="Dashboard" className="text-white hover:text-primary focus:outline-none" title="Dashboard">
-                      <FiUser size={20} />
+                    <a 
+                      aria-label="Dashboard" 
+                      className="text-white hover:text-primary focus:outline-none font-medium" 
+                      title="Dashboard"
+                    >
+                      Dashboard
                     </a>
                   </Link>
-                  <button onClick={handleLogout} aria-label="Logout" className="text-white hover:text-primary focus:outline-none ml-4" title="Logout">
-                    <FiLogOut size={20} />
+                  
+                  {/* ปุ่ม Logout */}
+                  <button 
+                    onClick={handleLogout} 
+                    aria-label="Logout" 
+                    className="text-white hover:text-primary focus:outline-none ml-4 font-medium" 
+                    title="Logout"
+                  >
+                    Logout
                   </button>
                 </>
               )}
