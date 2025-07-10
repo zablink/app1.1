@@ -195,7 +195,7 @@ export default function Navbar() {
 
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
-                  // ปุ่ม Login: ลบไอคอนและปรับ class
+                  // ปุ่ม Login: ลบไอคอนและปรับ class..
                   <button 
                     onClick={() => { setMobileMenuOpen(false); handleLogin(); }} 
                     className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
