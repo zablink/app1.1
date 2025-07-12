@@ -156,7 +156,7 @@ export default function Navbar() {
                       className="text-white hover:text-primary focus:outline-none ml-4 font-medium"
                       title="Logout"
                     >
-                      <FiLogout size={24} /> {/* เพิ่ม FiLogout เข้าไปแทนที่ข้อความ Logout */}
+                      <FiLogOut size={24} /> {/* เพิ่ม FiLogout เข้าไปแทนที่ข้อความ Logout */}
                     </button>
                 </>
               )}
