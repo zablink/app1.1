@@ -150,14 +150,14 @@ export default function Navbar() {
                   </Link>
                   
                   {/* ปุ่ม Logout */}
-                  <button 
-                    onClick={handleLogout} 
-                    aria-label="Logout" 
-                    className="text-white hover:text-primary focus:outline-none ml-4 font-medium" 
-                    title="Logout"
-                  >
-                    Logout
-                  </button>
+                    <button
+                      onClick={handleLogout}
+                      aria-label="Logout"
+                      className="text-white hover:text-primary focus:outline-none ml-4 font-medium"
+                      title="Logout"
+                    >
+                      <FiLogout size={24} /> {/* เพิ่ม FiLogout เข้าไปแทนที่ข้อความ Logout */}
+                    </button>
                 </>
               )}
             </div>
