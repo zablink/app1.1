@@ -63,9 +63,10 @@ export default function Navbar() {
     if (role === "admin") {
       return (
         <>
-          {wrap("/admin/shops", "จัดการร้านค้า")}
-          {wrap("/admin/users", "ผู้ใช้")}
-          {wrap("/admin/promotions", "เรทโปรโมท")}
+          {wrap("/admin/shops", "จัดการร้านค้า(s)")}
+          {wrap("/admin/users", "จัดการผู้ใช้")}
+          {wrap("/admin/promotions", "จัดการโปรโมชั่น")}
+          {wrap("/admin/ads", "จัดการโฆษณา")}
           {wrap("/admin/reports", "รายงานรวม")}
         </>
       );
