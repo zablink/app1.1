@@ -1,45 +1,74 @@
 // pages/auth/error.tsx
 
-import { useRouter } from "next/router";
-import Link from "next/link";
-import Head from "next/head";
+import { useRouter } from 'next/router';
+import React from 'react';
+import { IoAlertCircleOutline } from 'react-icons/io5'; // Icon สำหรับแจ้งเตือน
 
-export default function AuthErrorPage() {
+const AuthErrorPage: React.FC = () => {
   const router = useRouter();
-  const { error } = router.query;
+  const { error } = router.query; // รับค่า error จาก query parameter
 
-  const errorMessages: Record<string, string> = {
-    OAuthAccountNotLinked:
-      "บัญชีอีเมลนี้เคยลงทะเบียนไว้แล้ว โปรดเข้าสู่ระบบด้วยวิธีเดิมที่เคยใช้ (เช่น Google หรือ Facebook)",
-    AccessDenied:
-      "คุณไม่ได้รับสิทธิ์ในการเข้าถึงหน้านี้ กรุณาติดต่อผู้ดูแลระบบ",
-    Configuration:
-      "การตั้งค่าระบบยังไม่ถูกต้อง กรุณาติดต่อผู้ดูแล",
-    Verification:
-      "ลิงก์ยืนยันไม่ถูกต้องหรือหมดอายุแล้ว กรุณาลองใหม่",
-    default:
-      "เกิดข้อผิดพลาดบางอย่างในการเข้าสู่ระบบ กรุณาลองใหม่ภายหลัง",
-  };
+  let errorMessage = "เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง";
+  let detailedMessage = "";
+  let iconColor = "text-red-500";
 
-  const errorCode = typeof error === "string" ? error : "default";
-  const errorMessage = errorMessages[errorCode] ?? errorMessages.default;
+  if (typeof error === 'string') {
+    // ตรวจสอบ Error ที่เรากำหนดเอง
+    if (error.startsWith("AuthMethodMismatch:")) {
+      const originalProvider = error.split(":")[1];
+      errorMessage = "อีเมลนี้เคยลงทะเบียนด้วยวิธีอื่น";
+      detailedMessage = `คุณเคยเข้าสู่ระบบด้วย ${originalProvider} โปรดใช้ช่องทางเดิมเพื่อเข้าสู่ระบบ`;
+      iconColor = "text-orange-500";
+    }
+    // NextAuth Error ทั่วไปที่อาจเกิดขึ้น
+    else {
+      switch (error) {
+        case 'OAuthAccountNotLinked':
+          errorMessage = "บัญชี Social Media นี้ยังไม่ได้เชื่อมโยงกับบัญชีของคุณ";
+          detailedMessage = "โปรดตรวจสอบว่าคุณได้เข้าสู่ระบบด้วยบัญชีที่ถูกต้อง หรือลองเข้าสู่ระบบด้วยวิธีเดิม";
+          iconColor = "text-yellow-500";
+          break;
+        case 'AccessDenied':
+          errorMessage = "ไม่ได้รับอนุญาตให้เข้าถึง";
+          detailedMessage = "อาจเป็นเพราะคุณไม่ได้ยืนยันอีเมล หรือบัญชีของคุณถูกระงับ โปรดติดต่อผู้ดูแลระบบ";
+          iconColor = "text-red-500";
+          break;
+        case 'Verification':
+          errorMessage = "ลิงก์ยืนยันตัวตนไม่ถูกต้องหรือไม่หมดอายุ";
+          detailedMessage = "โปรดตรวจสอบอีเมลของคุณอีกครั้ง หรือลองขอลิงก์ใหม่";
+          iconColor = "text-yellow-500";
+          break;
+        case 'Configuration':
+          errorMessage = "การตั้งค่าระบบไม่ถูกต้อง";
+          detailedMessage = "โปรดติดต่อผู้ดูแลระบบ";
+          iconColor = "text-red-500";
+          break;
+        default:
+          errorMessage = `เกิดข้อผิดพลาดที่ไม่คาดคิด: ${error}`;
+          detailedMessage = "โปรดลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบ";
+          iconColor = "text-gray-500";
+      }
+    }
+  }
 
   return (
-    <>
-      <Head>
-        <title>เกิดข้อผิดพลาดในการเข้าสู่ระบบ</title>
-      </Head>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-8 text-center">
-        <div className="max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-md">
-          <h1 className="mb-4 text-2xl font-semibold text-red-600">🚫 เข้าสู่ระบบไม่สำเร็จ</h1>
-          <p className="mb-6 text-gray-700">{errorMessage}</p>
-          <Link href="/login">
-            <span className="inline-block rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition">
-              กลับไปหน้าเข้าสู่ระบบ
-            </span>
-          </Link>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4 font-inter">
+      <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md w-full border border-gray-200">
+        <div className={`flex justify-center mb-6 ${iconColor}`}>
+          <IoAlertCircleOutline className="h-20 w-20" />
         </div>
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-3">เข้าสู่ระบบไม่สำเร็จ</h1>
+        <p className="text-xl font-semibold text-gray-800 mb-2">{errorMessage}</p>
+        {detailedMessage && <p className="text-md text-gray-600 mb-6">{detailedMessage}</p>}
+        <button
+          onClick={() => router.push('/login')} // หรือหน้า login ของคุณ
+          className="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 ease-in-out transform hover:scale-105"
+        >
+          กลับไปหน้าเข้าสู่ระบบ
+        </button>
       </div>
-    </>
+    </div>
   );
-}
+};
+
+export default AuthErrorPage;
