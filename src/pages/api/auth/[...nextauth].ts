@@ -15,7 +15,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js"; //
 // **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
 const supabase = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY! // ต้องเป็น SERVICE_ROLE_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, 
 );
 
 // กำหนด AuthOptions แยกต่างหาก
