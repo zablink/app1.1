@@ -1,11 +1,10 @@
 // /src/components/NavbarNew.tsx
-console.log('The new one...');
-
 // Updated NavbarNew.tsx with shared role-based menu for desktop and mobile
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { FiSearch, FiLogIn, FiLogOut, FiUser, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
+// เพิ่ม FiSettings เข้ามาใน import
+import { FiSearch, FiLogIn, FiLogOut, FiUser, FiMenu, FiX, FiChevronDown, FiSettings } from "react-icons/fi";
 
 const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"];
 
@@ -49,7 +48,6 @@ export default function Navbar() {
         <a onClick={onClick} className={baseClass}>{text}</a>
       </Link>
     );
-
 
     console.log(`Role: ${role}`);
 
@@ -131,37 +129,38 @@ export default function Navbar() {
               </button>
 
               {!isLoggedIn ? (
-                // ปุ่ม Login
-                <button 
-                  onClick={handleLogin} 
-                  aria-label="Login" 
-                  className="text-white hover:text-primary focus:outline-none font-medium px-2" 
+                // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
+                <button
+                  onClick={handleLogin}
+                  aria-label="Login"
+                  className="text-white hover:text-primary focus:outline-none font-medium px-2"
                   title="Login"
                 >
                   Login
                 </button>
               ) : (
                 <>
-                  {/* ลิงก์ Dashboard */}
+                  {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings) */}
                   <Link href="/dashboard">
-                    <a 
-                      aria-label="Dashboard" 
-                      className="text-white hover:text-primary focus:outline-none font-medium" 
+                    <a
+                      aria-label="Dashboard"
+                      className="text-white hover:text-primary focus:outline-none font-medium flex items-center space-x-1" // เพิ่ม flex และ space-x-1 เพื่อจัดไอคอนและข้อความ
                       title="Dashboard"
                     >
-                      Dashboard
+                      <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
+                      <span>Dashboard</span>
                     </a>
                   </Link>
-                  
-                  {/* ปุ่ม Logout */}
-                    <button
-                      onClick={handleLogout}
-                      aria-label="Logout"
-                      className="text-white hover:text-primary focus:outline-none ml-4 font-medium"
-                      title="Logout"
-                    >
-                      <FiLogOut size={24} /> {/* เพิ่ม FiLogout เข้าไปแทนที่ข้อความ Logout */}
-                    </button>
+
+                  {/* ปุ่ม Logout (เปลี่ยนเป็น FiLogOut สำหรับ Desktop) */}
+                  <button
+                    onClick={handleLogout}
+                    aria-label="Logout"
+                    className="text-white hover:text-primary focus:outline-none ml-4 font-medium"
+                    title="Logout"
+                  >
+                    <FiLogOut size={24} />
+                  </button>
                 </>
               )}
             </div>
@@ -218,27 +217,29 @@ export default function Navbar() {
 
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
-                  // ปุ่ม Login: ลบไอคอนและปรับ class..
-                  <button 
-                    onClick={() => { setMobileMenuOpen(false); handleLogin(); }} 
+                  // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleLogin(); }}
                     className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
                   >
                     Login
                   </button>
                 ) : (
                   <>
+                    {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings สำหรับ Mobile) */}
                     <Link href="/dashboard">
                       <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
-                        <FiUser size={20} />
+                        <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
                         <span>Dashboard</span>
                       </a>
                     </Link>
-                    {/* ปุ่ม Logout: ลบไอคอนและปรับ class */}
-                    <button 
-                      onClick={() => { setMobileMenuOpen(false); handleLogout(); }} 
-                      className="px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left"
+                    {/* ปุ่ม Logout (เปลี่ยนเป็น FiLogOut สำหรับ Mobile) */}
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left" // เพิ่ม flex และ space-x-2
                     >
-                      Logout
+                      <FiLogOut size={20} /> {/* เพิ่ม FiLogOut */}
+                      <span>Logout</span>
                     </button>
                   </>
                 )}
