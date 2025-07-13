@@ -13,8 +13,8 @@ import { createClient } from "@supabase/supabase-js";
 
 // สร้าง Supabase client สำหรับ Adapter
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY!
 );
 
 // กำหนด AuthOptions แยกต่างหาก
