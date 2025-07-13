@@ -39,6 +39,8 @@ export default function Navbar() {
   const handleLogout = () => signOut();
 
   const renderRoleMenus = (role: string, isMobile = false, onClick?: () => void) => {
+    console.log('in function renderRoleMenus');
+    console.log("Role: ${role}");
     const baseClass = isMobile
       ? "block px-3 py-2 hover:bg-gray-700 rounded"
       : "text-white hover:text-primary";
