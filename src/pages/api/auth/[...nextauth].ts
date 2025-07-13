@@ -31,8 +31,8 @@ export const authOptions: NextAuthOptions = { // <--- **เพิ่ม export c
   ],
 
   adapter: SupabaseAdapter({
-    url: process.env.SUPABASE_URL!,
-    secret: process.env.SUPABASE_SECRET_KEY!,
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    secret: process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY!,
   }),
 
   secret: process.env.NEXTAUTH_SECRET,
