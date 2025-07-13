@@ -3,7 +3,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { supabaseServer } from "@/lib/supabaseServer"; // <--- แก้ไขตรงนี้: import supabaseServer
+import { supabaseServer } from "@/lib/supabaseServer"; // 
 import { Session } from "next-auth"; // Import type Session
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
