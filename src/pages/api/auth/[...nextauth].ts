@@ -4,7 +4,8 @@ import NextAuth, { NextAuthOptions } from "next-auth"; // Import NextAuthOptions
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { SupabaseAdapter } from "@next-auth/supabase-adapter";
-import { createClient } from "@supabase/supabase-js";
+//import { createClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"; // <--- ใช้ createClient as createSupabaseClient
 
 // ตรวจสอบให้แน่ใจว่าได้ตั้งค่าตัวแปรสภาพแวดล้อมเหล่านี้ใน .env.local
 // GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET

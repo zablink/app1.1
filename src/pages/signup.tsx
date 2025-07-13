@@ -1,7 +1,7 @@
 // /pages/signup.tsx
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +12,7 @@ export default function SignupPage() {
   const handleSignup = async () => {
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password });
+    const supabase = createClient();
 
     if (error) {
       alert(error.message);
