@@ -1,3 +1,5 @@
+// /types/membership.ts
+
 import { User } from "./user";
 
 export type MembershipHistory = {

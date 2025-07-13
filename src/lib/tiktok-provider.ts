@@ -38,7 +38,7 @@ export default function TikTokProvider(
         email: profile.data.user.email ?? `${profile.data.user.open_id}@tiktok.com`,
         image: profile.data.user.avatar_url,
         role: "user",
-        membershipType: "free",
+        membership_type: "free",
       } as User;
     },
     ...options,

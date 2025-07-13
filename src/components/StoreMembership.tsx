@@ -15,8 +15,8 @@ export default function StoreMembership() {
   const [selected, setSelected] = useState<string>("free");
 
   useEffect(() => {
-    if (session?.user?.membershipType) {
-      setSelected(session.user.membershipType);
+    if (session?.user?.membership_type) {
+      setSelected(session.user.membership_type);
     }
   }, [session]);
 
@@ -30,7 +30,7 @@ export default function StoreMembership() {
   return (
     <div style={{ padding: 24 }}>
       <h1>เปลี่ยนรูปแบบสมาชิกของร้าน</h1>
-      <p>สถานะปัจจุบัน: <strong>{session?.user?.membershipType || "free"}</strong></p>
+      <p>สถานะปัจจุบัน: <strong>{session?.user?.membership_type || "free"}</strong></p>
 
       <div style={{ marginTop: 16 }}>
         {membershipOptions.map(option => (
