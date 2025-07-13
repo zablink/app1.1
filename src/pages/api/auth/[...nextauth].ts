@@ -18,6 +18,25 @@ const supabase = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, 
 );
 
+
+// ตรวจสอบชื่อตัวแปรใน Vercel และโค้ดให้ตรงกันเป๊ะ
+// แนะนำให้ใช้ตัวแปรที่ไม่มี NEXT_PUBLIC_ นำหน้าสำหรับ API routes เพื่อความปลอดภัย
+// และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน (SUPABASE_URL, SUPABASE_ANON_KEY)
+const supabaseUrl = supabase.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = supabase.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// *** เพิ่ม console.log เพื่อยืนยันค่าอีกครั้ง ***
+console.log("NextAuth Supabase Adapter Debug:");
+console.log("  Adapter Supabase URL:", supabaseUrl ? "Exists" : "MISSING");
+console.log("  Adapter Supabase Anon Key:", supabaseAnonKey ? "Exists" : "MISSING");
+// console.log("  Full Anon Key Value:", supabaseAnonKey); // สำหรับ debug ค่าเต็มๆ ถ้าจำเป็น
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("Critical: Supabase URL or Anon Key is missing for NextAuth Adapter!");
+  throw new Error("Supabase URL and Anon Key are required for SupabaseAdapter.");
+}
+
+
 // กำหนด AuthOptions แยกต่างหาก
 export const authOptions: NextAuthOptions = {
   providers: [
