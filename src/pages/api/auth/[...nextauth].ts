@@ -4,22 +4,22 @@ import NextAuth, { NextAuthOptions } from "next-auth"; // Import NextAuthOptions
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { SupabaseAdapter } from "@next-auth/supabase-adapter";
-//import { createClient } from "@supabase/supabase-js";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"; // <--- ใช้ createClient as createSupabaseClient
 
-// ตรวจสอบให้แน่ใจว่าได้ตั้งค่าตัวแปรสภาพแวดล้อมเหล่านี้ใน .env.local
+// ตรวจสอบให้แน่ใจว่าได้ตั้งค่าตัวแปรสภาพแวดล้อมเหล่านี้ใน .env.local และบน Vercel
 // GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 // SUPABASE_URL, SUPABASE_SECRET_KEY (ต้องเป็น SERVICE_ROLE_KEY)
 // NEXTAUTH_SECRET
 
 // สร้าง Supabase client สำหรับ Adapter
-const supabase = createClient(
+// **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
+const supabase = createSupabaseClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY! // ต้องเป็น SERVICE_ROLE_KEY
 );
 
 // กำหนด AuthOptions แยกต่างหาก
-export const authOptions: NextAuthOptions = { // <--- **เพิ่ม export const authOptions**
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = { // <--- **เพิ่ม export c
 
   adapter: SupabaseAdapter({
     url: process.env.SUPABASE_URL!,
-    secret: process.env.SUPABASE_SECRET_KEY!,
+    secret: process.env.SUPABASE_SECRET_KEY!, // ต้องเป็น service_role key
   }),
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -185,8 +185,10 @@ export const authOptions: NextAuthOptions = { // <--- **เพิ่ม export c
           if (error && error.code !== 'PGRST116') {
             console.error("Error fetching user profile for session:", error);
           } else if (profile) {
-            session.user.username = profile.username;
-            session.user.role = profile.role;
+            session.user.username = profile.username || null;
+            session.user.role = profile.role || "user";
+            session.user.membership_type = profile.membership_type || "free";
+            session.user.avatar_url = profile.avatar_url || null;
           }
         } catch (e) {
           console.error("Exception in Session callback during profile fetch:", e);
@@ -205,5 +207,4 @@ export const authOptions: NextAuthOptions = { // <--- **เพิ่ม export c
   },
 };
 
-// Default export สำหรับ NextAuth handler
-export default NextAuth(authOptions); // <--- ใช้ authOptions ที่เรา export ไปแล้ว
+export default NextAuth(authOptions);
