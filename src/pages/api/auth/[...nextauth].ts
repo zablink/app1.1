@@ -19,22 +19,100 @@ const supabase = createSupabaseClient(
 );
 
 
-// ตรวจสอบชื่อตัวแปรใน Vercel และโค้ดให้ตรงกันเป๊ะ
+
+
+
+
+
+
+
+// --- ส่วนที่เพิ่มสำหรับ Debugging ---
+
+// 1. Log ค่าของ Environment Variables ดิบๆ ก่อนใช้งาน
+console.log("--- DEBUG: Environment Variables ---");
+console.log("process.env.NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "SET" : "NOT SET");
+console.log("process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "SET" : "NOT SET");
+console.log("process.env.SUPABASE_URL:", process.env.SUPABASE_URL ? "SET" : "NOT SET"); // ตรวจสอบชื่อที่ไม่มี NEXT_PUBLIC_ ด้วย
+console.log("process.env.SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY ? "SET" : "NOT SET"); // ตรวจสอบชื่อที่ไม่มี NEXT_PUBLIC_ ด้วย
+console.log("process.env.SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "SET" : "NOT SET"); // ตรวจสอบ SERVICE_ROLE_KEY ด้วย (ถ้าใช้)
+console.log("process.env.NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "SET" : "NOT SET");
+console.log("------------------------------------");
+
+// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
+
+
+// สร้าง Supabase client สำหรับ Adapter
+// **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
+// Note: ถ้าคุณใช้ SupabaseAdapter ของ NextAuth.js ปกติแล้วคุณไม่จำเป็นต้องสร้าง Supabase client ขึ้นมาเองในไฟล์นี้
+// เพราะ SupabaseAdapter จะสร้าง client ภายในตัวมันเองโดยใช้ url และ key ที่คุณส่งให้
+// อย่างไรก็ตาม หากคุณมีเหตุผลเฉพาะที่ต้องการสร้าง client ตรงนี้ ก็ทำได้ แต่ต้องแน่ใจว่าได้ใช้ตัวแปรที่ถูกต้อง
+const supabaseForInternalUse = createSupabaseClient( // เปลี่ยนชื่อตัวแปรเป็น supabaseForInternalUse เพื่อความชัดเจน
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
+
+// --- ส่วนที่เพิ่มสำหรับ Debugging ---
+
+// 2. Log สถานะของ Supabase client ที่สร้างขึ้น
+console.log("--- DEBUG: Supabase Client Status (Internal Use) ---");
+console.log("supabaseForInternalUse created:", !!supabaseForInternalUse);
+// Supabase client instance ไม่มี property แบบนี้โดยตรง
+// console.log("supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_URL:", supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_URL);
+// console.log("supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+// แทนที่จะเป็นแบบนั้น คุณจะรู้ว่ามันถูกสร้างขึ้นสำเร็จจากบรรทัดบน และจากนั้นใช้ตัวแปร env ตรงๆ ใน adapter
+console.log("------------------------------------");
+
+// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
+
+
+// ดึงค่า URL และ Key โดยตรงจาก process.env สำหรับ SupabaseAdapter
 // แนะนำให้ใช้ตัวแปรที่ไม่มี NEXT_PUBLIC_ นำหน้าสำหรับ API routes เพื่อความปลอดภัย
-// และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน (SUPABASE_URL, SUPABASE_ANON_KEY)
-const supabaseUrl = supabase.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = supabase.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน: SUPABASE_URL, SUPABASE_ANON_KEY
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // ใช้ SERVICE_ROLE_KEY
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
 
-// *** เพิ่ม console.log เพื่อยืนยันค่าอีกครั้ง ***
-console.log("NextAuth Supabase Adapter Debug:");
-console.log("  Adapter Supabase URL:", supabaseUrl ? "Exists" : "MISSING");
-console.log("  Adapter Supabase Anon Key:", supabaseAnonKey ? "Exists" : "MISSING");
-// console.log("  Full Anon Key Value:", supabaseAnonKey); // สำหรับ debug ค่าเต็มๆ ถ้าจำเป็น
+// --- ส่วนที่เพิ่มสำหรับ Debugging ---
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("Critical: Supabase URL or Anon Key is missing for NextAuth Adapter!");
-  throw new Error("Supabase URL and Anon Key are required for SupabaseAdapter.");
+// 3. Log ค่าที่ถูกส่งไปยัง SupabaseAdapter
+console.log("--- DEBUG: Values for SupabaseAdapter ---");
+console.log("Adapter URL (SUPABASE_URL):", SUPABASE_URL ? "SET" : "NOT SET");
+// ปกติ SupabaseAdapter ใช้ key ที่เป็น SERVICE_ROLE_KEY ไม่ใช่ ANON_KEY สำหรับการจัดการผู้ใช้
+console.log("Adapter Key (SUPABASE_SERVICE_ROLE_KEY):", SUPABASE_SERVICE_ROLE_KEY ? "SET" : "NOT SET");
+// console.log("Full Adapter URL Value:", SUPABASE_URL); // Debug ค่าเต็มๆ ชั่วคราว
+// console.log("Full Adapter Key Value:", SUPABASE_SERVICE_ROLE_KEY); // Debug ค่าเต็มๆ ชั่วคราว
+console.log("------------------------------------");
+
+// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
+
+
+// ตรวจสอบให้แน่ใจว่าตัวแปรมีค่า ก่อนที่จะส่งให้ Adapter
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) { // ตรวจสอบ SERVICE_ROLE_KEY
+  console.error("⛔️ Critical Error: Supabase URL or SERVICE_ROLE_KEY is missing for NextAuth Adapter!");
+  throw new Error("Supabase URL and SERVICE_ROLE_KEY must be set in environment variables for NextAuth SupabaseAdapter.");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // กำหนด AuthOptions แยกต่างหาก
