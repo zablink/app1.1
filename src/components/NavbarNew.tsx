@@ -148,7 +148,6 @@ export default function Navbar() {
                       title="Dashboard"
                     >
                       <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
-                      <!--<span>Dashboard</span>-->
                     </a>
                   </Link>
 
@@ -230,7 +229,6 @@ export default function Navbar() {
                     <Link href="/dashboard">
                       <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
                         <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
-                        <!--<span>Dashboard</span>-->
                       </a>
                     </Link>
                     {/* ปุ่ม Logout (เปลี่ยนเป็น FiLogOut สำหรับ Mobile) */}
