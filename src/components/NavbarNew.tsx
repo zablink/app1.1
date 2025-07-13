@@ -237,7 +237,6 @@ export default function Navbar() {
                       className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left" // เพิ่ม flex และ space-x-2
                     >
                       <FiLogOut size={20} /> {/* เพิ่ม FiLogOut */}
-                      <!--<span>Logout</span>-->
                     </button>
                   </>
                 )}
