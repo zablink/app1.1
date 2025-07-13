@@ -1,20 +1,26 @@
 // /pages/store/location.tsx
 
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+// import { createClient } from "@supabase/supabase-js"; // <--- ลบ import นี้ออก
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import { createClient as createClientSideSupabase } from "@/lib/supabase"; // <--- Import createClient จาก lib/supabase
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+// **ลบ** การสร้าง supabase client ที่ Top-level ออกไป:
+// const supabase = createClient(
+//   process.env.SUPABASE_URL!,
+//   process.env.SUPABASE_ANON_KEY!
+// );
 
 function StoreLocationInner() {
   const { data: session, status } = useSession();
   const mapRef = useRef<HTMLDivElement>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // **สร้าง Supabase client instance ภายใน Component**
+  // นี่คือตำแหน่งที่ถูกต้องสำหรับ Client-side component
+  const supabase = createClientSideSupabase(); // <--- เรียกใช้ createClientSideSupabase()
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -49,15 +55,25 @@ function StoreLocationInner() {
   }, [marker, status]);
 
   const saveLocation = async () => {
-    if (!location || !session?.user?.id) return alert("กรุณาเลือกพิกัดก่อน");
+    if (!location || !session?.user?.id) { // ใช้ session.user.id แทน email เพื่อความสอดคล้อง
+      alert("กรุณาเลือกพิกัดและเข้าสู่ระบบก่อน"); // ควรใช้ Modal
+      return;
+    }
 
-    const { error } = await supabase
-      .from("stores")
-      .update({ latitude: location.lat, longitude: location.lng })
-      .eq("user_id", session.user.id);
+    try {
+      const { error } = await supabase
+        .from("stores")
+        .update({ latitude: location.lat, longitude: location.lng })
+        .eq("user_id", session.user.id); // สมมติว่าผูก store กับ user_id
 
-    if (error) alert("บันทึกไม่สำเร็จ: " + error.message);
-    else alert("บันทึกพิกัดเรียบร้อยแล้ว");
+      if (error) {
+        throw new Error(error.message);
+      }
+      alert("บันทึกพิกัดเรียบร้อยแล้ว"); // ควรใช้ Modal
+    } catch (err: any) {
+      console.error("Error saving location:", err.message);
+      alert("บันทึกไม่สำเร็จ: " + err.message); // ควรใช้ Modal
+    }
   };
 
   if (status === "loading") return <p>กำลังโหลด...</p>;
