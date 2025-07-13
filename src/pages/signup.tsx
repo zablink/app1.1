@@ -1,7 +1,7 @@
 // /pages/signup.tsx
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase"; 
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -9,13 +9,18 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // **สร้าง Supabase client instance ภายใน Component แต่ก่อนใช้งาน**
+  // นี่คือตำแหน่งที่ถูกต้อง: สร้าง client ก่อนที่จะถูกใช้ใน handleSignup
+  const supabase = createClient();
+
   const handleSignup = async () => {
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password });
-    const supabase = createClient();
 
     if (error) {
-      alert(error.message);
+      // ควรใช้ SweetAlert2 หรือ Modal แทน alert()
+      console.error("Signup error:", error.message);
+      alert(error.message); // ใช้ alert ชั่วคราวสำหรับการ debug
     } else {
       // สร้าง OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
