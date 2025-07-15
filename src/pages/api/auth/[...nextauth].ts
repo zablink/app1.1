@@ -77,48 +77,20 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBL
 // >>> ใช้ NEXT_PUBLIC_SUPABASE_URL เพราะ logs ยืนยันว่ามัน SET
 // >>> ใช้ SUPABASE_SERVICE_ROLE_KEY เพราะ logs ยืนยันว่ามัน SET
 const SUPABASE_ADAPTER_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ADAPTER_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-// --- ส่วนที่เพิ่มสำหรับ Debugging ---
+const SUPABASE_ADAPTER_SECRET_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
 // --- DEBUG: Values for SupabaseAdapter ---
 console.log("--- DEBUG: Values for SupabaseAdapter ---");
 console.log("Adapter URL (SUPABASE_ADAPTER_URL):", SUPABASE_ADAPTER_URL ? "SET" : "NOT SET");
-console.log("Adapter Key (SUPABASE_ADAPTER_KEY):", SUPABASE_ADAPTER_KEY ? "SET" : "NOT SET");
-// console.log("Full Adapter URL Value:", SUPABASE_ADAPTER_URL); // Debug ค่าเต็มๆ ชั่วคราว
-// console.log("Full Adapter Key Value:", SUPABASE_ADAPTER_KEY); // Debug ค่าเต็มๆ ชั่วคราว
+console.log("Adapter Secret Key (SUPABASE_ADAPTER_SECRET_KEY):", SUPABASE_ADAPTER_SECRET_KEY ? "SET" : "NOT SET");
 console.log("------------------------------------");
 
 
-// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
-
-
 // ตรวจสอบให้แน่ใจว่าตัวแปรมีค่า ก่อนที่จะส่งให้ Adapter
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) { // ตรวจสอบ SERVICE_ROLE_KEY
+if (!SUPABASE_ADAPTER_URL || !SUPABASE_ADAPTER_SECRET_KEY) { // <<< ตรวจสอบตัวแปรที่ใช้
   console.error("⛔️ Critical Error: Supabase URL or SERVICE_ROLE_KEY is missing for NextAuth Adapter!");
   throw new Error("Supabase URL and SERVICE_ROLE_KEY must be set in environment variables for NextAuth SupabaseAdapter.");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -139,7 +111,7 @@ export const authOptions: NextAuthOptions = {
 
   adapter: SupabaseAdapter({
     url: SUPABASE_ADAPTER_URL!, 
-    key: SUPABASE_ADAPTER_KEY!,  
+    secret: SUPABASE_ADAPTER_SECRET_KEY!,  
   }),
 
   secret: process.env.NEXTAUTH_SECRET,
