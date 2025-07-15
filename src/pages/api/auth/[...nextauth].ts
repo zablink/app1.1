@@ -72,16 +72,23 @@ const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABAS
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // ใช้ SERVICE_ROLE_KEY
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
 
+
+// >>> ดึงค่าสำหรับ SupabaseAdapter:
+// >>> ใช้ NEXT_PUBLIC_SUPABASE_URL เพราะ logs ยืนยันว่ามัน SET
+// >>> ใช้ SUPABASE_SERVICE_ROLE_KEY เพราะ logs ยืนยันว่ามัน SET
+const SUPABASE_ADAPTER_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ADAPTER_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // --- ส่วนที่เพิ่มสำหรับ Debugging ---
 
-// 3. Log ค่าที่ถูกส่งไปยัง SupabaseAdapter
+// --- DEBUG: Values for SupabaseAdapter ---
 console.log("--- DEBUG: Values for SupabaseAdapter ---");
-console.log("Adapter URL (SUPABASE_URL):", SUPABASE_URL ? "SET" : "NOT SET");
-// ปกติ SupabaseAdapter ใช้ key ที่เป็น SERVICE_ROLE_KEY ไม่ใช่ ANON_KEY สำหรับการจัดการผู้ใช้
-console.log("Adapter Key (SUPABASE_SERVICE_ROLE_KEY):", SUPABASE_SERVICE_ROLE_KEY ? "SET" : "NOT SET");
-// console.log("Full Adapter URL Value:", SUPABASE_URL); // Debug ค่าเต็มๆ ชั่วคราว
-// console.log("Full Adapter Key Value:", SUPABASE_SERVICE_ROLE_KEY); // Debug ค่าเต็มๆ ชั่วคราว
+console.log("Adapter URL (SUPABASE_ADAPTER_URL):", SUPABASE_ADAPTER_URL ? "SET" : "NOT SET");
+console.log("Adapter Key (SUPABASE_ADAPTER_KEY):", SUPABASE_ADAPTER_KEY ? "SET" : "NOT SET");
+// console.log("Full Adapter URL Value:", SUPABASE_ADAPTER_URL); // Debug ค่าเต็มๆ ชั่วคราว
+// console.log("Full Adapter Key Value:", SUPABASE_ADAPTER_KEY); // Debug ค่าเต็มๆ ชั่วคราว
 console.log("------------------------------------");
+
 
 // --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
 
@@ -91,6 +98,8 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) { // ตรวจสอบ SERV
   console.error("⛔️ Critical Error: Supabase URL or SERVICE_ROLE_KEY is missing for NextAuth Adapter!");
   throw new Error("Supabase URL and SERVICE_ROLE_KEY must be set in environment variables for NextAuth SupabaseAdapter.");
 }
+
+
 
 
 
@@ -129,8 +138,8 @@ export const authOptions: NextAuthOptions = {
   ],
 
   adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY!, // ต้องเป็น service_role key
+    url: SUPABASE_ADAPTER_URL!, 
+    key: SUPABASE_ADAPTER_KEY!,  
   }),
 
   secret: process.env.NEXTAUTH_SECRET,
