@@ -79,6 +79,11 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBL
 const SUPABASE_ADAPTER_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ADAPTER_SECRET_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
+const supabaseForCallbacks = createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!, // หรือ process.env.SUPABASE_URL!
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // <<< ใช้ SERVICE_ROLE_KEY ตรงนี้
+);
+
 // --- DEBUG: Values for SupabaseAdapter ---
 console.log("--- DEBUG: Values for SupabaseAdapter ---");
 console.log("Adapter URL (SUPABASE_ADAPTER_URL):", SUPABASE_ADAPTER_URL ? "SET" : "NOT SET");
@@ -109,9 +114,14 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
+  /*
   adapter: SupabaseAdapter({
     url: SUPABASE_ADAPTER_URL!, 
     secret: SUPABASE_ADAPTER_SECRET_KEY!,  
+  }),*/
+  adapter: SupabaseAdapter({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!, // **สำคัญ: ใช้ SERVICE_ROLE_KEY ที่นี่**
   }),
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -126,7 +136,7 @@ export const authOptions: NextAuthOptions = {
 
       if (user && account && user.id) {
         try {
-          const { data: identities, error: identitiesError } = await supabase
+          const { data: identities, error: identitiesError } = await supabaseForCallbacks 
             .from('identities')
             .select('provider')
             .eq('user_id', user.id);
@@ -181,7 +191,7 @@ export const authOptions: NextAuthOptions = {
       if (isNewUser && user) {
         console.log("New user detected or new social identity linked. Checking/creating/updating profile...");
         try {
-          const { data: existingProfile, error: fetchError } = await supabase
+          const { data: existingProfile, error: fetchError } = await supabaseForCallbacks
             .from('profiles')
             .select('id')
             .eq('id', user.id)
@@ -254,7 +264,7 @@ export const authOptions: NextAuthOptions = {
 
       if (session.user.id) {
         try {
-          const { data: profile, error } = await supabase
+          const { data: profile, error } = await supabaseForCallbacks
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
