@@ -38,7 +38,8 @@ function mockAddLinkedProvider(email: string, provider: string) {
   console.log("MOCK: Linked Providers after add:", MOCK_LINKED_PROVIDERS);
 }
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = { 
+//const authOptions: NextAuthOptions = {
   // adapter: SupabaseAdapter({ // <-- REMOVED SupabaseAdapter
   //   url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
   //   secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
