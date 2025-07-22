@@ -15,7 +15,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js"; //
 // **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
 const supabase = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, 
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, 
 );
 
 
@@ -48,7 +48,7 @@ console.log("------------------------------------");
 // อย่างไรก็ตาม หากคุณมีเหตุผลเฉพาะที่ต้องการสร้าง client ตรงนี้ ก็ทำได้ แต่ต้องแน่ใจว่าได้ใช้ตัวแปรที่ถูกต้อง
 const supabaseForInternalUse = createSupabaseClient( // เปลี่ยนชื่อตัวแปรเป็น supabaseForInternalUse เพื่อความชัดเจน
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // --- ส่วนที่เพิ่มสำหรับ Debugging ---
@@ -70,7 +70,7 @@ console.log("------------------------------------");
 // และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน: SUPABASE_URL, SUPABASE_ANON_KEY
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // ใช้ SERVICE_ROLE_KEY
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
 
 
 // >>> ดึงค่าสำหรับ SupabaseAdapter:
