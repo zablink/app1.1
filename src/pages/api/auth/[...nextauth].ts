@@ -89,7 +89,7 @@ console.log("--- DEBUG: Values for SupabaseAdapter ---");
 console.log("Adapter URL (SUPABASE_ADAPTER_URL):", SUPABASE_ADAPTER_URL ? "SET" : "NOT SET");
 console.log("Adapter Secret Key (SUPABASE_ADAPTER_SECRET_KEY):", SUPABASE_ADAPTER_SECRET_KEY ? "SET" : "NOT SET");
 console.log("------------------------------------");
-
+ 
 
 // ตรวจสอบให้แน่ใจว่าตัวแปรมีค่า ก่อนที่จะส่งให้ Adapter
 if (!SUPABASE_ADAPTER_URL || !SUPABASE_ADAPTER_SECRET_KEY) { // <<< ตรวจสอบตัวแปรที่ใช้
