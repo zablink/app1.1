@@ -7,5 +7,5 @@ import { createClient } from "@supabase/supabase-js";
 // และใช้ SUPABASE_SECRET_KEY (service_role key) เพื่อสิทธิ์ที่สูงกว่า
 export const supabaseServer = createClient( // <--- เปลี่ยนชื่อ export เป็น supabaseServer เพื่อไม่ให้ชนกับ Client-side
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY! // ต้องเป็น SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ต้องเป็น SERVICE_ROLE_KEY
 );
