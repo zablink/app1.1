@@ -130,14 +130,16 @@ export default function Navbar() {
 
               {!isLoggedIn ? (
                 // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
-                <button
-                  onClick={handleLogin}
-                  aria-label="Login"
-                  className="text-white hover:text-primary focus:outline-none font-medium px-2"
-                  title="Login"
-                >
-                  Login
-                </button>
+                <Link  href="/login">
+                  <button
+                    //onClick={handleLogin}
+                    aria-label="Login"
+                    className="text-white hover:text-primary focus:outline-none font-medium px-2"
+                    title="Login"
+                  >
+                    Login
+                  </button>
+                </Link>
               ) : (
                 <>
                   {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings) */}
