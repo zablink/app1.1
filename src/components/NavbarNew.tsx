@@ -217,11 +217,10 @@ export default function Navbar() {
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
                   // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
-                  <link  href="/login">
+                  <Link  href="/login">
                     <button
                       //onClick={() => { setMobileMenuOpen(false); handleLogin(); }}
-                      className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
-                    >
+                      className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left">
                       Login
                     </button>
                   </Link>
