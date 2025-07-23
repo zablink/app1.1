@@ -217,12 +217,14 @@ export default function Navbar() {
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
                   // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); handleLogin(); }}
-                    className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
-                  >
-                    Login
-                  </button>
+                  <link  href="/login">
+                    <button
+                      //onClick={() => { setMobileMenuOpen(false); handleLogin(); }}
+                      className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left"
+                    >
+                      Login
+                    </button>
+                  </Link>
                 ) : (
                   <>
                     {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings สำหรับ Mobile) */}
