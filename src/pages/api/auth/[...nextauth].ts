@@ -70,7 +70,7 @@ console.log("------------------------------------");
 // และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน: SUPABASE_URL, SUPABASE_ANON_KEY
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // ใช้ SERVICE_ROLE_KEY
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
+//const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
 
 
 // >>> ดึงค่าสำหรับ SupabaseAdapter:
