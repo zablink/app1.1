@@ -15,6 +15,9 @@ export default function LoginPage() {
 
   const { data: session, status } = useSession();
 
+
+  const [isAuthDivVisible, setIsAuthDivVisible] = useState(false); 
+
   useEffect(() => {
     // Redirect if already authenticated
     if (status === "authenticated") {
@@ -131,7 +134,8 @@ export default function LoginPage() {
         </p>
 
         {/* OAuth Buttons */}
-        <div id="authdiv" className="mt-6 space-y-3" style="display:none;">
+        {isAuthDivVisible && (
+        <div id="authdiv" className="mt-6 space-y-3" >
           <button
             onClick={() => handleOAuthLogin("google")}
             className="w-full flex items-center justify-center py-3 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
@@ -142,6 +146,7 @@ export default function LoginPage() {
           </button>
           {/* Other OAuth buttons can be styled similarly */}
         </div>
+        )}
 
       </div>
     </div>
