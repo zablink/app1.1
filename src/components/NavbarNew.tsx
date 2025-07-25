@@ -196,12 +196,8 @@ export default function Navbar() {
                     className="text-white hover:text-primary focus:outline-none flex items-center space-x-1"
                     title="โปรไฟล์ผู้ใช้"
                   >
-                    {/* แสดงชื่อผู้ใช้หรือไอคอน FiUser */}
-                    {session?.user?.name ? (
-                      <span className="font-medium">{session.user.name.split(' ')[0]}</span>
-                    ) : (
-                      <FiUser size={20} />
-                    )}
+                    {/* แสดงไอคอน FiUser เสมอเมื่อล็อกอินแล้ว */}
+                    <FiUser size={20} />
                     <FiChevronDown className="ml-1" />
                   </button>
                   {userProfileDropdownOpen && (
