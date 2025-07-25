@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-// เพิ่ม FiSettings เข้ามาใน import
-import { FiSearch, FiLogIn, FiLogOut, FiUser, FiMenu, FiX, FiChevronDown, FiSettings } from "react-icons/fi";
+// เพิ่ม FiSettings, FiUser, FiHome เข้ามาใน import
+import { FiSearch, FiLogIn, FiLogOut, FiUser, FiMenu, FiX, FiChevronDown, FiSettings, FiHome } from "react-icons/fi";
 
+// ตัวอย่างหมวดหมู่ร้านค้า
 const categories = ["อาหารญี่ปุ่น", "ชานมไข่มุก", "อาหารตามสั่ง"];
 
 export default function Navbar() {
@@ -13,11 +14,12 @@ export default function Navbar() {
   // isLoggedIn เป็นจริงถ้ามี session
   const isLoggedIn = !!session;
   // ดึง role จาก session, ถ้าไม่มีจะใช้ "user" เป็นค่าเริ่มต้น
-  const role = session?.user?.role || "user"; 
+  const role = session?.user?.role || "user";
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
+  const [userProfileDropdownOpen, setUserProfileDropdownOpen] = useState(false); // สถานะสำหรับเมนูดรอปดาวน์โปรไฟล์ผู้ใช้
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,18 +37,44 @@ export default function Navbar() {
     }
   }, [searchOpen]);
 
+  // Effect สำหรับปิดเมนูดรอปดาวน์เมื่อคลิกนอกพื้นที่ (สำหรับ desktop)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // ตรวจสอบว่าคลิกนอก Shop Dropdown หรือไม่
+      if (shopDropdownOpen && !(event.target as HTMLElement).closest(".group")) {
+        setShopDropdownOpen(false);
+      }
+      // ตรวจสอบว่าคลิกนอก User Profile Dropdown หรือไม่
+      if (userProfileDropdownOpen && !(event.target as HTMLElement).closest(".user-profile-dropdown-container")) {
+        setUserProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [shopDropdownOpen, userProfileDropdownOpen]);
+
+
   // ฟังก์ชันสำหรับเปิด/ปิด UI ต่างๆ
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+    // ปิด dropdown อื่นๆ เมื่อเปิด/ปิด mobile menu
+    setShopDropdownOpen(false);
+    setUserProfileDropdownOpen(false);
+  };
   const toggleShopDropdown = () => setShopDropdownOpen(!shopDropdownOpen);
+  const toggleUserProfileDropdown = () => setUserProfileDropdownOpen(!userProfileDropdownOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
   
   // Handlers สำหรับ Login และ Logout โดยใช้ NextAuth
-  // callbackUrl เป็นสิ่งสำคัญสำหรับกำหนดหน้าที่จะถูก Redirect ไปหลัง Login สำเร็จ
-  const handleLogin = () => signIn("google", { callbackUrl: "/" }); // Login ด้วย Google แล้ว Redirect ไปหน้าแรก
-  const handleLogout = () => signOut({ callbackUrl: "/" }); // Logout แล้ว Redirect ไปหน้าแรก
+  const handleLogin = () => signIn("google", { callbackUrl: "/" });
+  const handleLogout = () => signOut({ callbackUrl: "/" });
 
-  // ฟังก์ชันสำหรับแสดงเมนูตามบทบาทของผู้ใช้
-  const renderRoleMenus = (userRole: string, isMobile = false, onClick?: () => void) => {
+  // ฟังก์ชันสำหรับแสดงเมนูตามบทบาทของผู้ใช้ (เฉพาะลิงก์ Dashboard/Admin)
+  // User Role จะไม่มีเมนูในส่วนนี้ เพราะจะจัดการผ่าน Profile Dropdown แทน
+  const renderRoleSpecificDashboardMenus = (userRole: string, isMobile = false, onClick?: () => void) => {
     const baseClass = isMobile
       ? "block px-3 py-2 hover:bg-gray-700 rounded"
       : "text-white hover:text-primary";
@@ -63,10 +91,10 @@ export default function Navbar() {
     if (userRole === "shop") {
       return (
         <>
-          {wrap("/dashboard/shop", "จัดการร้าน")}
-          {wrap("/dashboard/menus", "เมนูสินค้า")}
+          {wrap("/dashboard/shop", "แดชบอร์ดร้านค้า", <FiHome size={20} />)}
+          {wrap("/dashboard/menus", "จัดการเมนู")}
           {wrap("/dashboard/promotion", "โปรโมทร้าน")}
-          {wrap("/dashboard/reports", "รายงาน")}
+          {wrap("/dashboard/reports", "รายงานร้านค้า")}
         </>
       );
     }
@@ -74,16 +102,20 @@ export default function Navbar() {
     if (userRole === "admin") {
       return (
         <>
+          {wrap("/admin/dashboard", "แดชบอร์ดผู้ดูแล", <FiHome size={20} />)} {/* เพิ่มลิงก์แดชบอร์ดหลักของ Admin */}
           {wrap("/admin/shops", "จัดการร้านค้า")}
           {wrap("/admin/users", "จัดการผู้ใช้")}
           {wrap("/admin/promotions", "จัดการโปรโมชั่น")}
           {wrap("/admin/ads", "จัดการโฆษณา")}
+          {wrap("/admin/reviews", "จัดการรีวิว")} {/* เพิ่มจัดการรีวิว */}
           {wrap("/admin/reports", "รายงานรวม")}
+          {wrap("/admin/categories", "จัดการหมวดหมู่")} {/* เพิ่มจัดการหมวดหมู่ */}
+          {wrap("/admin/settings", "ตั้งค่าระบบ")} {/* เพิ่มตั้งค่าระบบ */}
         </>
       );
     }
 
-    // ไม่มีเมนูเฉพาะบทบาทสำหรับ 'user' หรือบทบาทอื่นๆ
+    // สำหรับ 'user' role หรือบทบาทอื่นๆ จะไม่มีเมนูเฉพาะ Dashboard ในส่วนนี้
     return null;
   };
 
@@ -99,7 +131,7 @@ export default function Navbar() {
             <Link href="/">
               <a className="flex items-center">
                 <img
-                  src="/images/zablink-logo-white.png"
+                  src="/images/zablink-logo-white.png" // ตรวจสอบให้แน่ใจว่า path นี้ถูกต้อง
                   alt="Zablink Logo"
                   className="h-8 w-auto sm:h-16"
                 />
@@ -108,7 +140,7 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center space-x-6">
-              {/* Shop Dropdown */}
+              {/* Shop Dropdown (หมวดหมู่ร้านค้า) */}
               <div className="relative group">
                 <div className="inline-flex items-center text-white hover:text-primary cursor-pointer">
                   <span>ร้านค้า</span>
@@ -119,7 +151,7 @@ export default function Navbar() {
                     {categories.map((cat) => (
                       <li key={cat}>
                         <Link href={`/shop/category/${encodeURIComponent(cat)}`}>
-                          <a className="block px-4 py-2 hover:bg-gray-100">{cat}</a>
+                          <a className="block px-4 py-2 hover:bg-gray-100 text-gray-800">{cat}</a>
                         </Link>
                       </li>
                     ))}
@@ -129,55 +161,89 @@ export default function Navbar() {
 
               {/* Static Links */}
               <Link href="/about">
-                <a className="text-white hover:text-primary">About</a>
+                <a className="text-white hover:text-primary">เกี่ยวกับเรา</a>
               </Link>
               <Link href="/contact">
-                <a className="text-white hover:text-primary">Contact</a>
+                <a className="text-white hover:text-primary">ติดต่อเรา</a>
               </Link>
 
-              {/* Role-based Menus (แสดงเฉพาะเมื่อล็อกอินแล้ว) */}
-              {isLoggedIn && renderRoleMenus(role)}
+              {/* Role-based Dashboard Menus (สำหรับ Shop และ Admin) */}
+              {isLoggedIn && renderRoleSpecificDashboardMenus(role)}
 
               {/* Search Button */}
               <button onClick={toggleSearch} aria-label="Search" className="text-white hover:text-primary focus:outline-none">
                 <FiSearch size={20} />
               </button>
 
-              {/* Login/Logout/Settings ตามสถานะการล็อกอิน */}
+              {/* Login/User Profile Dropdown ตามสถานะการล็อกอิน */}
               {!isLoggedIn ? (
                 // ปุ่ม Login สำหรับ Desktop
                 <Link href="/login">
                   <a // ใช้ <a> แทน <button> ภายใน Link เพื่อความถูกต้องของ Semantic HTML
                     aria-label="Login"
                     className="text-white hover:text-primary focus:outline-none font-medium px-2"
-                    title="Login"
+                    title="เข้าสู่ระบบ"
                   >
-                    Login
+                    เข้าสู่ระบบ
                   </a>
                 </Link>
               ) : (
-                <>
-                  {/* ไอคอน/ลิงก์ Settings สำหรับ Desktop (สำหรับผู้ใช้ที่ล็อกอินแล้ว) */}
-                  <Link href="/settings"> {/* เปลี่ยนจาก /dashboard เป็น /settings */}
-                    <a
-                      aria-label="Settings"
-                      className="text-white hover:text-primary focus:outline-none font-medium flex items-center space-x-1"
-                      title="Settings"
-                    >
-                      <FiSettings size={20} />
-                    </a>
-                  </Link>
-
-                  {/* ปุ่ม Logout สำหรับ Desktop */}
+                // เมนูดรอปดาวน์โปรไฟล์ผู้ใช้สำหรับ Desktop
+                <div className="relative user-profile-dropdown-container">
                   <button
-                    onClick={handleLogout}
-                    aria-label="Logout"
-                    className="text-white hover:text-primary focus:outline-none ml-4 font-medium"
-                    title="Logout"
+                    onClick={toggleUserProfileDropdown}
+                    aria-label="User Profile"
+                    className="text-white hover:text-primary focus:outline-none flex items-center space-x-1"
+                    title="โปรไฟล์ผู้ใช้"
                   >
-                    <FiLogOut size={24} />
+                    {/* แสดงชื่อผู้ใช้หรือไอคอน FiUser */}
+                    {session?.user?.name ? (
+                      <span className="font-medium">{session.user.name.split(' ')[0]}</span>
+                    ) : (
+                      <FiUser size={20} />
+                    )}
+                    <FiChevronDown className="ml-1" />
                   </button>
-                </>
+                  {userProfileDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                      <ul>
+                        {/* ลิงก์ไปยังหน้า Settings/Profile สำหรับทุก Role */}
+                        <li>
+                          <Link href="/settings">
+                            <a onClick={() => setUserProfileDropdownOpen(false)} className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
+                              <FiSettings size={18} />
+                              <span>ตั้งค่าโปรไฟล์</span>
+                            </a>
+                          </Link>
+                        </li>
+                        {/* "เปลี่ยน Role เป็นร้านค้า" สำหรับ User Role เท่านั้น */}
+                        {role === "user" && (
+                          <li>
+                            <Link href="/register-shop"> {/* สมมติว่ามีหน้าสำหรับลงทะเบียนร้านค้า */}
+                              <a onClick={() => setUserProfileDropdownOpen(false)} className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
+                                <FiUser size={18} /> {/* อาจใช้ไอคอนอื่นที่สื่อถึงร้านค้าได้ */}
+                                <span>เป็นร้านค้า</span>
+                              </a>
+                            </Link>
+                          </li>
+                        )}
+                        {/* ปุ่ม Logout */}
+                        <li>
+                          <button
+                            onClick={() => {
+                              setUserProfileDropdownOpen(false);
+                              handleLogout();
+                            }}
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2 border-t border-gray-200"
+                          >
+                            <FiLogOut size={18} />
+                            <span>ออกจากระบบ</span>
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -197,7 +263,7 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="sm:hidden bg-black bg-opacity-90 backdrop-blur-md shadow-lg">
             <ul className="flex flex-col space-y-1 p-4 text-white">
-              {/* Mobile Shop Dropdown */}
+              {/* Mobile Shop Dropdown (หมวดหมู่ร้านค้า) */}
               <li>
                 <button onClick={toggleShopDropdown} className="flex justify-between w-full items-center px-3 py-2 hover:bg-gray-700 rounded">
                   <span>ร้านค้า</span>
@@ -221,22 +287,22 @@ export default function Navbar() {
               <li>
                 <Link href="/about">
                   <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
-                    About
+                    เกี่ยวกับเรา
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/contact">
                   <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
-                    Contact
+                    ติดต่อเรา
                   </a>
                 </Link>
               </li>
 
-              {/* Mobile Role-based Menus (แสดงเฉพาะเมื่อล็อกอินแล้ว) */}
-              {isLoggedIn && renderRoleMenus(role, true, () => setMobileMenuOpen(false))}
+              {/* Mobile Role-based Dashboard Menus (สำหรับ Shop และ Admin) */}
+              {isLoggedIn && renderRoleSpecificDashboardMenus(role, true, () => setMobileMenuOpen(false))}
 
-              {/* Mobile Login/Logout/Settings ตามสถานะการล็อกอิน */}
+              {/* Mobile User Profile/Settings & Logout */}
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
                   // Mobile Login Button
@@ -244,25 +310,34 @@ export default function Navbar() {
                     <a // ใช้ <a> แทน <button> ภายใน Link
                       onClick={() => setMobileMenuOpen(false)}
                       className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left">
-                      Login
+                      เข้าสู่ระบบ
                     </a>
                   </Link>
                 ) : (
                   <>
                     {/* Mobile Settings Link */}
-                    <Link href="/settings"> {/* เปลี่ยนจาก /dashboard เป็น /settings */}
+                    <Link href="/settings">
                       <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
                         <FiSettings size={20} />
-                        <span>Settings</span> {/* เพิ่มข้อความเพื่อให้ชัดเจนบน Mobile */}
+                        <span>ตั้งค่าโปรไฟล์</span>
                       </a>
                     </Link>
+                    {/* "เปลี่ยน Role เป็นร้านค้า" สำหรับ User Role เท่านั้น (Mobile) */}
+                    {role === "user" && (
+                      <Link href="/register-shop">
+                        <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
+                          <FiUser size={20} />
+                          <span>เป็นร้านค้า</span>
+                        </a>
+                      </Link>
+                    )}
                     {/* Mobile Logout Button */}
                     <button
                       onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
                       className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left"
                     >
                       <FiLogOut size={20} />
-                      <span>Logout</span> {/* เพิ่มข้อความเพื่อให้ชัดเจนบน Mobile */}
+                      <span>ออกจากระบบ</span>
                     </button>
                   </>
                 )}
@@ -275,9 +350,9 @@ export default function Navbar() {
         {searchOpen && (
           <div onClick={() => setSearchOpen(false)} className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50">
             <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-md p-4 w-11/12 max-w-md">
-              <input ref={searchInputRef} type="text" placeholder="Search..." className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input ref={searchInputRef} type="text" placeholder="ค้นหา..." className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary text-gray-800" />
               <button onClick={() => setSearchOpen(false)} className="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">
-                Search
+                ค้นหา
               </button>
             </div>
           </div>
