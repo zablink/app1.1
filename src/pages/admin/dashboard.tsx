@@ -1,9 +1,9 @@
-// /src/pages/admin/settings.tsx (หรืออาจจะรวมใน /src/pages/settings.tsx แล้วแสดงตาม role)
+// /src/pages/admin/dashboard.tsx (หรืออาจจะรวมใน /src/pages/settings.tsx แล้วแสดงตาม role)
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-// แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag
-import { FiStore, FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiShoppingBag, FiDollarSign, FiBarChart, FiUpload } from 'react-icons/fi';
+// แก้ไข: เพิ่ม FiUpload เข้ามาใน import
+import { FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiShoppingBag, FiDollarSign, FiBarChart, FiUpload } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export default function AdminSettingsPage() {
