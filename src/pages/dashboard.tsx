@@ -37,7 +37,8 @@ export default function DashboardPage() {
 
     // Clean-up function สำหรับ unsubscribe listener เมื่อ component ถูก unmount
     return () => {
-      authListener?.unsubscribe();
+      // **แก้ไขตรงนี้:** เรียก unsubscribe บน object 'subscription'
+      authListener?.subscription?.unsubscribe(); 
     };
   }, [router, supabase]); // dependencies ของ useEffect
 
