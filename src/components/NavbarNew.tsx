@@ -19,7 +19,10 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
-  const [userProfileDropdownOpen, setUserProfileDropdownOpen] = useState(false); // สถานะสำหรับเมนูดรอปดาวน์โปรไฟล์ผู้ใช้
+  // userProfileDropdownOpen state ไม่จำเป็นสำหรับ desktop hover แล้ว แต่ยังคงใช้สำหรับ mobile ถ้ามีการทำ dropdown ย่อยบน mobile
+  // ในที่นี้ mobile settings เป็นรายการตรงๆ จึงไม่จำเป็นต้องใช้ state นี้แล้ว
+  // const [userProfileDropdownOpen, setUserProfileDropdownOpen] = useState(false);
+
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,24 +40,22 @@ export default function Navbar() {
     }
   }, [searchOpen]);
 
-  // Effect สำหรับปิดเมนูดรอปดาวน์เมื่อคลิกนอกพื้นที่ (สำหรับ desktop)
+  // Effect สำหรับปิดเมนูดรอปดาวน์เมื่อคลิกนอกพื้นที่ (สำหรับ Shop Dropdown บน desktop)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // ตรวจสอบว่าคลิกนอก Shop Dropdown หรือไม่
       if (shopDropdownOpen && !(event.target as HTMLElement).closest(".group")) {
         setShopDropdownOpen(false);
       }
-      // ตรวจสอบว่าคลิกนอก User Profile Dropdown หรือไม่
-      if (userProfileDropdownOpen && !(event.target as HTMLElement).closest(".user-profile-dropdown-container")) {
-        setUserProfileDropdownOpen(false);
-      }
+      // เนื่องจาก User Profile Dropdown บน desktop ใช้ hover และ Mobile Settings เป็นรายการตรงๆ
+      // จึงไม่จำเป็นต้องมี logic สำหรับ userProfileDropdownOpen ใน handleClickOutside แล้ว
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [shopDropdownOpen, userProfileDropdownOpen]);
+  }, [shopDropdownOpen]);
 
 
   // ฟังก์ชันสำหรับเปิด/ปิด UI ต่างๆ
@@ -62,10 +63,10 @@ export default function Navbar() {
     setMobileMenuOpen(!mobileMenuOpen);
     // ปิด dropdown อื่นๆ เมื่อเปิด/ปิด mobile menu
     setShopDropdownOpen(false);
-    setUserProfileDropdownOpen(false);
   };
   const toggleShopDropdown = () => setShopDropdownOpen(!shopDropdownOpen);
-  const toggleUserProfileDropdown = () => setUserProfileDropdownOpen(!userProfileDropdownOpen);
+  // toggleUserProfileDropdown function ไม่จำเป็นสำหรับ desktop hover แล้ว
+  // const toggleUserProfileDropdown = () => setUserProfileDropdownOpen(!userProfileDropdownOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
   
   // Handlers สำหรับ Login และ Logout โดยใช้ NextAuth
@@ -188,10 +189,10 @@ export default function Navbar() {
                   </a>
                 </Link>
               ) : (
-                // เมนูดรอปดาวน์โปรไฟล์ผู้ใช้สำหรับ Desktop
-                <div className="relative user-profile-dropdown-container">
+                // เมนูดรอปดาวน์โปรไฟล์ผู้ใช้สำหรับ Desktop (เปิดเมื่อ hover)
+                <div className="relative group user-profile-dropdown-container"> {/* เพิ่ม class 'group' ที่นี่ */}
                   <button
-                    onClick={toggleUserProfileDropdown}
+                    // onClick={toggleUserProfileDropdown} // ลบ onClick ออกเพื่อใช้ hover แทน
                     aria-label="User Profile"
                     className="text-white hover:text-primary focus:outline-none flex items-center space-x-1"
                     title="โปรไฟล์ผู้ใช้"
@@ -200,45 +201,42 @@ export default function Navbar() {
                     <FiUser size={20} />
                     <FiChevronDown className="ml-1" />
                   </button>
-                  {userProfileDropdownOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
-                      <ul>
-                        {/* ลิงก์ไปยังหน้า Settings/Profile สำหรับทุก Role */}
+                  {/* Dropdown Content (แสดงเมื่อ group-hover) */}
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <ul>
+                      {/* ลิงก์ไปยังหน้า Settings/Profile สำหรับทุก Role */}
+                      <li>
+                        {/* ไม่ต้องใช้ onClick เพื่อปิด dropdown เพราะ hover จะจัดการเอง */}
+                        <Link href="/settings">
+                          <a className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
+                            <FiSettings size={18} />
+                            <span>ตั้งค่าโปรไฟล์</span>
+                          </a>
+                        </Link>
+                      </li>
+                      {/* "เปลี่ยน Role เป็นร้านค้า" สำหรับ User Role เท่านั้น */}
+                      {role === "user" && (
                         <li>
-                          <Link href="/settings">
-                            <a onClick={() => setUserProfileDropdownOpen(false)} className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
-                              <FiSettings size={18} />
-                              <span>ตั้งค่าโปรไฟล์</span>
+                          <Link href="/register-shop"> {/* สมมติว่ามีหน้าสำหรับลงทะเบียนร้านค้า */}
+                            <a className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
+                              <FiUser size={18} /> {/* อาจใช้ไอคอนอื่นที่สื่อถึงร้านค้าได้ */}
+                              <span>เป็นร้านค้า</span>
                             </a>
                           </Link>
                         </li>
-                        {/* "เปลี่ยน Role เป็นร้านค้า" สำหรับ User Role เท่านั้น */}
-                        {role === "user" && (
-                          <li>
-                            <Link href="/register-shop"> {/* สมมติว่ามีหน้าสำหรับลงทะเบียนร้านค้า */}
-                              <a onClick={() => setUserProfileDropdownOpen(false)} className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
-                                <FiUser size={18} /> {/* อาจใช้ไอคอนอื่นที่สื่อถึงร้านค้าได้ */}
-                                <span>เป็นร้านค้า</span>
-                              </a>
-                            </Link>
-                          </li>
-                        )}
-                        {/* ปุ่ม Logout */}
-                        <li>
-                          <button
-                            onClick={() => {
-                              setUserProfileDropdownOpen(false);
-                              handleLogout();
-                            }}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2 border-t border-gray-200"
-                          >
-                            <FiLogOut size={18} />
-                            <span>ออกจากระบบ</span>
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                      )}
+                      {/* ปุ่ม Logout */}
+                      <li>
+                        <button
+                          onClick={handleLogout} // ใช้ handleLogout โดยตรง
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2 border-t border-gray-200"
+                        >
+                          <FiLogOut size={18} />
+                          <span>ออกจากระบบ</span>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
