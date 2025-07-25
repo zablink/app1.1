@@ -61,6 +61,8 @@ export const authOptions: NextAuthOptions = {
               email: data.user.email,
               name: data.user.user_metadata?.full_name || data.user.email, // ปรับตาม user_metadata ของคุณ
               image: data.user.user_metadata?.avatar_url || null, // ปรับตาม user_metadata ของคุณ
+              role: "user", // กำหนดค่าเริ่มต้นเพื่อให้ตรงตาม Type
+              membership_type: "free", // กำหนดค่าเริ่มต้นเพื่อให้ตรงตาม Type
             };
           } else {
             console.warn("Supabase signInWithPassword returned no user data (in CredentialsProvider).");
