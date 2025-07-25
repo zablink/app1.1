@@ -1,39 +1,83 @@
 // pages/api/send-otp.ts
-import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
+import { createClient } from '@/lib/supabase';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!);
+// ตั้งค่า Nodemailer transporter (ควรใช้บริการส่งอีเมลจริงใน Production)
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST, // เช่น smtp.gmail.com
+  port: parseInt(process.env.EMAIL_PORT || '587'), // เช่น 587 หรือ 465
+  secure: process.env.EMAIL_SECURE === 'true', // true สำหรับ 465, false สำหรับ 587
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'Missing email' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  }
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // สร้าง OTP 6 หลัก
+  const { email, otp, userId } = req.body; // รับ userId มาด้วย
 
-  // บันทึก OTP ลง Supabase
-  await supabase.from('otps').insert({
-    email,
-    otp,
-    expires_at: new Date(Date.now() + 5 * 60 * 1000) // หมดอายุใน 5 นาที
-  });
+  if (!email || !otp || !userId) {
+    return res.status(400).json({ message: 'Email, OTP, and UserId are required.' });
+  }
 
-  // ส่งอีเมล
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_SENDER,
-      pass: process.env.EMAIL_PASSWORD
+  const supabase = createClient();
+
+  try {
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // OTP หมดอายุใน 5 นาที, แปลงเป็น ISO String
+
+    // **บันทึกหรืออัปเดต OTP ลงในฐานข้อมูล Supabase**
+    // 1. ตรวจสอบว่ามี OTP ที่ยังไม่ถูกใช้สำหรับ user นี้อยู่หรือไม่
+    const { data: existingActiveOtp, error: fetchError } = await supabase
+      .from('otp_codes')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_used', false)
+      .maybeSingle(); // ใช้ maybeSingle เพราะอาจจะไม่มี
+
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 คือ Record not found
+      throw fetchError;
     }
-  });
 
-  await transporter.sendMail({
-    from: `"MyApp" <${process.env.EMAIL_SENDER}>`,
-    to: email,
-    subject: 'รหัส OTP ของคุณ',
-    text: `รหัส OTP ของคุณคือ: ${otp}`,
-    html: `<p>รหัส OTP ของคุณคือ: <strong>${otp}</strong></p>`
-  });
+    if (existingActiveOtp) {
+      // หากมี OTP ที่ยังไม่ถูกใช้ ให้ตั้งค่าเป็นใช้แล้ว (หมดอายุ) ก่อนสร้างใหม่
+      const { error: updateOldOtpError } = await supabase
+        .from('otp_codes')
+        .update({ is_used: true })
+        .eq('id', existingActiveOtp.id);
 
-  res.status(200).json({ success: true });
+      if (updateOldOtpError) throw updateOldOtpError;
+    }
+
+    // 2. แทรก OTP ใหม่
+    const { error: insertError } = await supabase
+      .from('otp_codes')
+      .insert([{ user_id: userId, email, otp_code: otp, expires_at: expiresAt }]);
+
+    if (insertError) throw insertError;
+
+    // 3. ส่งอีเมล
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'รหัส OTP สำหรับการยืนยันบัญชีของคุณ',
+      html: `
+        <p>สวัสดีครับ/ค่ะ</p>
+        <p>รหัส OTP ของคุณคือ: <strong>${otp}</strong></p>
+        <p>รหัสนี้จะหมดอายุใน 5 นาที</p>
+        <p>หากคุณไม่ได้ร้องขอรหัสนี้ โปรดละเว้นอีเมลนี้</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'OTP sent and saved successfully.' });
+  } catch (error: any) {
+    console.error('Error sending OTP or saving to DB:', error.message);
+    res.status(500).json({ message: 'Failed to send OTP.', error: error.message });
+  }
 }
