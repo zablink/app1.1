@@ -1,8 +1,9 @@
-// /src/pages/admin/dashboard.tsx (หรืออาจจะรวมใน /src/pages/settings.tsx แล้วแสดงตาม role)
+// /src/pages/admin/settings.tsx (หรืออาจจะรวมใน /src/pages/settings.tsx แล้วแสดงตาม role)
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiStore, FiDollarSign, FiBarChart } from 'react-icons/fi';
+// แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag
+import { FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiShoppingBag, FiDollarSign, FiBarChart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export default function AdminSettingsPage() {
@@ -302,7 +303,7 @@ export default function AdminSettingsPage() {
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center justify-center p-4 bg-blue-100 text-blue-800 rounded-md shadow hover:bg-blue-200 transition-colors"
               >
-                <FiStore className="mr-2" /> จัดการร้านค้า
+                <FiShoppingBag className="mr-2" /> จัดการร้านค้า
               </motion.a>
             </Link>
             <Link href="/admin/ads">
