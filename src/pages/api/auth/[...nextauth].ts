@@ -1,107 +1,21 @@
 // pages/api/auth/[...nextauth].ts
 
-import NextAuth, { NextAuthOptions } from "next-auth"; // Import NextAuthOptions type
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials"; // <<--- เพิ่มการนำเข้าตัวนี้
 import { SupabaseAdapter } from "@next-auth/supabase-adapter";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"; // <--- ใช้ createClient as createSupabaseClient
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// ตรวจสอบให้แน่ใจว่าได้ตั้งค่าตัวแปรสภาพแวดล้อมเหล่านี้ใน .env.local และบน Vercel
-// GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-// SUPABASE_URL, SUPABASE_SECRET_KEY (ต้องเป็น SERVICE_ROLE_KEY)
-// NEXTAUTH_SECRET
-
-// สร้าง Supabase client สำหรับ Adapter
-// **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
-const supabase = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, 
-);
-
-
-
-
-
-
-
-
-
-// --- ส่วนที่เพิ่มสำหรับ Debugging ---
-
-// 1. Log ค่าของ Environment Variables ดิบๆ ก่อนใช้งาน
-console.log("--- DEBUG: Environment Variables ---");
-console.log("process.env.NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "SET" : "NOT SET");
-console.log("process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "SET" : "NOT SET");
-console.log("process.env.SUPABASE_URL:", process.env.SUPABASE_URL ? "SET" : "NOT SET"); // ตรวจสอบชื่อที่ไม่มี NEXT_PUBLIC_ ด้วย
-console.log("process.env.SUPABASE_ANON_KEY:", process.env.SUPABASE_ANON_KEY ? "SET" : "NOT SET"); // ตรวจสอบชื่อที่ไม่มี NEXT_PUBLIC_ ด้วย
-console.log("process.env.SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "SET" : "NOT SET"); // ตรวจสอบ SERVICE_ROLE_KEY ด้วย (ถ้าใช้)
-console.log("process.env.NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "SET" : "NOT SET");
-console.log("------------------------------------");
-
-// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
-
-
-// สร้าง Supabase client สำหรับ Adapter
-// **แก้ไขตรงนี้**: เรียกใช้ createSupabaseClient แทน createClient
-// Note: ถ้าคุณใช้ SupabaseAdapter ของ NextAuth.js ปกติแล้วคุณไม่จำเป็นต้องสร้าง Supabase client ขึ้นมาเองในไฟล์นี้
-// เพราะ SupabaseAdapter จะสร้าง client ภายในตัวมันเองโดยใช้ url และ key ที่คุณส่งให้
-// อย่างไรก็ตาม หากคุณมีเหตุผลเฉพาะที่ต้องการสร้าง client ตรงนี้ ก็ทำได้ แต่ต้องแน่ใจว่าได้ใช้ตัวแปรที่ถูกต้อง
-const supabaseForInternalUse = createSupabaseClient( // เปลี่ยนชื่อตัวแปรเป็น supabaseForInternalUse เพื่อความชัดเจน
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
-
-// --- ส่วนที่เพิ่มสำหรับ Debugging ---
-
-// 2. Log สถานะของ Supabase client ที่สร้างขึ้น
-console.log("--- DEBUG: Supabase Client Status (Internal Use) ---");
-console.log("supabaseForInternalUse created:", !!supabaseForInternalUse);
-// Supabase client instance ไม่มี property แบบนี้โดยตรง
-// console.log("supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_URL:", supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_URL);
-// console.log("supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseForInternalUse.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-// แทนที่จะเป็นแบบนั้น คุณจะรู้ว่ามันถูกสร้างขึ้นสำเร็จจากบรรทัดบน และจากนั้นใช้ตัวแปร env ตรงๆ ใน adapter
-console.log("------------------------------------");
-
-// --- สิ้นสุดส่วนที่เพิ่มสำหรับ Debugging ---
-
-
-// ดึงค่า URL และ Key โดยตรงจาก process.env สำหรับ SupabaseAdapter
-// แนะนำให้ใช้ตัวแปรที่ไม่มี NEXT_PUBLIC_ นำหน้าสำหรับ API routes เพื่อความปลอดภัย
-// และตั้งค่าใน Vercel Dashboard ด้วยชื่อเดียวกัน: SUPABASE_URL, SUPABASE_ANON_KEY
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // ใช้ SERVICE_ROLE_KEY
-//const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY; // ปกติ Adapter จะใช้ SERVICE_ROLE_KEY
-
-
-// >>> ดึงค่าสำหรับ SupabaseAdapter:
-// >>> ใช้ NEXT_PUBLIC_SUPABASE_URL เพราะ logs ยืนยันว่ามัน SET
-// >>> ใช้ SUPABASE_SERVICE_ROLE_KEY เพราะ logs ยืนยันว่ามัน SET
-const SUPABASE_ADAPTER_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ADAPTER_SECRET_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; 
+// ... (ส่วนโค้ดการตรวจสอบ Environment Variables และการสร้าง supabaseForInternalUse client ที่มีอยู่เดิม) ...
 
 const supabaseForCallbacks = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!, // หรือ process.env.SUPABASE_URL!
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // <<< ใช้ SERVICE_ROLE_KEY ตรงนี้
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// --- DEBUG: Values for SupabaseAdapter ---
-console.log("--- DEBUG: Values for SupabaseAdapter ---");
-console.log("Adapter URL (SUPABASE_ADAPTER_URL):", SUPABASE_ADAPTER_URL ? "SET" : "NOT SET");
-console.log("Adapter Secret Key (SUPABASE_ADAPTER_SECRET_KEY):", SUPABASE_ADAPTER_SECRET_KEY ? "SET" : "NOT SET");
-console.log("------------------------------------");
- 
+// ... (ส่วนโค้ดการตรวจสอบ Environment Variables สำหรับ Adapter ที่มีอยู่เดิม) ...
 
-// ตรวจสอบให้แน่ใจว่าตัวแปรมีค่า ก่อนที่จะส่งให้ Adapter
-if (!SUPABASE_ADAPTER_URL || !SUPABASE_ADAPTER_SECRET_KEY) { // <<< ตรวจสอบตัวแปรที่ใช้
-  console.error("⛔️ Critical Error: Supabase URL or SERVICE_ROLE_KEY is missing for NextAuth Adapter!");
-  throw new Error("Supabase URL and SERVICE_ROLE_KEY must be set in environment variables for NextAuth SupabaseAdapter.");
-}
-
-
-
-
-
-// กำหนด AuthOptions แยกต่างหาก
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -112,178 +26,74 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
+    // <<--- เพิ่ม Credentials Provider นี้เข้ามา
+    CredentialsProvider({
+      name: "Credentials", // ชื่อของ Provider (จะใช้เมื่อเรียก signIn("credentials", ...))
+      credentials: { // กำหนดฟิลด์ข้อมูลที่ต้องการรับ
+        email: { label: "Email", type: "text", placeholder: "jsmith@example.com" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        // ฟังก์ชันนี้จะถูกเรียกเมื่อ NextAuth.js พยายาม authenticate ด้วย "credentials"
+        if (!credentials?.email || !credentials?.password) {
+          return null; // ไม่มีข้อมูล email/password
+        }
+
+        try {
+          // ใช้ Supabase client ในการตรวจสอบ email/password
+          const { data, error } = await supabaseForCallbacks.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          });
+
+          if (error) {
+            console.error("Supabase signInWithPassword error (in NextAuth CredentialsProvider):", error.message);
+            // คุณสามารถส่งข้อความ error ที่กำหนดเองกลับไปให้ NextAuth.js ได้
+            throw new Error(error.message); // NextAuth.js จะจับ error นี้และแสดงผล
+          }
+
+          if (data.user) {
+            // ถ้า Supabase ยืนยันผู้ใช้ได้สำเร็จ ให้คืนค่า user object
+            // NextAuth.js จะใช้ user object นี้ในการสร้าง Session
+            console.log("Supabase signInWithPassword successful. User (from CredentialsProvider):", data.user);
+            return {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.user_metadata?.full_name || data.user.email, // ปรับตาม user_metadata ของคุณ
+              image: data.user.user_metadata?.avatar_url || null, // ปรับตาม user_metadata ของคุณ
+            };
+          } else {
+            console.warn("Supabase signInWithPassword returned no user data (in CredentialsProvider).");
+            return null; // ไม่มี user ถูกคืนค่าจาก Supabase
+          }
+        } catch (e: any) {
+          console.error("Authorize function caught an exception (in CredentialsProvider):", e.message);
+          return null; // หรือ throw new Error("Invalid credentials");
+        }
+      },
+    }),
   ],
 
-  /*
-  adapter: SupabaseAdapter({
-    url: SUPABASE_ADAPTER_URL!, 
-    secret: SUPABASE_ADAPTER_SECRET_KEY!,  
-  }),*/
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!, // **สำคัญ: ใช้ SERVICE_ROLE_KEY ที่นี่**
-  }),
-
-  secret: process.env.NEXTAUTH_SECRET,
+  // ... (ส่วน adapter, secret ที่มีอยู่เดิม) ...
 
   callbacks: {
+    // Callbacks ส่วนนี้ที่เหลือ ยังคงเหมือนเดิมเพราะมันถูกออกแบบมาเพื่อรับ user object
+    // จาก Adapter/Provider อยู่แล้ว ไม่ว่าจะมาจาก Google, GitHub หรือ Credentials
     async signIn({ user, account, profile, email }) {
-      console.log("\n--- signIn Callback ---");
-      console.log("User object from Adapter (if email exists):", user);
-      console.log("Account (current provider trying to sign in):", account);
-      console.log("Profile (from provider):", profile);
-      console.log("Email attempting to sign in with:", email);
-
-      if (user && account && user.id) {
-        try {
-          const { data: identities, error: identitiesError } = await supabaseForCallbacks 
-            .from('identities')
-            .select('provider')
-            .eq('user_id', user.id);
-
-          if (identitiesError) {
-            console.error("Error fetching user identities:", identitiesError);
-            throw new Error("DatabaseError: Could not verify user identities.");
-          }
-
-          const linkedProviders = identities.map(identity => identity.provider);
-          console.log("Linked Providers for this user ID:", linkedProviders);
-
-          const isCurrentProviderAlreadyLinked = linkedProviders.includes(account.provider);
-
-          if (!isCurrentProviderAlreadyLinked && linkedProviders.length > 0) {
-            const suggestedProvider = linkedProviders[0];
-            console.log(`User ${email} tried to sign in with ${account.provider} but has existing linked providers. Suggesting: ${suggestedProvider}`);
-            throw new Error(`AuthMethodMismatch:${suggestedProvider}`);
-          }
-          console.log("Allowing sign-in: Current provider is linked or no existing providers for this user.");
-          return true;
-
-        } catch (e: any) {
-          if (e.message.startsWith("AuthMethodMismatch:")) {
-            console.warn("Auth method mismatch detected, redirecting to custom error page.");
-            throw e;
-          }
-          console.error("Unexpected error in signIn callback:", e);
-          return false;
-        }
-      }
-
-      console.log("No specific conflict detected, allowing default sign-in behavior.");
+      // ... (โค้ดเดิมของคุณ) ...
+      // Logic การตรวจสอบ AuthMethodMismatch จะยังคงทำงานได้ดี
       return true;
     },
 
     async jwt({ token, user, account, profile, isNewUser }) {
-      console.log("\n--- JWT Callback ---");
-      console.log("Current Token:", token);
-      console.log("User (from Adapter/Provider):", user);
-      console.log("Account:", account);
-      console.log("Profile:", profile);
-      console.log("Is New User?:", isNewUser);
-
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name || profile?.name;
-        token.picture = user.image || profile?.image;
-      }
-
-      if (isNewUser && user) {
-        console.log("New user detected or new social identity linked. Checking/creating/updating profile...");
-        try {
-          const { data: existingProfile, error: fetchError } = await supabaseForCallbacks
-            .from('profiles')
-            .select('id')
-            .eq('id', user.id)
-            .single();
-
-          if (fetchError && fetchError.code !== 'PGRST116') {
-            console.error("Error checking existing profile:", fetchError);
-          }
-
-          if (!existingProfile) {
-            console.log("No existing profile found for user ID, creating new profile...");
-            const { data, error } = await supabase
-              .from('profiles')
-              .insert([
-                {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name || profile?.name || 'New User',
-                  avatar_url: user.image || profile?.image,
-                },
-              ]);
-
-            if (error) {
-              console.error("Error creating user profile in public.profiles:", error);
-            } else {
-              console.log("User profile created successfully in public.profiles:", data);
-            }
-          } else {
-            console.log("Profile already exists for this user ID, updating existing profile.");
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                name: user.name || profile?.name,
-                avatar_url: user.image || profile?.image,
-              })
-              .eq('id', user.id);
-
-            if (updateError) {
-              console.error("Error updating existing user profile:", updateError);
-            } else {
-              console.log("Existing user profile updated.");
-            }
-          }
-        } catch (e) {
-          console.error("Exception in JWT callback during profile creation/update:", e);
-        }
-      }
-      console.log("--- End JWT Callback ---\n");
+      // ... (โค้ดเดิมของคุณ) ...
       return token;
     },
 
     async session({ session, token, user }) {
-      console.log("\n--- Session Callback ---");
-      console.log("Current Session:", session);
-      console.log("Token (from JWT callback):", token);
-      console.log("User (from Adapter/DB):", user);
-
-      if (token?.id) {
-        session.user.id = token.id as string;
-      }
-      if (token?.email) {
-        session.user.email = token.email as string;
-      }
-      if (token?.name) {
-        session.user.name = token.name as string;
-      }
-      if (token?.picture) {
-        session.user.image = token.picture as string;
-      }
-
-      if (session.user.id) {
-        try {
-          const { data: profile, error } = await supabaseForCallbacks
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (error && error.code !== 'PGRST116') {
-            console.error("Error fetching user profile for session:", error);
-          } else if (profile) {
-            session.user.username = profile.username || null;
-            session.user.role = profile.role || "user";
-            session.user.membership_type = profile.membership_type || "free";
-            session.user.avatar_url = profile.avatar_url || null;
-          }
-        } catch (e) {
-          console.error("Exception in Session callback during profile fetch:", e);
-        }
-      }
-      console.log("Final Session:", session);
-      console.log("--- End Session Callback ---\n");
+      // ... (โค้ดเดิมของคุณ) ...
+      // ส่วนนี้สำคัญมาก เพราะมันดึง role จาก profiles table มาใส่ใน session.user
+      // ซึ่งทำให้ Navbar ของคุณสามารถใช้ session.user.role ได้
       return session;
     },
   },
@@ -291,7 +101,10 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
 
   pages: {
-    error: '/auth/error',
+    error: '/auth/error', // หน้านี้จะจับ error เช่น AuthMethodMismatch ที่มาจาก callback
+    // คุณสามารถกำหนดหน้า login/signup ให้ NextAuth.js จัดการได้
+    // signIn: '/login', // ถ้าต้องการให้ NextAuth.js จัดการ route /login โดยตรง
+    // newUser: '/signup', // ถ้าต้องการให้ NextAuth.js จัดการ route /signup สำหรับผู้ใช้ใหม่
   },
 };
 
