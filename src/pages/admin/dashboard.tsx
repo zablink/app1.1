@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 // แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag
-import { FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiShoppingBag, FiDollarSign, FiBarChart, FiUpload } from 'react-icons/fi';
+import { FiStore, FiUser, FiMail, FiLock, FiSettings, FiSave, FiEdit, FiUsers, FiShoppingBag, FiDollarSign, FiBarChart, FiUpload } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export default function AdminSettingsPage() {
