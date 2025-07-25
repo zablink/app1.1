@@ -32,17 +32,18 @@ export default function SignupPage() {
     }
 
     // 3. Perform signup with Supabase
-    // Supabase will automatically send a confirmation email with a link
+    // เมื่อ "Enable Email Confirmations" ถูกปิดใน Supabase Dashboard
+    // ผู้ใช้จะถูกยืนยันอีเมลโดยอัตโนมัติและพร้อมใช้งานทันที
     const { data, error: signupError } = await supabase.auth.signUp({ email, password });
 
     if (signupError) {
       console.error("Signup error:", signupError.message);
       setError(signupError.message); // Display error from Supabase
     } else {
-      // Signup was successful. Supabase has sent the verification email.
-      // We navigate the user to a page instructing them to check their email.
-      alert("สมัครสมาชิกสำเร็จ! โปรดตรวจสอบอีเมลของคุณเพื่อยืนยันบัญชี");
-      router.push(`/check-email?email=${encodeURIComponent(email)}`); // Navigate to a "check email" page
+      // Signup was successful. User is now active.
+      alert("สมัครสมาชิกสำเร็จ! คุณสามารถเข้าสู่ระบบได้ทันที");
+      router.push("/login"); // Navigate directly to the login page
+      // หรือ router.push("/"); ถ้าต้องการไปหน้าแรก
     }
     setLoading(false);
   };
