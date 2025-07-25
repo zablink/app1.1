@@ -10,8 +10,10 @@ const categories = ["อาหารญี่ปุ่น", "ชานมไข�
 
 export default function Navbar() {
   const { data: session } = useSession();
+  // isLoggedIn เป็นจริงถ้ามี session
   const isLoggedIn = !!session;
-  const role = session?.user?.role || "user"; // default to user if undefined
+  // ดึง role จาก session, ถ้าไม่มีจะใช้ "user" เป็นค่าเริ่มต้น
+  const role = session?.user?.role || "user"; 
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,39 +21,46 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Effect สำหรับจัดการพฤติกรรมการเลื่อนหน้าจอ
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Effect สำหรับโฟกัสช่องค้นหาเมื่อเปิด
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
 
+  // ฟังก์ชันสำหรับเปิด/ปิด UI ต่างๆ
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const toggleShopDropdown = () => setShopDropdownOpen(!shopDropdownOpen);
   const toggleSearch = () => setSearchOpen(!searchOpen);
-  const handleLogin = () => signIn("google", { callbackUrl: window.location.href || "/" });
-  const handleLogout = () => signOut();
+  
+  // Handlers สำหรับ Login และ Logout โดยใช้ NextAuth
+  // callbackUrl เป็นสิ่งสำคัญสำหรับกำหนดหน้าที่จะถูก Redirect ไปหลัง Login สำเร็จ
+  const handleLogin = () => signIn("google", { callbackUrl: "/" }); // Login ด้วย Google แล้ว Redirect ไปหน้าแรก
+  const handleLogout = () => signOut({ callbackUrl: "/" }); // Logout แล้ว Redirect ไปหน้าแรก
 
-  const renderRoleMenus = (role: string, isMobile = false, onClick?: () => void) => {
-    console.log('in function renderRoleMenus');
+  // ฟังก์ชันสำหรับแสดงเมนูตามบทบาทของผู้ใช้
+  const renderRoleMenus = (userRole: string, isMobile = false, onClick?: () => void) => {
     const baseClass = isMobile
       ? "block px-3 py-2 hover:bg-gray-700 rounded"
       : "text-white hover:text-primary";
 
-    const wrap = (href: string, text: string) => (
+    const wrap = (href: string, text: string, icon?: React.ReactNode) => (
       <Link href={href} key={href}>
-        <a onClick={onClick} className={baseClass}>{text}</a>
+        <a onClick={onClick} className={`${baseClass} flex items-center space-x-2`}>
+            {icon && icon}
+            <span>{text}</span>
+        </a>
       </Link>
     );
 
-    console.log(`Role: ${role}`);
-
-    if (role === "shop") {
+    if (userRole === "shop") {
       return (
         <>
           {wrap("/dashboard/shop", "จัดการร้าน")}
@@ -62,10 +71,10 @@ export default function Navbar() {
       );
     }
 
-    if (role === "admin") {
+    if (userRole === "admin") {
       return (
         <>
-          {wrap("/admin/shops", "จัดการร้านค้า(s)")}
+          {wrap("/admin/shops", "จัดการร้านค้า")}
           {wrap("/admin/users", "จัดการผู้ใช้")}
           {wrap("/admin/promotions", "จัดการโปรโมชั่น")}
           {wrap("/admin/ads", "จัดการโฆษณา")}
@@ -74,6 +83,7 @@ export default function Navbar() {
       );
     }
 
+    // ไม่มีเมนูเฉพาะบทบาทสำหรับ 'user' หรือบทบาทอื่นๆ
     return null;
   };
 
@@ -96,7 +106,9 @@ export default function Navbar() {
               </a>
             </Link>
 
+            {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center space-x-6">
+              {/* Shop Dropdown */}
               <div className="relative group">
                 <div className="inline-flex items-center text-white hover:text-primary cursor-pointer">
                   <span>ร้านค้า</span>
@@ -115,6 +127,7 @@ export default function Navbar() {
                 </div>
               </div>
 
+              {/* Static Links */}
               <Link href="/about">
                 <a className="text-white hover:text-primary">About</a>
               </Link>
@@ -122,38 +135,40 @@ export default function Navbar() {
                 <a className="text-white hover:text-primary">Contact</a>
               </Link>
 
-              {renderRoleMenus(role)}
+              {/* Role-based Menus (แสดงเฉพาะเมื่อล็อกอินแล้ว) */}
+              {isLoggedIn && renderRoleMenus(role)}
 
+              {/* Search Button */}
               <button onClick={toggleSearch} aria-label="Search" className="text-white hover:text-primary focus:outline-none">
                 <FiSearch size={20} />
               </button>
 
+              {/* Login/Logout/Settings ตามสถานะการล็อกอิน */}
               {!isLoggedIn ? (
-                // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
-                <Link  href="/login">
-                  <button
-                    //onClick={handleLogin}
+                // ปุ่ม Login สำหรับ Desktop
+                <Link href="/login">
+                  <a // ใช้ <a> แทน <button> ภายใน Link เพื่อความถูกต้องของ Semantic HTML
                     aria-label="Login"
                     className="text-white hover:text-primary focus:outline-none font-medium px-2"
                     title="Login"
                   >
                     Login
-                  </button>
+                  </a>
                 </Link>
               ) : (
                 <>
-                  {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings) */}
-                  <Link href="/dashboard">
+                  {/* ไอคอน/ลิงก์ Settings สำหรับ Desktop (สำหรับผู้ใช้ที่ล็อกอินแล้ว) */}
+                  <Link href="/settings"> {/* เปลี่ยนจาก /dashboard เป็น /settings */}
                     <a
-                      aria-label="Dashboard"
-                      className="text-white hover:text-primary focus:outline-none font-medium flex items-center space-x-1" // เพิ่ม flex และ space-x-1 เพื่อจัดไอคอนและข้อความ
-                      title="Dashboard"
+                      aria-label="Settings"
+                      className="text-white hover:text-primary focus:outline-none font-medium flex items-center space-x-1"
+                      title="Settings"
                     >
-                      <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
+                      <FiSettings size={20} />
                     </a>
                   </Link>
 
-                  {/* ปุ่ม Logout (เปลี่ยนเป็น FiLogOut สำหรับ Desktop) */}
+                  {/* ปุ่ม Logout สำหรับ Desktop */}
                   <button
                     onClick={handleLogout}
                     aria-label="Logout"
@@ -166,6 +181,7 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Mobile Navigation Toggle */}
             <div className="sm:hidden flex items-center space-x-3">
               <button onClick={toggleSearch} aria-label="Search" className="text-white hover:text-primary focus:outline-none">
                 <FiSearch size={24} />
@@ -177,9 +193,11 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-black bg-opacity-90 backdrop-blur-md shadow-lg">
             <ul className="flex flex-col space-y-1 p-4 text-white">
+              {/* Mobile Shop Dropdown */}
               <li>
                 <button onClick={toggleShopDropdown} className="flex justify-between w-full items-center px-3 py-2 hover:bg-gray-700 rounded">
                   <span>ร้านค้า</span>
@@ -199,6 +217,7 @@ export default function Navbar() {
                   </ul>
                 )}
               </li>
+              {/* Mobile Static Links */}
               <li>
                 <Link href="/about">
                   <a onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 hover:bg-gray-700 rounded">
@@ -214,32 +233,36 @@ export default function Navbar() {
                 </Link>
               </li>
 
-              {renderRoleMenus(role, true, () => setMobileMenuOpen(false))}
+              {/* Mobile Role-based Menus (แสดงเฉพาะเมื่อล็อกอินแล้ว) */}
+              {isLoggedIn && renderRoleMenus(role, true, () => setMobileMenuOpen(false))}
 
+              {/* Mobile Login/Logout/Settings ตามสถานะการล็อกอิน */}
               <li className="border-t border-gray-700 pt-2">
                 {!isLoggedIn ? (
-                  // ปุ่ม Login (ยังคงเป็นข้อความตามที่คุณต้องการ)
-                  <Link  href="/login">
-                    <button
-                      //onClick={() => { setMobileMenuOpen(false); handleLogin(); }}
+                  // Mobile Login Button
+                  <Link href="/login">
+                    <a // ใช้ <a> แทน <button> ภายใน Link
+                      onClick={() => setMobileMenuOpen(false)}
                       className="px-3 py-2 hover:bg-gray-700 rounded w-full text-left">
                       Login
-                    </button>
+                    </a>
                   </Link>
                 ) : (
                   <>
-                    {/* ลิงก์ Dashboard (เปลี่ยนเป็น FiSettings สำหรับ Mobile) */}
-                    <Link href="/dashboard">
+                    {/* Mobile Settings Link */}
+                    <Link href="/settings"> {/* เปลี่ยนจาก /dashboard เป็น /settings */}
                       <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
-                        <FiSettings size={20} /> {/* เพิ่ม FiSettings */}
+                        <FiSettings size={20} />
+                        <span>Settings</span> {/* เพิ่มข้อความเพื่อให้ชัดเจนบน Mobile */}
                       </a>
                     </Link>
-                    {/* ปุ่ม Logout (เปลี่ยนเป็น FiLogOut สำหรับ Mobile) */}
+                    {/* Mobile Logout Button */}
                     <button
                       onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
-                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left" // เพิ่ม flex และ space-x-2
+                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded w-full mt-1 text-left"
                     >
-                      <FiLogOut size={20} /> {/* เพิ่ม FiLogOut */}
+                      <FiLogOut size={20} />
+                      <span>Logout</span> {/* เพิ่มข้อความเพื่อให้ชัดเจนบน Mobile */}
                     </button>
                   </>
                 )}
@@ -248,6 +271,7 @@ export default function Navbar() {
           </div>
         )}
 
+        {/* Search Overlay */}
         {searchOpen && (
           <div onClick={() => setSearchOpen(false)} className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50">
             <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-md p-4 w-11/12 max-w-md">
