@@ -134,7 +134,7 @@ export default function HomePage() {
         </div>
       </div>
     </Layout>
-  ); s
+  ); 
 }
 
 // ✅ fallback ร้านตัวอย่าง
