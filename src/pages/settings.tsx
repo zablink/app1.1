@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSession, signOut } from 'next-auth/react'; // ใช้ useSession สำหรับหน้า settings
 
+import Layout from "@/components/Layout";
+
 export default function SettingsPage() {
   const { data: session, status } = useSession(); // ดึง session และสถานะการโหลด
   const router = useRouter();
@@ -36,18 +38,20 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 text-center">
-      <h1 className="text-2xl font-bold mb-4">การตั้งค่าผู้ใช้</h1>
-      <p>ยินดีต้อนรับ, {session.user?.email}!</p>
-      {/* เพิ่มฟอร์มและตัวเลือกการตั้งค่าของคุณที่นี่ */}
-      <p className="mt-4">คุณสามารถจัดการโปรไฟล์และการตั้งค่าของคุณได้ที่นี่</p>
-      <button
-        className="bg-red-500 text-white px-4 py-2 rounded mt-6"
-        onClick={handleLogout}
-        disabled={loading}
-      >
-        ออกจากระบบ
-      </button>
-    </div>
+    <Layout>
+      <div className="max-w-md mx-auto mt-20 text-center">
+        <h1 className="text-2xl font-bold mb-4">การตั้งค่าผู้ใช้</h1>
+        <p>ยินดีต้อนรับ, {session.user?.email}!</p>
+        {/* เพิ่มฟอร์มและตัวเลือกการตั้งค่าของคุณที่นี่ */}
+        <p className="mt-4">คุณสามารถจัดการโปรไฟล์และการตั้งค่าของคุณได้ที่นี่</p>
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded mt-6"
+          onClick={handleLogout}
+          disabled={loading}
+        >
+          ออกจากระบบ
+        </button>
+      </div>
+    </Layout>
   );
 }
