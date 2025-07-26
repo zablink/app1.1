@@ -87,9 +87,10 @@ export const authOptions: NextAuthOptions = {
 
   adapter: SupabaseAdapter({
     url: NEXT_PUBLIC_SUPABASE_URL,
-    serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY,
+    // แก้ไข: เปลี่ยน serviceRoleKey เป็น secret
+    secret: SUPABASE_SERVICE_ROLE_KEY, 
   }),
-  secret: NEXTAUTH_SECRET,
+  secret: NEXTAUTH_SECRET, // This is the NextAuth secret, not Supabase secret
 
   callbacks: {
     async signIn({ user, account, profile, email }) {
