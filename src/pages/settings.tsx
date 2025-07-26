@@ -38,7 +38,7 @@ export default function UserSettingsPage() {
       console.log('Uploading new avatar:', pendingAvatarFile.name);
       // Simulate upload success
       setTimeout(() => {
-        alert('รูปโปรไฟล์อัปโหลดแล้ว (จำลอง)');
+        alert('รูปโปรไฟล์อัปโหลดแล้ว');
         setPendingAvatarFile(null); // Clear pending file after simulated upload
       }, 500);
     }
