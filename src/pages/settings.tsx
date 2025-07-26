@@ -17,6 +17,23 @@ export default function UserSettingsPage() {
   const { data: session, status } = useSession(); // Get session data and status
   const router = useRouter(); // Initialize router
 
+  // --- Console.log: ตรวจสอบสถานะและข้อมูล Session ทันทีที่ component ถูก render ---
+  console.log('--- UserSettingsPage Component Render ---');
+  console.log('Session Status:', status);
+  console.log('Session Data (initial render):', session);
+  if (session?.user) {
+    console.log('Session User Name (initial render):', session.user.name);
+    console.log('Session User Email (initial render):', session.user.email);
+    console.log('Session User Image (initial render):', session.user.image);
+    // @ts-ignore
+    console.log('Session User Role (initial render):', session.user.role); // Log custom role
+    // @ts-ignore
+    console.log('Session User Membership Type (initial render):', session.user.membership_type); // Log custom membership_type
+  } else {
+    console.log('Session User is null or undefined on initial render.');
+  }
+  // --- End Console.log ---
+
   // Initialize state with session data or default values
   // These states will hold the *editable* values, initialized from the session.
   const [profileName, setProfileName] = useState(session?.user?.name || 'Current User Name');
@@ -30,31 +47,60 @@ export default function UserSettingsPage() {
 
   // Authentication protection and session data update effect
   useEffect(() => {
+    // --- Console.log: ตรวจสอบสถานะและข้อมูล Session เมื่อ useEffect ทำงาน ---
+    console.log('--- useEffect Triggered ---');
+    console.log('Current Session Status in useEffect:', status);
+    console.log('Current Session Data in useEffect:', session);
+    // --- End Console.log ---
+
     // Redirect if not authenticated
     if (status === 'unauthenticated') {
+      console.log('User unauthenticated, redirecting to /login');
       router.push('/login');
-    } 
+    }
     // If authenticated and session data is available, update component state
     // This handles cases where session data might load/change after initial component mount
     else if (status === 'authenticated' && session) {
+      console.log('User authenticated, checking session data for state update...');
       // Only update state if the session data is different to prevent unnecessary re-renders
       if (session.user?.name && session.user.name !== profileName) {
+        console.log(`Updating profileName from "${profileName}" to "${session.user.name}"`);
         setProfileName(session.user.name);
+      } else if (!session.user?.name) {
+        console.warn('Session user name is undefined or null.');
       }
+
       if (session.user?.email && session.user.email !== email) {
+        console.log(`Updating email from "${email}" to "${session.user.email}"`);
         setEmail(session.user.email);
+      } else if (!session.user?.email) {
+        console.warn('Session user email is undefined or null.');
       }
+
       // Only update avatarUrl if it's different and not currently selecting a new file
       if (session.user?.image && session.user.image !== avatarUrl && !pendingAvatarFile) {
+        console.log(`Updating avatarUrl from "${avatarUrl}" to "${session.user.image}"`);
         setAvatarUrl(session.user.image);
+      } else if (!session.user?.image) {
+        console.warn('Session user image is undefined or null.');
+      } else if (pendingAvatarFile) {
+        console.log('Skipping avatarUrl update from session because a new avatar file is pending.');
       }
+      // --- Console.log: แสดงค่า state หลังการอัปเดตจาก session ---
+      console.log('State after useEffect update:');
+      console.log('  profileName:', profileName);
+      console.log('  email:', email);
+      console.log('  avatarUrl:', avatarUrl);
+      // --- End Console.log ---
     }
   }, [status, router, session, profileName, email, avatarUrl, pendingAvatarFile]); // Add pendingAvatarFile to dependencies
 
   // Function to handle avatar selection (for preview and compression)
   const handleAvatarSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleAvatarSelect triggered.');
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
+      console.log('Selected file:', file.name, 'Size:', (file.size / 1024).toFixed(2), 'KB');
       setIsCompressing(true); // Start loading indicator
 
       // Image compression options
@@ -66,6 +112,7 @@ export default function UserSettingsPage() {
 
       try {
         const compressedFile = await imageCompression(file, options);
+        console.log('Compressed file:', compressedFile.name, 'Size:', (compressedFile.size / 1024).toFixed(2), 'KB');
         setAvatarUrl(URL.createObjectURL(compressedFile)); // Update for immediate preview
         setPendingAvatarFile(compressedFile); // Store compressed file for later upload
         alert('รูปภาพถูกย่อขนาดแล้ว พร้อมสำหรับการบันทึก');
@@ -76,19 +123,25 @@ export default function UserSettingsPage() {
       } finally {
         setIsCompressing(false); // End loading indicator
       }
+    } else {
+      console.log('No file selected for avatar.');
     }
   };
 
   // Function to handle saving profile information (name and avatar)
   const handleSaveProfileInfo = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent page refresh
-    console.log('Updating profile name to:', profileName);
+    console.log('--- handleSaveProfileInfo Triggered ---');
+    console.log('Attempting to update profile name to:', profileName);
+    console.log('Current email:', email); // Email is disabled, but good to log
+
     // In a real application, you would:
     // 1. Update the user's name in your database (e.g., Supabase table).
     // 2. If the user's name is part of the NextAuth session, you might need to
     //    manually update the session or trigger a session refresh to reflect changes.
 
     if (pendingAvatarFile) {
+      console.log('New avatar file detected. Attempting upload...');
       // In a real application, you would:
       // 1. Upload the 'pendingAvatarFile' (which is already compressed) to Supabase Storage.
       //    Example:
@@ -106,13 +159,15 @@ export default function UserSettingsPage() {
       console.log('Uploading new (compressed) avatar:', pendingAvatarFile.name);
       // Simulate upload success
       setTimeout(() => {
+        console.log('Simulated avatar upload complete.');
         alert('รูปโปรไฟล์อัปโหลดแล้ว (จำลอง)');
         setPendingAvatarFile(null); // Clear pending file after simulated upload
         // In a real app, after successful upload to Supabase and DB update,
         // you would refresh the session here to update Navbar and other components.
-        // Example: update({ user: { image: publicURL } }); // If NextAuth supports this
+        // Example: update({ user: { image: publicURL } }); // If NextAuth supports this. Consider calling `refreshSession` if available or `router.reload()` for full refresh.
       }, 500);
     } else {
+      console.log('No new avatar file to upload. Only name will be updated (simulated).');
       alert('อัปเดตข้อมูลโปรไฟล์แล้ว');
     }
   };
@@ -120,13 +175,19 @@ export default function UserSettingsPage() {
   // Function to handle password change
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('--- handleChangePassword Triggered ---');
+    console.log('Current Password entered:', currentPassword ? '********' : 'Not entered');
+    console.log('New Password entered:', newPassword ? '********' : 'Not entered');
+    console.log('Confirm New Password entered:', confirmNewPassword ? '********' : 'Not entered');
+
     if (newPassword !== confirmNewPassword) {
+      console.error('New password and confirm password do not match.');
       alert('รหัสผ่านใหม่ไม่ตรงกัน');
       return;
     }
     // In a real application, you would call your authentication service (e.g., NextAuth)
     // to update the password. This typically involves calling a backend API route.
-    console.log('Changing password...');
+    console.log('Changing password (simulated)...');
     alert('เปลี่ยนรหัสผ่านแล้ว');
     setCurrentPassword('');
     setNewPassword('');
@@ -135,6 +196,7 @@ export default function UserSettingsPage() {
 
   // If session is loading or unauthenticated, render a loading spinner or nothing
   if (status === 'loading' || status === 'unauthenticated') {
+    console.log('Rendering loading/unauthenticated state. Status:', status);
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -142,7 +204,14 @@ export default function UserSettingsPage() {
         </div>
       </Layout>
     );
-}
+  }
+
+  // --- Console.log: แสดงข้อมูลที่ใช้ render หลังจาก Session โหลดเสร็จและ Authenticated ---
+  console.log('--- Rendering Authenticated User Settings ---');
+  console.log('Profile Name for display:', profileName);
+  console.log('Email for display:', email);
+  console.log('Avatar URL for display:', avatarUrl);
+  // --- End Console.log ---
 
   return (
     <Layout>
