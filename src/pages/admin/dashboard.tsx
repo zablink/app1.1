@@ -31,7 +31,7 @@ export default function AdminSettingsPage() {
       setAvatarUrl(URL.createObjectURL(file));
       setTimeout(() => {
         alert('รูปโปรไฟล์ผู้ดูแลอัปโหลดแล้ว (จำลอง)');
-      }, 500);
+      }, 500); 
     }
   };
 
