@@ -1,40 +1,81 @@
 // /pages/settings.tsx
 // this is Settings for USER role
-import React, { useState, useEffect } from 'react'; // Added useEffect
+// pages/settings.tsx (or /src/pages/settings/user.tsx)
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from "next/link";
-import { useRouter } from 'next/router'; // Added useRouter
-import { useSession } from 'next-auth/react'; // Added useSession
-// Corrected: Changed FiStore to FiShoppingBag
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiShoppingBag } from 'react-icons/fi';
-import { motion } from 'framer-motion'; // For small animations
-import Layout from "@/components/Layout"; // Ensure this path is correct
+import { motion } from 'framer-motion';
+import Layout from "@/components/Layout"; // Ensure this path is correct for your project structure
+
+// Import image compression library (you need to install this: npm install browser-image-compression)
+import imageCompression from 'browser-image-compression';
 
 export default function UserSettingsPage() {
   const { data: session, status } = useSession(); // Get session data and status
   const router = useRouter(); // Initialize router
 
-  const [profileName, setProfileName] = useState('ชื่อผู้ใช้งานปัจจุบัน');
-  const [email, setEmail] = useState('user@example.com');
+  // Initialize state with session data or default values
+  // These states will hold the *editable* values, initialized from the session.
+  const [profileName, setProfileName] = useState(session?.user?.name || 'Current User Name');
+  const [email, setEmail] = useState(session?.user?.email || 'user@example.com');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('https://placehold.co/150x150/aabbcc/ffffff?text=User'); // Placeholder avatar
+  const [avatarUrl, setAvatarUrl] = useState(session?.user?.image || 'https://placehold.co/150x150/aabbcc/ffffff?text=User'); // Placeholder avatar
   const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null); // To store avatar file awaiting upload
+  const [isCompressing, setIsCompressing] = useState(false); // New state for loading indicator during compression
 
-  // Authentication protection effect
+  // Authentication protection and session data update effect
   useEffect(() => {
+    // Redirect if not authenticated
     if (status === 'unauthenticated') {
-      router.push('/login'); // Redirect to login page if not authenticated
+      router.push('/login');
+    } 
+    // If authenticated and session data is available, update component state
+    // This handles cases where session data might load/change after initial component mount
+    else if (status === 'authenticated' && session) {
+      // Only update state if the session data is different to prevent unnecessary re-renders
+      if (session.user?.name && session.user.name !== profileName) {
+        setProfileName(session.user.name);
+      }
+      if (session.user?.email && session.user.email !== email) {
+        setEmail(session.user.email);
+      }
+      // Only update avatarUrl if it's different and not currently selecting a new file
+      if (session.user?.image && session.user.image !== avatarUrl && !pendingAvatarFile) {
+        setAvatarUrl(session.user.image);
+      }
     }
-  }, [status, router]); // Depend on status and router
+  }, [status, router, session, profileName, email, avatarUrl, pendingAvatarFile]); // Add pendingAvatarFile to dependencies
 
-  // Function to handle avatar selection (for preview and pending upload)
-  const handleAvatarSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Function to handle avatar selection (for preview and compression)
+  const handleAvatarSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setAvatarUrl(URL.createObjectURL(file)); // For immediate preview
-      setPendingAvatarFile(file); // Store file for later upload
+      setIsCompressing(true); // Start loading indicator
+
+      // Image compression options
+      const options = {
+        maxSizeMB: 0.1, // Max file size in MB (e.g., 100KB)
+        maxWidthOrHeight: 150, // Max width or height in pixels for the output image
+        useWebWorker: true, // Use web worker for better performance (recommended)
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+        setAvatarUrl(URL.createObjectURL(compressedFile)); // Update for immediate preview
+        setPendingAvatarFile(compressedFile); // Store compressed file for later upload
+        alert('รูปภาพถูกย่อขนาดแล้ว พร้อมสำหรับการบันทึก');
+      } catch (error) {
+        console.error('Image compression error:', error);
+        alert('เกิดข้อผิดพลาดในการย่อขนาดรูปภาพ');
+        setPendingAvatarFile(null); // Clear pending file on error
+      } finally {
+        setIsCompressing(false); // End loading indicator
+      }
     }
   };
 
@@ -42,18 +83,38 @@ export default function UserSettingsPage() {
   const handleSaveProfileInfo = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent page refresh
     console.log('Updating profile name to:', profileName);
-    // In a real application, you would update the user's name in your database (e.g., Supabase)
+    // In a real application, you would:
+    // 1. Update the user's name in your database (e.g., Supabase table).
+    // 2. If the user's name is part of the NextAuth session, you might need to
+    //    manually update the session or trigger a session refresh to reflect changes.
 
     if (pendingAvatarFile) {
-      // In a real application, you would upload this file to Supabase Storage
-      console.log('Uploading new avatar:', pendingAvatarFile.name);
+      // In a real application, you would:
+      // 1. Upload the 'pendingAvatarFile' (which is already compressed) to Supabase Storage.
+      //    Example:
+      //    const { data, error } = await supabase.storage.from('avatars').upload(`public/${session.user.id}/avatar.png`, pendingAvatarFile);
+      //    if (error) throw error;
+      //    const publicURL = supabase.storage.from('avatars').getPublicUrl(`public/${session.user.id}/avatar.png`).data.publicUrl;
+      // 2. Update the user's profile in your database (e.g., Supabase table) with the new 'publicURL'.
+      //    await supabase.from('profiles').update({ avatar_url: publicURL }).eq('id', session.user.id);
+      // 3. Important: After a successful upload and database update, you need to
+      //    update the NextAuth session to reflect the new image URL. This often involves:
+      //    - Calling `signIn('credentials', { redirect: false, ... })` with updated user data, or
+      //    - Using a custom `update` function if your NextAuth setup supports it, or
+      //    - Forcing a session refresh (e.g., `router.reload()` or `window.location.reload()`, but this is less ideal as it reloads the entire page).
+      //    For now, we'll just simulate the process.
+      console.log('Uploading new (compressed) avatar:', pendingAvatarFile.name);
       // Simulate upload success
       setTimeout(() => {
         alert('รูปโปรไฟล์อัปโหลดแล้ว');
         setPendingAvatarFile(null); // Clear pending file after simulated upload
+        // In a real app, after successful upload to Supabase and DB update,
+        // you would refresh the session here to update Navbar and other components.
+        // Example: update({ user: { image: publicURL } }); // If NextAuth supports this
       }, 500);
+    } else {
+      alert('อัปเดตข้อมูลโปรไฟล์แล้ว');
     }
-    alert('อัปเดตข้อมูลโปรไฟล์แล้ว');
   };
 
   // Function to handle password change
@@ -64,7 +125,7 @@ export default function UserSettingsPage() {
       return;
     }
     // In a real application, you would call your authentication service (e.g., NextAuth)
-    // to update the password.
+    // to update the password. This typically involves calling a backend API route.
     console.log('Changing password...');
     alert('เปลี่ยนรหัสผ่านแล้ว');
     setCurrentPassword('');
@@ -72,12 +133,12 @@ export default function UserSettingsPage() {
     setConfirmNewPassword('');
   };
 
-  // If session is loading or unauthenticated, render nothing or a loading spinner
+  // If session is loading or unauthenticated, render a loading spinner or nothing
   if (status === 'loading' || status === 'unauthenticated') {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
-          <p className="text-lg text-gray-700">กำลังโหลด...</p>
+          <p className="text-lg text-gray-700">Loading...</p>
         </div>
       </Layout>
     );
@@ -87,7 +148,7 @@ export default function UserSettingsPage() {
     <Layout>
       <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
         <Head>
-          <title>ตั้งค่าโปรไฟล์ผู้ใช้</title>
+          <title>User Profile Settings</title>
         </Head>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -95,28 +156,37 @@ export default function UserSettingsPage() {
           transition={{ duration: 0.5 }}
           className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg"
         >
-          <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">ตั้งค่าโปรไฟล์ผู้ใช้</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">User Profile Settings</h1>
 
           {/* Profile Information Section */}
           <div className="mb-8 p-6 border border-gray-200 rounded-lg">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
-              <FiUser className="mr-2" /> ข้อมูลโปรไฟล์
+              <FiUser className="mr-2" /> Profile Information
             </h2>
-            <form onSubmit={handleSaveProfileInfo}> {/* Use form for saving profile information */}
+            <form onSubmit={handleSaveProfileInfo}>
               <div className="flex flex-col items-center mb-6">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-md">
                   <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                   <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer">
-                    <FiUpload size={24} />
+                    {isCompressing ? (
+                      <span className="animate-spin text-white"><FiRefreshCw size={24} /></span> // แสดง loading spinner
+                    ) : (
+                      <FiUpload size={24} />
+                    )}
                   </label>
-                  <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+                  <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} disabled={isCompressing} />
                 </div>
-                <p className="text-gray-600 mt-2">อัปเดตรูปโปรไฟล์ของคุณ</p>
+                <p className="text-gray-600 mt-2">Update your profile picture</p>
+                {pendingAvatarFile && (
+                  <p className="text-sm text-blue-500 mt-1">
+                    รูปภาพใหม่พร้อมบันทึกแล้ว (ขนาด: {(pendingAvatarFile.size / 1024).toFixed(2)} KB)
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="profileName" className="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ใช้งาน</label>
+                  <label htmlFor="profileName" className="block text-sm font-medium text-gray-700 mb-1">User Name</label>
                   <input
                     type="text"
                     id="profileName"
@@ -127,7 +197,7 @@ export default function UserSettingsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input
                     type="email"
                     id="email"
@@ -141,10 +211,15 @@ export default function UserSettingsPage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  type="submit" // Use type="submit" to link with the form
+                  type="submit"
                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  disabled={isCompressing} // Disable button during compression
                 >
-                  <FiSave className="mr-2" /> บันทึกข้อมูลโปรไฟล์
+                  {isCompressing ? (
+                    <span className="flex items-center"><FiRefreshCw className="animate-spin mr-2" /> Compressing...</span>
+                  ) : (
+                    <><FiSave className="mr-2" /> Save Profile Information</>
+                  )}
                 </motion.button>
               </div>
             </form>
@@ -153,12 +228,12 @@ export default function UserSettingsPage() {
           {/* Change Password Section */}
           <div className="mb-8 p-6 border border-gray-200 rounded-lg">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
-              <FiLock className="mr-2" /> เปลี่ยนรหัสผ่าน
+              <FiLock className="mr-2" /> Change Password
             </h2>
             <form onSubmit={handleChangePassword}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่านปัจจุบัน</label>
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
                   <input
                     type="password"
                     id="currentPassword"
@@ -169,7 +244,7 @@ export default function UserSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่านใหม่</label>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                   <input
                     type="password"
                     id="newPassword"
@@ -180,7 +255,7 @@ export default function UserSettingsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่านใหม่</label>
+                  <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
                   <input
                     type="password"
                     id="confirmNewPassword"
@@ -198,7 +273,7 @@ export default function UserSettingsPage() {
                   type="submit"
                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
-                  บันทึกรหัสผ่าน
+                  Save Password
                 </motion.button>
               </div>
             </form>
@@ -207,10 +282,10 @@ export default function UserSettingsPage() {
           {/* Become a Shop Section */}
           <div className="p-6 border border-gray-200 rounded-lg bg-blue-50">
             <h2 className="text-2xl font-semibold text-blue-700 mb-4 flex items-center">
-              <FiShoppingBag className="mr-2" /> ต้องการเป็นร้านค้า?
+              <FiShoppingBag className="mr-2" /> Want to become a Shop?
             </h2>
             <p className="text-gray-700 mb-4">
-              หากคุณเป็นเจ้าของร้านอาหารและต้องการโปรโมทร้านของคุณบนแพลตฟอร์มของเรา คุณสามารถลงทะเบียนเป็นร้านค้าได้ที่นี่
+              If you are a restaurant owner and want to promote your business on our platform, you can register as a shop here.
             </p>
             <Link href="/register-shop">
               <motion.a
@@ -218,7 +293,7 @@ export default function UserSettingsPage() {
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <FiShoppingBag className="mr-2" /> ลงทะเบียนร้านค้า
+                <FiShoppingBag className="mr-2" /> Register as a Shop
               </motion.a>
             </Link>
           </div>

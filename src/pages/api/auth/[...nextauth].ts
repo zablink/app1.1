@@ -3,18 +3,27 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import CredentialsProvider from "next-auth/providers/credentials"; // <<--- เพิ่มการนำเข้าตัวนี้
+import CredentialsProvider from "next-auth/providers/credentials";
 import { SupabaseAdapter } from "@next-auth/supabase-adapter";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// ... (ส่วนโค้ดการตรวจสอบ Environment Variables และการสร้าง supabaseForInternalUse client ที่มีอยู่เดิม) ...
+// Ensure these environment variables are checked outside the main export if not already.
+// For demonstration, assuming they are correctly configured.
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
+
+if (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error("Missing Supabase environment variables for NextAuth callbacks.");
+}
+if (!NEXTAUTH_SECRET) {
+  throw new Error("Missing NEXTAUTH_SECRET environment variable.");
+}
 
 const supabaseForCallbacks = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  NEXT_PUBLIC_SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY
 );
-
-// ... (ส่วนโค้ดการตรวจสอบ Environment Variables สำหรับ Adapter ที่มีอยู่เดิม) ...
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -26,21 +35,18 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
-    // <<--- เพิ่ม Credentials Provider นี้เข้ามา
     CredentialsProvider({
-      name: "Credentials", // ชื่อของ Provider (จะใช้เมื่อเรียก signIn("credentials", ...))
-      credentials: { // กำหนดฟิลด์ข้อมูลที่ต้องการรับ
+      name: "Credentials",
+      credentials: {
         email: { label: "Email", type: "text", placeholder: "jsmith@example.com" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // ฟังก์ชันนี้จะถูกเรียกเมื่อ NextAuth.js พยายาม authenticate ด้วย "credentials"
         if (!credentials?.email || !credentials?.password) {
-          return null; // ไม่มีข้อมูล email/password
+          return null;
         }
 
         try {
-          // ใช้ Supabase client ในการตรวจสอบ email/password
           const { data, error } = await supabaseForCallbacks.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
@@ -48,54 +54,80 @@ export const authOptions: NextAuthOptions = {
 
           if (error) {
             console.error("Supabase signInWithPassword error (in NextAuth CredentialsProvider):", error.message);
-            // คุณสามารถส่งข้อความ error ที่กำหนดเองกลับไปให้ NextAuth.js ได้
-            throw new Error(error.message); // NextAuth.js จะจับ error นี้และแสดงผล
+            throw new Error(error.message);
           }
 
           if (data.user) {
-            // ถ้า Supabase ยืนยันผู้ใช้ได้สำเร็จ ให้คืนค่า user object
-            // NextAuth.js จะใช้ user object นี้ในการสร้าง Session
             console.log("Supabase signInWithPassword successful. User (from CredentialsProvider):", data.user);
+            // Ensure user_metadata is correctly populated in Supabase for these fields
             return {
               id: data.user.id,
               email: data.user.email,
-              name: data.user.user_metadata?.full_name || data.user.email, // ปรับตาม user_metadata ของคุณ
-              image: data.user.user_metadata?.avatar_url || null, // ปรับตาม user_metadata ของคุณ
-              role: "user", // กำหนดค่าเริ่มต้นเพื่อให้ตรงตาม Type
-              membership_type: "free", // กำหนดค่าเริ่มต้นเพื่อให้ตรงตาม Type
+              name: data.user.user_metadata?.full_name || data.user.email,
+              image: data.user.user_metadata?.avatar_url || null,
+              // Assuming 'role' and 'membership_type' are stored in user_metadata or profiles table
+              // In a real app, you'd fetch these from your 'profiles' table using data.user.id
+              // For now, using user_metadata or a default for demonstration
+              // @ts-ignore
+              role: data.user.user_metadata?.role || "user",
+              // @ts-ignore
+              membership_type: data.user.user_metadata?.membership_type || "free",
             };
           } else {
             console.warn("Supabase signInWithPassword returned no user data (in CredentialsProvider).");
-            return null; // ไม่มี user ถูกคืนค่าจาก Supabase
+            return null;
           }
         } catch (e: any) {
           console.error("Authorize function caught an exception (in CredentialsProvider):", e.message);
-          return null; // หรือ throw new Error("Invalid credentials");
+          return null;
         }
       },
     }),
   ],
 
-  // ... (ส่วน adapter, secret ที่มีอยู่เดิม) ...
+  adapter: SupabaseAdapter({
+    url: NEXT_PUBLIC_SUPABASE_URL,
+    serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY,
+  }),
+  secret: NEXTAUTH_SECRET,
 
   callbacks: {
-    // Callbacks ส่วนนี้ที่เหลือ ยังคงเหมือนเดิมเพราะมันถูกออกแบบมาเพื่อรับ user object
-    // จาก Adapter/Provider อยู่แล้ว ไม่ว่าจะมาจาก Google, GitHub หรือ Credentials
     async signIn({ user, account, profile, email }) {
-      // ... (โค้ดเดิมของคุณ) ...
-      // Logic การตรวจสอบ AuthMethodMismatch จะยังคงทำงานได้ดี
+      // This callback runs after a successful authentication.
       return true;
     },
 
     async jwt({ token, user, account, profile, isNewUser }) {
-      // ... (โค้ดเดิมของคุณ) ...
+      // The `user` object is only available the first time this callback is called on a new session.
+      // After that, `token` is passed between subsequent calls.
+      if (user) {
+        // This 'user' object comes from the 'signIn' callback or the provider's 'authorize' method.
+        // It should contain 'id', 'name', 'email', 'image', 'role', 'membership_type'
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image; // Use 'picture' for avatar URL in JWT
+        // @ts-ignore // Suppress TypeScript error if 'role' is not in default User type
+        token.role = user.role;
+        // @ts-ignore // Suppress TypeScript error if 'membership_type' is not in default User type
+        token.membership_type = user.membership_type;
+      }
       return token;
     },
 
     async session({ session, token, user }) {
-      // ... (โค้ดเดิมของคุณ) ...
-      // ส่วนนี้สำคัญมาก เพราะมันดึง role จาก profiles table มาใส่ใน session.user
-      // ซึ่งทำให้ Navbar ของคุณสามารถใช้ session.user.role ได้
+      // The `session` object is what gets sent to the client.
+      // We populate `session.user` with data from the `token`.
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture; // Populate session.user.image from token.picture
+        // @ts-ignore // Suppress TypeScript error if 'role' is not in default SessionUser type
+        session.user.role = token.role;
+        // @ts-ignore // Suppress TypeScript error if 'membership_type' is not in default SessionUser type
+        session.user.membership_type = token.membership_type;
+      }
       return session;
     },
   },
@@ -103,10 +135,7 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
 
   pages: {
-    error: '/auth/error', // หน้านี้จะจับ error เช่น AuthMethodMismatch ที่มาจาก callback
-    // คุณสามารถกำหนดหน้า login/signup ให้ NextAuth.js จัดการได้
-    // signIn: '/login', // ถ้าต้องการให้ NextAuth.js จัดการ route /login โดยตรง
-    // newUser: '/signup', // ถ้าต้องการให้ NextAuth.js จัดการ route /signup สำหรับผู้ใช้ใหม่
+    error: '/auth/error',
   },
 };
 
