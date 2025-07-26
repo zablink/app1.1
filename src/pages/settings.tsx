@@ -142,7 +142,6 @@ export default function UserSettingsPage() {
         </div>
       </Layout>
     );
-  );
 }
 
   return (
