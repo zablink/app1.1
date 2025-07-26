@@ -16,42 +16,87 @@ export default function HomePage() {
   const [locationError, setLocationError] = useState(false);
   const [loadingNearby, setLoadingNearby] = useState(false);
 
+  // --- Console.log: ตรวจสอบสถานะและข้อมูล Session ทันทีที่ component ถูก render ---
+  console.log('--- HomePage Component Render ---');
+  console.log('Session Status:', status);
+  console.log('Session Data (initial render):', session);
+  if (session?.user) {
+    console.log('Session User Name (initial render):', session.user.name);
+    console.log('Session User Email (initial render):', session.user.email);
+    console.log('Session User Image (initial render):', session.user.image);
+    // @ts-ignore
+    console.log('Session User Role (initial render):', session.user.role); // Log custom role
+    // @ts-ignore
+    console.log('Session User Membership Type (initial render):', session.user.membership_type); // Log custom membership_type
+  } else {
+    console.log('Session User is null or undefined on initial render.');
+  }
+  // --- End Console.log ---
+
   useEffect(() => {
-  fetch("/api/stores/all")
-    .then(res => res.json())
-    .then(data => setStores(data))
-    .catch(err => {
-      console.error("Error fetching all stores:", err);
-      setStores(dummyStores);
-    });
-}, []);
+    // --- Console.log: ตรวจสอบสถานะและข้อมูล Session เมื่อ useEffect สำหรับ fetch stores ทำงาน ---
+    console.log('--- useEffect for fetching all stores triggered ---');
+    console.log('Current Session Status in useEffect:', status);
+    console.log('Current Session User Role in useEffect:', session?.user?.role);
+    // --- End Console.log ---
+
+    fetch("/api/stores/all")
+      .then(res => {
+        if (!res.ok) {
+          console.error(`HTTP error! status: ${res.status}`);
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Fetched all stores data:', data);
+        setStores(data);
+      })
+      .catch(err => {
+        console.error("Error fetching all stores:", err);
+        console.log('Falling back to dummy stores.');
+        setStores(dummyStores);
+      });
+  }, []);
 
 
   // ✅ ฟังก์ชันกดปุ่มเพื่อค้นหาร้านใกล้ตัว
   const handleFindNearby = () => {
+    console.log('--- handleFindNearby triggered ---');
     if (!navigator.geolocation) {
+      console.warn('Geolocation is not supported by this browser.');
       setLocationError(true);
       return;
     }
 
     setLoadingNearby(true);
+    console.log('Attempting to get current geolocation position...');
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        console.log(`Geolocation successful: Latitude=${latitude}, Longitude=${longitude}`);
         try {
           const nearby = await getNearbyStores(latitude, longitude);
+          console.log('Fetched nearby stores data:', nearby);
           setStores(nearby?.length > 0 ? nearby : dummyStores);
+          if (nearby?.length === 0) {
+            console.log('No nearby stores found, falling back to dummy stores.');
+          }
         } catch (err) {
           console.error("Error loading nearby stores:", err);
+          console.log('Falling back to dummy stores due to API error.');
           setStores(dummyStores);
         } finally {
           setLoadingNearby(false);
+          console.log('Finished loading nearby stores.');
         }
       },
-      () => {
+      (error) => {
+        console.error('Geolocation error:', error.message);
         setLocationError(true);
         setStores(dummyStores);
         setLoadingNearby(false);
+        console.log('Falling back to dummy stores due to geolocation error.');
       }
     );
   };
@@ -61,16 +106,30 @@ export default function HomePage() {
       <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
         <div className="max-w-5xl mx-auto space-y-8">
 
+          {/* Console.log: ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" */}
           {status === "authenticated" && session?.user?.role === "store" && (
-            <div className="flex justify-end">
-              <Link 
-                href="/store/dashboard"
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-              >
-                ไปที่แดชบอร์ด
-              </Link>
-            </div>
+            <>
+              {console.log('User is authenticated and role is "store". Displaying dashboard link.')}
+              <div className="flex justify-end">
+                <Link
+                  href="/store/dashboard"
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                >
+                  ไปที่แดชบอร์ด
+                </Link>
+              </div>
+            </>
           )}
+          {status === "authenticated" && session?.user?.role !== "store" && (
+            console.log(`User is authenticated, but role is "${session?.user?.role}". Not displaying dashboard link.`)
+          )}
+          {status === "unauthenticated" && (
+            console.log('User is unauthenticated. Not displaying dashboard link.')
+          )}
+          {status === "loading" && (
+            console.log('Session is loading. Not displaying dashboard link yet.')
+          )}
+          {/* End Console.log */}
 
           <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-3xl md:text-4xl font-semibold text-primary">
@@ -134,7 +193,7 @@ export default function HomePage() {
         </div>
       </div>
     </Layout>
-  ); 
+  );
 }
 
 // ✅ fallback ร้านตัวอย่าง
