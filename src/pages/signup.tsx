@@ -40,7 +40,7 @@ export default function SignupPage() {
     const { data: signUpData, error: signupError } = await supabase.auth.signUp({ email, password });
 
     if (signupError) {
-      console.error("Signup error:", signupError.message);
+      console.error("Signup error:", signupError.message);  
       setError(signupError.message);
       setLoading(false);
     } else {
@@ -56,7 +56,7 @@ export default function SignupPage() {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .insert({
-              user_id: signUpData.user.id,
+              id: signUpData.user.id,
               email: signUpData.user.email,
               role: 'user', // <<< กำหนด role เริ่มต้นเป็น 'user' ที่นี่
               // ไม่ได้ใส่ name หรือ avatar_url ในขั้นตอนนี้
