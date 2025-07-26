@@ -1,12 +1,12 @@
 // /pages/settings.tsx
 // this is Settings for USER role
-// pages/settings.tsx (or /src/pages/settings/user.tsx)
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from "next/link";
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiShoppingBag } from 'react-icons/fi';
+// Corrected: Added FiRefreshCw to the import list
+import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiShoppingBag, FiRefreshCw } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import Layout from "@/components/Layout"; // Ensure this path is correct for your project structure
 
@@ -106,7 +106,7 @@ export default function UserSettingsPage() {
       console.log('Uploading new (compressed) avatar:', pendingAvatarFile.name);
       // Simulate upload success
       setTimeout(() => {
-        alert('รูปโปรไฟล์อัปโหลดแล้ว');
+        alert('รูปโปรไฟล์อัปโหลดแล้ว (จำลอง)');
         setPendingAvatarFile(null); // Clear pending file after simulated upload
         // In a real app, after successful upload to Supabase and DB update,
         // you would refresh the session here to update Navbar and other components.
@@ -142,7 +142,8 @@ export default function UserSettingsPage() {
         </div>
       </Layout>
     );
-  }
+  );
+}
 
   return (
     <Layout>
@@ -169,7 +170,7 @@ export default function UserSettingsPage() {
                   <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                   <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer">
                     {isCompressing ? (
-                      <span className="animate-spin text-white"><FiRefreshCw size={24} /></span> // แสดง loading spinner
+                      <span className="animate-spin text-white"><FiRefreshCw size={24} /></span> // Display loading spinner
                     ) : (
                       <FiUpload size={24} />
                     )}
@@ -179,7 +180,7 @@ export default function UserSettingsPage() {
                 <p className="text-gray-600 mt-2">Update your profile picture</p>
                 {pendingAvatarFile && (
                   <p className="text-sm text-blue-500 mt-1">
-                    รูปภาพใหม่พร้อมบันทึกแล้ว (ขนาด: {(pendingAvatarFile.size / 1024).toFixed(2)} KB)
+                    New image ready to save (Size: {(pendingAvatarFile.size / 1024).toFixed(2)} KB)
                   </p>
                 )}
               </div>
