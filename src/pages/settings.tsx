@@ -1,4 +1,5 @@
 // /pages/settings.tsx
+// this is Settings for USER role
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from "next/link";

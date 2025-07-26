@@ -73,6 +73,17 @@ export default function Navbar() {
   const handleLogin = () => signIn("google", { callbackUrl: "/" });
   const handleLogout = () => signOut({ callbackUrl: "/" });
 
+  // Determine the correct settings path based on the user's role
+  const getSettingsPath = (userRole: string) => {
+    if (userRole === 'shop') {
+      return '/dashboard/shop/settings';
+    }
+    if (userRole === 'admin') {
+      return '/admin/settings';
+    }
+    return '/settings'; // Default for 'user' role
+  };
+
   // ฟังก์ชันสำหรับแสดงเมนูตามบทบาทของผู้ใช้ (เฉพาะลิงก์ Dashboard/Admin)
   // User Role จะไม่มีเมนูในส่วนนี้ เพราะจะจัดการผ่าน Profile Dropdown แทน
   const renderRoleSpecificDashboardMenus = (userRole: string, isMobile = false, onClick?: () => void) => {
@@ -206,8 +217,8 @@ export default function Navbar() {
                     <ul>
                       {/* ลิงก์ไปยังหน้า Settings/Profile สำหรับทุก Role */}
                       <li>
-                        {/* ไม่ต้องใช้ onClick เพื่อปิด dropdown เพราะ hover จะจัดการเอง */}
-                        <Link href="/settings">
+                        {/* ใช้ getSettingsPath เพื่อกำหนดลิงก์ตาม Role */}
+                        <Link href={getSettingsPath(role)}>
                           <a className="block px-4 py-2 hover:bg-gray-100 text-gray-800 flex items-center space-x-2">
                             <FiSettings size={18} />
                             <span>ตั้งค่าโปรไฟล์</span>
@@ -310,7 +321,8 @@ export default function Navbar() {
                 ) : (
                   <>
                     {/* Mobile Settings Link */}
-                    <Link href="/settings">
+                    {/* ใช้ getSettingsPath เพื่อกำหนดลิงก์ตาม Role */}
+                    <Link href={getSettingsPath(role)}>
                       <a onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-700 rounded">
                         <FiSettings size={20} />
                         <span>ตั้งค่าโปรไฟล์</span>
