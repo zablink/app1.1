@@ -56,7 +56,7 @@ export default function SignupPage() {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .insert({
-              id: signUpData.user.id,
+              user_id: signUpData.user.id,
               email: signUpData.user.email,
               role: 'user', // <<< กำหนด role เริ่มต้นเป็น 'user' ที่นี่
               // ไม่ได้ใส่ name หรือ avatar_url ในขั้นตอนนี้
