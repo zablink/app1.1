@@ -1,8 +1,9 @@
 // /src/pages/dashboard/shop.tsx
 import React, { useState } from 'react';
-import Head from 'next/head'; 
+import Head from 'next/head';
 import Link from 'next/link';
-import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiMapPin, FiLink, FiCamera, FiAward, FiDollarSign } from 'react-icons/fi';
+// แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag และเพิ่ม FiX สำหรับปุ่มลบลิงก์/รูปภาพ
+import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiMapPin, FiLink, FiCamera, FiAward, FiDollarSign, FiShoppingBag, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export default function ShopSettingsPage() {
@@ -245,7 +246,7 @@ export default function ShopSettingsPage() {
         {/* Shop Information Section */}
         <div className="mb-8 p-6 border border-gray-200 rounded-lg bg-green-50">
           <h2 className="text-2xl font-semibold text-green-700 mb-4 flex items-center">
-            <FiStore className="mr-2" /> ข้อมูลร้านค้า
+            <FiShoppingBag className="mr-2" /> ข้อมูลร้านค้า {/* แก้ไขตรงนี้ */}
           </h2>
           <form onSubmit={handleUpdateShopInfo}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
