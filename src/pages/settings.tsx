@@ -1,22 +1,33 @@
 // /pages/settings.tsx
 // this is Settings for USER role
-// /src/pages/settings/user.tsx (หรืออาจจะรวมใน /src/pages/settings.tsx แล้วแสดงตาม role)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import Head from 'next/head';
 import Link from "next/link";
-// แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag
+import { useRouter } from 'next/router'; // Added useRouter
+import { useSession } from 'next-auth/react'; // Added useSession
+// Corrected: Changed FiStore to FiShoppingBag
 import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiShoppingBag } from 'react-icons/fi';
-import { motion } from 'framer-motion'; // สำหรับ animation เล็กน้อย
-import Layout from "@/components/Layout"; // ตรวจสอบให้แน่ใจว่า path นี้ถูกต้อง
+import { motion } from 'framer-motion'; // For small animations
+import Layout from "@/components/Layout"; // Ensure this path is correct
 
 export default function UserSettingsPage() {
+  const { data: session, status } = useSession(); // Get session data and status
+  const router = useRouter(); // Initialize router
+
   const [profileName, setProfileName] = useState('ชื่อผู้ใช้งานปัจจุบัน');
   const [email, setEmail] = useState('user@example.com');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://placehold.co/150x150/aabbcc/ffffff?text=User'); // Placeholder avatar
-  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null); // สำหรับเก็บไฟล์ avatar ที่รอการอัปโหลด
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null); // To store avatar file awaiting upload
+
+  // Authentication protection effect
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login'); // Redirect to login page if not authenticated
+    }
+  }, [status, router]); // Depend on status and router
 
   // Function to handle avatar selection (for preview and pending upload)
   const handleAvatarSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +40,7 @@ export default function UserSettingsPage() {
 
   // Function to handle saving profile information (name and avatar)
   const handleSaveProfileInfo = (e: React.FormEvent) => {
-    e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+    e.preventDefault(); // Prevent page refresh
     console.log('Updating profile name to:', profileName);
     // In a real application, you would update the user's name in your database (e.g., Supabase)
 
@@ -61,6 +72,17 @@ export default function UserSettingsPage() {
     setConfirmNewPassword('');
   };
 
+  // If session is loading or unauthenticated, render nothing or a loading spinner
+  if (status === 'loading' || status === 'unauthenticated') {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <p className="text-lg text-gray-700">กำลังโหลด...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
@@ -80,7 +102,7 @@ export default function UserSettingsPage() {
             <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
               <FiUser className="mr-2" /> ข้อมูลโปรไฟล์
             </h2>
-            <form onSubmit={handleSaveProfileInfo}> {/* ใช้ form สำหรับการบันทึกข้อมูลโปรไฟล์ */}
+            <form onSubmit={handleSaveProfileInfo}> {/* Use form for saving profile information */}
               <div className="flex flex-col items-center mb-6">
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary shadow-md">
                   <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
@@ -119,7 +141,7 @@ export default function UserSettingsPage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  type="submit" // ใช้ type="submit" เพื่อผูกกับ form
+                  type="submit" // Use type="submit" to link with the form
                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
                   <FiSave className="mr-2" /> บันทึกข้อมูลโปรไฟล์
