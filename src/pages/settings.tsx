@@ -1,6 +1,7 @@
 // /pages/settings.tsx
 import React, { useState } from 'react';
 import Head from 'next/head';
+import Link from "next/link";
 // แก้ไข: เปลี่ยน FiStore เป็น FiShoppingBag
 import { FiUser, FiMail, FiLock, FiImage, FiUpload, FiSave, FiEdit, FiShoppingBag } from 'react-icons/fi';
 import { motion } from 'framer-motion'; // สำหรับ animation เล็กน้อย
