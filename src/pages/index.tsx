@@ -38,7 +38,18 @@ export default function HomePage() {
     console.log('--- useEffect for fetching all stores triggered ---');
     console.log('Current Session Status in useEffect:', status);
     console.log('Current Session User Role in useEffect:', session?.user?.role);
-    // --- End Console.log ---
+
+    // --- Console.log: ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" ใน useEffect ---
+    if (status === "authenticated" && session?.user?.role === "store") {
+      console.log('User is authenticated and role is "store". Dashboard link should be visible.');
+    } else if (status === "authenticated" && session?.user?.role !== "store") {
+      console.log(`User is authenticated, but role is "${session?.user?.role}". Dashboard link should NOT be visible.`);
+    } else if (status === "unauthenticated") {
+      console.log('User is unauthenticated. Dashboard link should NOT be visible.');
+    } else if (status === "loading") {
+      console.log('Session is loading. Dashboard link visibility will be determined after load.');
+    }
+    // --- End Console.log for dashboard link ---
 
     fetch("/api/stores/all")
       .then(res => {
@@ -57,7 +68,7 @@ export default function HomePage() {
         console.log('Falling back to dummy stores.');
         setStores(dummyStores);
       });
-  }, []);
+  }, [status, session]); // เพิ่ม status และ session ใน dependency array เพื่อให้ console.log ทำงานเมื่อค่าเหล่านี้เปลี่ยน
 
 
   // ✅ ฟังก์ชันกดปุ่มเพื่อค้นหาร้านใกล้ตัว
@@ -106,30 +117,17 @@ export default function HomePage() {
       <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
         <div className="max-w-5xl mx-auto space-y-8">
 
-          {/* Console.log: ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" */}
+          {/* ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" */}
           {status === "authenticated" && session?.user?.role === "store" && (
-            <>
-              {console.log('User is authenticated and role is "store". Displaying dashboard link.')}
-              <div className="flex justify-end">
-                <Link
-                  href="/store/dashboard"
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-                >
-                  ไปที่แดชบอร์ด
-                </Link>
-              </div>
-            </>
+            <div className="flex justify-end">
+              <Link
+                href="/store/dashboard"
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+              >
+                ไปที่แดชบอร์ด
+              </Link>
+            </div>
           )}
-          {status === "authenticated" && session?.user?.role !== "store" && (
-            console.log(`User is authenticated, but role is "${session?.user?.role}". Not displaying dashboard link.`)
-          )}
-          {status === "unauthenticated" && (
-            console.log('User is unauthenticated. Not displaying dashboard link.')
-          )}
-          {status === "loading" && (
-            console.log('Session is loading. Not displaying dashboard link yet.')
-          )}
-          {/* End Console.log */}
 
           <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-3xl md:text-4xl font-semibold text-primary">
