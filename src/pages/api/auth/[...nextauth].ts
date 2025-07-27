@@ -219,7 +219,7 @@ export const authOptions: NextAuthOptions = {
         // Populate custom fields from token to session.user
         session.user.role = (token.role ); // No fallback needed here as it's handled in jwt callback
         session.user.membership_type = (token.membership_type ); // No fallback needed here
-      }
+      } 
       return session;
     },
   },
