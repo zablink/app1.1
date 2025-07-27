@@ -217,8 +217,8 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string;
         session.user.image = token.picture as string; // Populate session.user.image from token.picture
         // Populate custom fields from token to session.user
-        session.user.role = token.role; // No fallback needed here as it's handled in jwt callback
-        session.user.membership_type = token.membership_type; // No fallback needed here
+        session.user.role = token.role ?? 'user'; // No fallback needed here as it's handled in jwt callback
+        session.user.membership_type = token.membership_type ?? 'free'; // No fallback needed here
       } 
       return session;
     },
