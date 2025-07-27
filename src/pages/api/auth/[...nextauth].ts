@@ -42,11 +42,16 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('--- NextAuth authorize callback triggered ---');
+        console.log('Received credentials:', credentials?.email); // Log email for debugging
+
         if (!credentials?.email || !credentials?.password) {
+          console.warn('Authorize failed: Email or password missing.');
           return null;
         }
 
         try {
+          // 1. Authenticate with Supabase Auth
           const { data, error } = await supabaseForCallbacks.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
@@ -54,80 +59,166 @@ export const authOptions: NextAuthOptions = {
 
           if (error) {
             console.error("Supabase signInWithPassword error (in NextAuth CredentialsProvider):", error.message);
-            throw new Error(error.message);
+            // Don't throw new Error here as it might prevent NextAuth from showing specific error messages
+            return null; // Return null on auth error
           }
 
           if (data.user) {
-            console.log("Supabase signInWithPassword successful. User (from CredentialsProvider):", data.user);
-            // Ensure user_metadata is correctly populated in Supabase for these fields
+            console.log("Supabase signInWithPassword successful. User ID:", data.user.id);
+
+            // 2. Fetch user profile data from your 'profiles' table
+            // This is crucial for getting 'role' and 'membership_type'
+            const { data: profile, error: profileError } = await supabaseForCallbacks
+              .from('profiles')
+              .select('id, name, email, role, membership_type, avatar_url') // Select all necessary fields
+              .eq('id', data.user.id) // Match by user ID
+              .single(); // Expect only one result
+
+            if (profileError || !profile) {
+              console.error("Error fetching user profile from 'profiles' table:", profileError?.message || "Profile not found after sign-in.");
+              return null; // If profile is not found or error, return null
+            }
+
+            console.log("Fetched user profile data:", profile);
+
+            // 3. Return user object for NextAuth
+            // This object will be passed to the jwt callback
             return {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.user_metadata?.full_name || data.user.email,
-              image: data.user.user_metadata?.avatar_url || null,
-              // Assuming 'role' and 'membership_type' are stored in user_metadata or profiles table
-              // In a real app, you'd fetch these from your 'profiles' table using data.user.id
-              // For now, using user_metadata or a default for demonstration
-              // @ts-ignore
-              role: data.user.user_metadata?.role || "user",
-              // @ts-ignore
-              membership_type: data.user.user_metadata?.membership_type || "free",
+              id: profile.id,
+              email: profile.email,
+              name: profile.name || profile.email?.split('@')[0] || 'User', // Use name from profile, fallback to email part
+              image: profile.avatar_url || null, // Use avatar_url from profile
+              role: profile.role || "user", // Use role from profile, fallback to "user"
+              membership_type: profile.membership_type || "free", // Use membership_type from profile, fallback to "free"
             };
           } else {
             console.warn("Supabase signInWithPassword returned no user data (in CredentialsProvider).");
-            return null;
+            return null; // No user data means authentication failed
           }
         } catch (e: any) {
-          console.error("Authorize function caught an exception (in CredentialsProvider):", e.message);
+          console.error("Authorize function caught an unexpected exception (in CredentialsProvider):", e.message);
           return null;
         }
       },
     }),
   ],
 
+  // --- Supabase Adapter ---
+  // The adapter connects NextAuth to your Supabase database for session and user management.
+  // Ensure your Supabase database has the tables required by the adapter (users, accounts, sessions, verification_tokens).
+  // These are typically managed by NextAuth-Supabase adapter directly.
   adapter: SupabaseAdapter({
     url: NEXT_PUBLIC_SUPABASE_URL,
-    // แก้ไข: เปลี่ยน serviceRoleKey เป็น secret
-    secret: SUPABASE_SERVICE_ROLE_KEY, 
+    secret: SUPABASE_SERVICE_ROLE_KEY,
   }),
-  secret: NEXTAUTH_SECRET, // This is the NextAuth secret, not Supabase secret
+  secret: NEXTAUTH_SECRET,
 
+  session: {
+    strategy: "jwt", // Required for adapter usage with callbacks
+  },
+
+  // --- Callbacks ---
+  // Callbacks allow you to control what happens when an action is performed.
   callbacks: {
+    // This signIn callback is typically used for additional checks before allowing sign-in
     async signIn({ user, account, profile, email }) {
-      // This callback runs after a successful authentication.
-      return true;
+      console.log('--- NextAuth signIn callback triggered ---');
+      console.log('User attempting to sign in:', user?.email);
+      // For CredentialsProvider, `user` here is the object returned from `authorize`
+      // For other providers (Google, GitHub), `profile` contains data from the OAuth provider.
+      
+      // If using SupabaseAdapter, the user might be inserted into NextAuth's internal 'users' table here.
+      // We generally allow all successful authentications at this stage unless specific blocking logic is needed.
+      return true; // Return true to allow sign-in, false to deny
     },
 
+    // The jwt callback is responsible for populating the JWT (JSON Web Token)
+    // This token is then used by the session callback.
     async jwt({ token, user, account, profile, isNewUser }) {
-      // The `user` object is only available the first time this callback is called on a new session.
-      // After that, `token` is passed between subsequent calls.
+      console.log('--- NextAuth JWT callback triggered ---');
+      // console.log('JWT User:', user?.email, 'Token:', token);
+
       if (user) {
-        // This 'user' object comes from the 'signIn' callback or the provider's 'authorize' method.
-        // It should contain 'id', 'name', 'email', 'image', 'role', 'membership_type'
+        // 'user' object comes from the 'authorize' method (for Credentials)
+        // or from the OAuth provider (for Google/GitHub) after it's processed.
+        // It should already contain 'id', 'name', 'email', 'image', 'role', 'membership_type'
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.picture = user.image; // Use 'picture' for avatar URL in JWT
-        // @ts-ignore // Suppress TypeScript error if 'role' is not in default User type
-        token.role = user.role;
-        // @ts-ignore // Suppress TypeScript error if 'membership_type' is not in default User type
-        token.membership_type = user.membership_type;
+        token.picture = user.image; // Using 'picture' for avatar URL in JWT
+        // Type assertion to access custom properties
+        token.role = (user as any).role; 
+        token.membership_type = (user as any).membership_type;
+      } else if (account?.provider === "google" || account?.provider === "github") {
+        // --- Handle OAuth Provider Logins (Google, GitHub) ---
+        // If user logs in with OAuth, we need to fetch their profile details
+        // from our 'profiles' table, similar to CredentialsProvider.
+        // This ensures 'role' and 'membership_type' are included for OAuth users too.
+        if (token.sub) { // 'sub' is the user ID from the provider/NextAuth
+            console.log(`Fetching profile for OAuth user ID: ${token.sub}`);
+            const { data: profile, error: profileError } = await supabaseForCallbacks
+                .from('profiles')
+                .select('id, name, email, role, membership_type, avatar_url')
+                .eq('id', token.sub) // Match by id (which is token.sub for OAuth users here)
+                .single();
+
+            if (profileError || !profile) {
+                console.error("Error fetching OAuth user profile:", profileError?.message || "Profile not found for OAuth user.");
+                // Optionally, create a default profile for new OAuth users here if not done during signup/creation
+                if (isNewUser) {
+                    console.log("Creating default profile for new OAuth user:", token.email);
+                    const { error: newProfileError } = await supabaseForCallbacks
+                        .from('profiles')
+                        .insert({
+                            id: token.sub,
+                            email: token.email,
+                            name: token.name,
+                            avatar_url: token.picture,
+                            role: 'user', // Default role for new OAuth users
+                            membership_type: 'free'
+                        });
+                    if (newProfileError) {
+                        console.error("Failed to create default profile for new OAuth user:", newProfileError.message);
+                    }
+                }
+                // Even if profile fetch/creation fails, proceed with basic token data
+                token.role = 'user'; // Ensure a default role even on error
+                token.membership_type = 'free';
+            } else {
+                token.name = profile.name;
+                token.email = profile.email;
+                token.picture = profile.avatar_url;
+                token.role = profile.role;
+                token.membership_type = profile.membership_type;
+            }
+        }
       }
+
+      // Ensure 'role' and 'membership_type' always have a fallback in the token
+      // This is helpful if they are undefined for any reason (e.g., old users without a role)
+      if (!token.role) {
+          token.role = "user";
+      }
+      if (!token.membership_type) {
+          token.membership_type = "free";
+      }
+
       return token;
     },
 
+    // The session callback populates the session object that is accessible on the client-side via useSession().
     async session({ session, token, user }) {
-      // The `session` object is what gets sent to the client.
-      // We populate `session.user` with data from the `token`.
-      if (token) {
+      console.log('--- NextAuth Session callback triggered ---');
+      // console.log('Session Token:', token, 'Session User (from Adapter):', user);
+
+      if (session.user && token) {
         session.user.id = token.id as string;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.image = token.picture; // Populate session.user.image from token.picture
-        // @ts-ignore // Suppress TypeScript error if 'role' is not in default SessionUser type
-        session.user.role = token.role;
-        // @ts-ignore // Suppress TypeScript error if 'membership_type' is not in default SessionUser type
-        session.user.membership_type = token.membership_type;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.picture as string; // Populate session.user.image from token.picture
+        // Populate custom fields from token to session.user
+        session.user.role = (token.role as string); // No fallback needed here as it's handled in jwt callback
+        session.user.membership_type = (token.membership_type as string); // No fallback needed here
       }
       return session;
     },
@@ -136,8 +227,34 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
 
   pages: {
-    error: '/auth/error',
+    signIn: '/login', // Make sure this points to your custom login page
+    error: '/auth/error', // Optional: Redirect for authentication errors
   },
+  
+  // Custom type definitions for NextAuth to extend session and JWT types
+  // You would typically declare this in a separate .d.ts file, e.g., types/next-auth.d.ts
+  // For quick testing, you can add it here.
+  // interface User {
+  //   id: string;
+  //   name?: string | null;
+  //   email?: string | null;
+  //   image?: string | null;
+  //   role?: string | null;
+  //   membership_type?: string | null;
+  // }
+
+  // interface Session {
+  //   user: {
+  //     id: string;
+  //     name?: string | null;
+  //     email?: string | null;
+  //     image?: string | null;
+  //     role?: string | null;
+  //     membership_type?: string | null;
+  //   } & DefaultSession['user'];
+  // }
+  // You might also need to extend the NextAuth.JWT interface for custom token properties.
+  // For full type safety, put these in a global declaration file.
 };
 
 export default NextAuth(authOptions);
