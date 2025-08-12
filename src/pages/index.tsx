@@ -143,7 +143,7 @@ export default function HomePage({
 
   const trackAdClick = async (campaignId: string, shopId: string) => {
     try {
-      await fetch('/api/analytics/ad-click', {
+      await fetch('/api/analytics/ad-click', { //ad click
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
