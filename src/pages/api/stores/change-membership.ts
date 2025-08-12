@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { toType } = req.body;
 
   // ตรวจสอบสิทธิ์
-  if (session.user.role !== "store") {
+  if (session.user.role !== "shop") {
     return res.status(403).json({ error: "Only store accounts allowed" });
   }
 
