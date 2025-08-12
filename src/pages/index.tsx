@@ -1,217 +1,166 @@
-// pages/index.tsx
-export const dynamic = "force-dynamic";
+// src/pages/index.tsx
+import { useState, useEffect } from 'react';
+import { GetServerSideProps } from 'next';
+import { useSession } from 'next-auth/react';
+import Head from 'next/head';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { 
+  Search, 
+  MapPin, 
+  Star, 
+  Filter,
+  Grid3X3,
+  List,
+  Phone,
+  Clock,
+  ChevronRight,
+  Heart,
+  Eye
+} from 'lucide-react';
+import { createClient } from '@/lib/supabase';
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { getNearbyStores } from "@/lib/stores";
 import Layout from "@/components/Layout";
 
-export default function HomePage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+interface Shop {
+  id: string;
+  name: string;
+  description: string;
+  cover_image_url: string;
+  thumbnail_url: string;
+  average_rating: number;
+  total_reviews: number;
+  food_category_name: string;
+  subdistrict_name: string;
+  district_name: string;
+  province_name: string;
+  package_name: string;
+  priority_score: number;
+  delivery_platforms: Array<{
+    name: string;
+    logo_url: string;
+    url: string;
+  }>;
+  opening_hours: any;
+  phone: string;
+  distance_km?: number;
+}
 
-  const [stores, setStores] = useState<any[]>([]);
-  const [locationError, setLocationError] = useState(false);
-  const [loadingNearby, setLoadingNearby] = useState(false);
+interface AdCampaign {
+  id: string;
+  shop_name: string;
+  banner_image_url: string;
+  banner_link_url: string;
+  banner_alt_text: string;
+  zone_name: string;
+}
 
-  // --- Console.log: ตรวจสอบสถานะและข้อมูล Session ทันทีที่ component ถูก render ---
-  console.log('--- HomePage Component Render ---');
-  console.log('Session Status:', status);
-  console.log('Session Data (initial render):', session);
-  if (session?.user) {
-    console.log('Session User Name (initial render):', session.user.name);
-    console.log('Session User Email (initial render):', session.user.email);
-    console.log('Session User Image (initial render):', session.user.image);
-    // @ts-ignore
-    console.log('Session User Role (initial render):', session.user.role); // Log custom role
-    // @ts-ignore
-    console.log('Session User Membership Type (initial render):', session.user.membership_type); // Log custom membership_type
-  } else {
-    console.log('Session User is null or undefined on initial render.');
-  }
-  // --- End Console.log ---
+interface HomePageProps {
+  featuredShops: Shop[];
+  nearbyShops: Shop[];
+  foodCategories: Array<{
+    id: number;
+    name_th: string;
+    icon_url: string;
+  }>;
+  adCampaigns: {
+    bannerTop: AdCampaign[];
+    floatingRight: AdCampaign[];
+    footerBanner: AdCampaign[];
+  };
+  userLocation?: {
+    lat: number;
+    lng: number;
+  };
+}
 
+export default function HomePage({
+  featuredShops,
+  nearbyShops,
+  foodCategories,
+  adCampaigns,
+  userLocation
+}: HomePageProps) {
+  const { data: session } = useSession();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filteredShops, setFilteredShops] = useState<Shop[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Filter shops based on search and category
   useEffect(() => {
-    // --- Console.log: ตรวจสอบสถานะและข้อมูล Session เมื่อ useEffect สำหรับ fetch stores ทำงาน ---
-    console.log('--- useEffect for fetching all stores triggered ---');
-    console.log('Current Session Status in useEffect:', status);
-    console.log('Current Session User Role in useEffect:', session?.user?.role);
-
-    // --- Console.log: ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" ใน useEffect ---
-    if (status === "authenticated" && session?.user?.role === "store") {
-      console.log('User is authenticated and role is "store". Dashboard link should be visible.');
-    } else if (status === "authenticated" && session?.user?.role !== "store") {
-      console.log(`User is authenticated, but role is "${session?.user?.role}". Dashboard link should NOT be visible.`);
-    } else if (status === "unauthenticated") {
-      console.log('User is unauthenticated. Dashboard link should NOT be visible.');
-    } else if (status === "loading") {
-      console.log('Session is loading. Dashboard link visibility will be determined after load.');
+    let shops = nearbyShops;
+    
+    if (searchQuery) {
+      shops = shops.filter(shop => 
+        shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        shop.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        shop.food_category_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
-    // --- End Console.log for dashboard link ---
-
-    fetch("/api/stores/all")
-      .then(res => {
-        if (!res.ok) {
-          console.error(`HTTP error! status: ${res.status}`);
-          throw new Error('Network response was not ok');
-        }
-        return res.json();
-      })
-      .then(data => {
-        console.log('Fetched all stores data:', data);
-        setStores(data);
-      })
-      .catch(err => {
-        console.error("Error fetching all stores:", err);
-        console.log('Falling back to dummy stores.');
-        setStores(dummyStores);
-      });
-  }, [status, session]); // เพิ่ม status และ session ใน dependency array เพื่อให้ console.log ทำงานเมื่อค่าเหล่านี้เปลี่ยน
-
-
-  // ✅ ฟังก์ชันกดปุ่มเพื่อค้นหาร้านใกล้ตัว
-  const handleFindNearby = () => {
-    console.log('--- handleFindNearby triggered ---');
-    if (!navigator.geolocation) {
-      console.warn('Geolocation is not supported by this browser.');
-      setLocationError(true);
-      return;
+    
+    if (selectedCategory) {
+      shops = shops.filter(shop => shop.food_category_name === foodCategories.find(c => c.id === selectedCategory)?.name_th);
     }
+    
+    setFilteredShops(shops);
+  }, [searchQuery, selectedCategory, nearbyShops, foodCategories]);
 
-    setLoadingNearby(true);
-    console.log('Attempting to get current geolocation position...');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log(`Geolocation successful: Latitude=${latitude}, Longitude=${longitude}`);
-        try {
-          const nearby = await getNearbyStores(latitude, longitude);
-          console.log('Fetched nearby stores data:', nearby);
-          setStores(nearby?.length > 0 ? nearby : dummyStores);
-          if (nearby?.length === 0) {
-            console.log('No nearby stores found, falling back to dummy stores.');
-          }
-        } catch (err) {
-          console.error("Error loading nearby stores:", err);
-          console.log('Falling back to dummy stores due to API error.');
-          setStores(dummyStores);
-        } finally {
-          setLoadingNearby(false);
-          console.log('Finished loading nearby stores.');
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error.message);
-        setLocationError(true);
-        setStores(dummyStores);
-        setLoadingNearby(false);
-        console.log('Falling back to dummy stores due to geolocation error.');
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length > 2) {
+      // Log search for analytics
+      try {
+        await fetch('/api/analytics/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            searchQuery: query,
+            categoryFilter: selectedCategory,
+            userLocation 
+          }),
+        });
+      } catch (error) {
+        console.error('Search tracking error:', error);
       }
-    );
+    }
+  };
+
+  const trackShopView = async (shopId: string) => {
+    try {
+      await fetch('/api/analytics/page-view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          shopId,
+          pageType: 'shop_detail'
+        }),
+      });
+    } catch (error) {
+      console.error('View tracking error:', error);
+    }
+  };
+
+  const trackAdClick = async (campaignId: string, shopId: string) => {
+    try {
+      await fetch('/api/analytics/ad-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          campaignId,
+          shopId,
+          clickType: 'ad_banner'
+        }),
+      });
+    } catch (error) {
+      console.error('Ad click tracking error:', error);
+    }
   };
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-neutral px-4 py-8 text-gray-800">
-        <div className="max-w-5xl mx-auto space-y-8">
-
-          {/* ตรวจสอบเงื่อนไขการแสดงปุ่ม "ไปที่แดชบอร์ด" */}
-          {status === "authenticated" && session?.user?.role === "store" && (
-            <div className="flex justify-end">
-              <Link
-                href="/store/dashboard"
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-              >
-                ไปที่แดชบอร์ด
-              </Link>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <h1 className="text-3xl md:text-4xl font-semibold text-primary">
-              ร้านอาหารแนะนำ
-            </h1>
-            <button
-              onClick={handleFindNearby}
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-            >
-              {loadingNearby ? "กำลังค้นหา..." : "ค้นหาร้านใกล้ฉัน"}
-            </button>
-          </div>
-
-          {locationError && (
-            <p className="text-red-600">ไม่สามารถเข้าถึงตำแหน่งของคุณได้</p>
-          )}
-
-          {stores.length === 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse space-y-4 rounded-xl bg-white shadow-md p-4"
-                >
-                  <div className="h-32 bg-gray-200 rounded-lg shimmer" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {stores.map((store) => {
-                const imageUrl = store.cover_url || `/store-images/${store.id}.jpg` || "/default-cover.jpg";
-                return (
-                  <div
-                    key={store.id}
-                    className="group rounded-xl bg-white shadow-md hover:shadow-xl transition duration-300 cursor-pointer"
-                    onClick={() => router.push(`/store/${store.id}`)}
-                  >
-                    <div className="h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={store.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-4 space-y-1">
-                      <h2 className="text-lg font-medium text-primary group-hover:underline">
-                        {store.name}
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        {store.description || store.category || "ไม่มีคำอธิบาย"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </Layout>
-  );
-}
-
-// ✅ fallback ร้านตัวอย่าง
-const dummyStores = [
-  {
-    id: "dummy1",
-    name: "ร้านตัวอย่าง A",
-    description: "ร้านอาหารญี่ปุ่นแนะนำ",
-    cover_url: "/store-images/store1.jpg",
-  },
-  {
-    id: "dummy2",
-    name: "ร้านตัวอย่าง B",
-    description: "ร้านชานมไข่มุกยอดฮิต",
-    cover_url: "/store-images/store2.jpg",
-  },
-  {
-    id: "dummy3",
-    name: "ร้านตัวอย่าง C",
-    description: "อาหารตามสั่งอร่อยๆ",
-    cover_url: "/store-images/store3.jpg",
-  },
-];
+    <>
+      <Head>
+        <title>ZabLink - แพลตฟอร์มรวมลิงก์ร้านอาหารครบครัน</title>
+        <meta name="description" content="ค้นหาร้านอาหารใกล้คุณ พร้อมลิงก์สั่งอาหารจากทุกแพลตฟอร์ม LINE M
