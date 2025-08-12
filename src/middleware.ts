@@ -55,8 +55,8 @@ export async function middleware(req: NextRequest) {
   }
 
   // ✅ BLOCK store เข้า admin
-  if (token?.role === "store" && pathname.startsWith("/admin")) {
-    console.log(`BLOCK: Store role tried to access ${pathname}`);
+  if (token?.role === "shop" && pathname.startsWith("/admin")) {
+    console.log(`BLOCK: Shop role tried to access ${pathname}`);
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
