@@ -64,7 +64,7 @@ export async function middleware(req: NextRequest) {
   if (token?.role === "admin" && pathname.startsWith("/store")) {
     console.log(`BLOCK: Admin role tried to access ${pathname}`);
     return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
+  } 
 
   // ✅ user ต้องกรอก complete-profile ก่อน
   /* อันนี้เป็น Logic ที่คุณคอมเมนต์ไว้เช่นกัน
