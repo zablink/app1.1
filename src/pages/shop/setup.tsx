@@ -412,4 +412,531 @@ export default function ShopSetup({ locations, foodCategories, deliveryPlatforms
                           </label>
                           <div className="relative">
                             <select
-                              value={formData.subdist
+                              value={formData.subdistrictId}
+                              onChange={(e) => setFormData(prev => ({ ...prev, subdistrictId: e.target.value }))}
+                              disabled={!formData.districtId}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none disabled:bg-gray-100"
+                            >
+                              <option value="">เลือกตำบล</option>
+                              {filteredSubdistricts.map((subdistrict) => (
+                                <option key={subdistrict.id} value={subdistrict.id}>
+                                  {subdistrict.name_th}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          ที่อยู่รายละเอียด *
+                        </label>
+                        <textarea
+                          value={formData.addressDetail}
+                          onChange={(e) => setFormData(prev => ({ ...prev, addressDetail: e.target.value }))}
+                          placeholder="เลขที่ ซอย ถนน หรือรายละเอียดที่อยู่เพิ่มเติม"
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 3: Contact & Hours */}
+                {currentStep === 3 && (
+                  <motion.div
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">ข้อมูลติดต่อและเวลาทำการ</h2>
+                    
+                    <div className="space-y-6">
+                      {/* Contact Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            เบอร์โทรศัพท์ *
+                          </label>
+                          <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                            placeholder="08x-xxx-xxxx"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            LINE ID
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lineId}
+                            onChange={(e) => setFormData(prev => ({ ...prev, lineId: e.target.value }))}
+                            placeholder="@your-line-id"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Facebook
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.facebookUrl}
+                            onChange={(e) => setFormData(prev => ({ ...prev, facebookUrl: e.target.value }))}
+                            placeholder="https://facebook.com/your-page"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Instagram
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.instagramUrl}
+                            onChange={(e) => setFormData(prev => ({ ...prev, instagramUrl: e.target.value }))}
+                            placeholder="https://instagram.com/your-account"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Opening Hours */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">เวลาทำการ</h3>
+                        <div className="space-y-3">
+                          {Object.entries(formData.openingHours).map(([day, hours]) => {
+                            const dayNames: Record<string, string> = {
+                              monday: 'จันทร์',
+                              tuesday: 'อังคาร', 
+                              wednesday: 'พุธ',
+                              thursday: 'พฤหัสบดี',
+                              friday: 'ศุกร์',
+                              saturday: 'เสาร์',
+                              sunday: 'อาทิตย์'
+                            };
+
+                            return (
+                              <div key={day} className="flex items-center space-x-4 p-3 border rounded-lg">
+                                <div className="w-20 text-sm font-medium text-gray-700">
+                                  {dayNames[day]}
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={!hours.closed}
+                                    onChange={(e) => {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        openingHours: {
+                                          ...prev.openingHours,
+                                          [day]: { ...hours, closed: !e.target.checked }
+                                        }
+                                      }));
+                                    }}
+                                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                                  />
+                                  <span className="text-sm text-gray-600">เปิด</span>
+                                </div>
+
+                                {!hours.closed && (
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="time"
+                                      value={hours.open}
+                                      onChange={(e) => {
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          openingHours: {
+                                            ...prev.openingHours,
+                                            [day]: { ...hours, open: e.target.value }
+                                          }
+                                        }));
+                                      }}
+                                      className="px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                    <span className="text-gray-500">-</span>
+                                    <input
+                                      type="time"
+                                      value={hours.close}
+                                      onChange={(e) => {
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          openingHours: {
+                                            ...prev.openingHours,
+                                            [day]: { ...hours, close: e.target.value }
+                                          }
+                                        }));
+                                      }}
+                                      className="px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                )}
+
+                                {hours.closed && (
+                                  <span className="text-sm text-gray-500">ปิด</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 4: Images */}
+                {currentStep === 4 && (
+                  <motion.div
+                    key="step4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">รูปภาพร้าน</h2>
+                    
+                    <div className="space-y-6">
+                      {/* Cover Image */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          รูปหน้าปกร้าน (แนะนำ)
+                        </label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload('coverImage')}
+                            className="hidden"
+                            id="cover-upload"
+                          />
+                          <label htmlFor="cover-upload" className="cursor-pointer">
+                            {formData.coverImage ? (
+                              <div>
+                                <Image
+                                  src={URL.createObjectURL(formData.coverImage)}
+                                  alt="Cover preview"
+                                  width={200}
+                                  height={100}
+                                  className="mx-auto rounded-lg mb-2"
+                                />
+                                <p className="text-sm text-gray-600">{formData.coverImage.name}</p>
+                              </div>
+                            ) : (
+                              <div>
+                                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-600">คลิกเพื่ออัพโหลดรูปหน้าปก</p>
+                                <p className="text-xs text-gray-500 mt-1">ขนาดแนะนำ: 1200x600 px</p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Thumbnail & Logo */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            รูปโปรไฟล์ร้าน
+                          </label>
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload('thumbnailImage')}
+                              className="hidden"
+                              id="thumbnail-upload"
+                            />
+                            <label htmlFor="thumbnail-upload" className="cursor-pointer">
+                              {formData.thumbnailImage ? (
+                                <div>
+                                  <Image
+                                    src={URL.createObjectURL(formData.thumbnailImage)}
+                                    alt="Thumbnail preview"
+                                    width={100}
+                                    height={100}
+                                    className="mx-auto rounded-lg mb-2"
+                                  />
+                                  <p className="text-xs text-gray-600">{formData.thumbnailImage.name}</p>
+                                </div>
+                              ) : (
+                                <div>
+                                  <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                  <p className="text-sm text-gray-600">รูปโปรไฟล์</p>
+                                  <p className="text-xs text-gray-500">400x400 px</p>
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            โลโก้ร้าน
+                          </label>
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload('logoImage')}
+                              className="hidden"
+                              id="logo-upload"
+                            />
+                            <label htmlFor="logo-upload" className="cursor-pointer">
+                              {formData.logoImage ? (
+                                <div>
+                                  <Image
+                                    src={URL.createObjectURL(formData.logoImage)}
+                                    alt="Logo preview"
+                                    width={100}
+                                    height={100}
+                                    className="mx-auto rounded-lg mb-2"
+                                  />
+                                  <p className="text-xs text-gray-600">{formData.logoImage.name}</p>
+                                </div>
+                              ) : (
+                                <div>
+                                  <Store className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                  <p className="text-sm text-gray-600">โลโก้ร้าน</p>
+                                  <p className="text-xs text-gray-500">200x200 px</p>
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Step 5: Delivery Links */}
+                {currentStep === 5 && (
+                  <motion.div
+                    key="step5"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">ลิงก์สั่งอาหาร</h2>
+                    
+                    <div className="space-y-6">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-start space-x-3">
+                          <Star className="w-5 h-5 text-blue-600 mt-0.5" />
+                          <div>
+                            <h3 className="font-semibold text-blue-900">สำคัญ!</h3>
+                            <p className="text-sm text-blue-800">
+                              เพิ่มลิงก์ร้านของคุณจากแพลตฟอร์มต่างๆ เช่น LINE MAN, Grab Food เพื่อให้ลูกค้าสั่งอาหารได้ง่าย
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Delivery Links */}
+                      <div className="space-y-4">
+                        {deliveryPlatforms.map((platform) => {
+                          const existingLink = formData.deliveryLinks.find(link => link.platformId === platform.id.toString());
+                          
+                          return (
+                            <div key={platform.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                              <div className="flex items-center space-x-3 flex-1">
+                                <Image
+                                  src={platform.logo_url}
+                                  alt={platform.name}
+                                  width={40}
+                                  height={40}
+                                  className="rounded-lg"
+                                />
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900">{platform.name}</h3>
+                                  <input
+                                    type="url"
+                                    value={existingLink?.url || ''}
+                                    onChange={(e) => {
+                                      const newLinks = formData.deliveryLinks.filter(link => link.platformId !== platform.id.toString());
+                                      if (e.target.value) {
+                                        newLinks.push({ platformId: platform.id.toString(), url: e.target.value });
+                                      }
+                                      setFormData(prev => ({ ...prev, deliveryLinks: newLinks }));
+                                    }}
+                                    placeholder={`ลิงก์ร้านใน ${platform.name}`}
+                                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {existingLink && (
+                                <div className="flex-shrink-0">
+                                  <Check className="w-5 h-5 text-green-500" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {formData.deliveryLinks.length === 0 && (
+                        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                          <LinkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="font-semibold text-gray-900 mb-2">
+                            เพิ่มลิงก์แรกของคุณ
+                          </h3>
+                          <p className="text-gray-600 text-sm">
+                            เพิ่มลิงก์จากแพลตฟอร์มต่างๆ เพื่อให้ลูกค้าสั่งอาหารได้
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Navigation Buttons */}
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+                <div>
+                  {currentStep > 1 && (
+                    <button
+                      onClick={handlePrev}
+                      className="flex items-center space-x-2 px-6 py-3 text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>ย้อนกลับ</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-500">
+                    ขั้นตอน {currentStep} จาก {steps.length}
+                  </span>
+                  
+                  {currentStep < 5 ? (
+                    <button
+                      onClick={handleNext}
+                      disabled={!canProceed()}
+                      className="flex items-center space-x-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg transition-colors"
+                    >
+                      <span>ถัดไป</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!canProceed() || isSubmitting}
+                      className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg transition-colors"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>กำลังสร้างร้าน...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>สร้างร้าน</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin?callbackUrl=/shops/setup',
+        permanent: false,
+      },
+    };
+  }
+
+  if (session.user.role !== 'shop') {
+    return {
+      redirect: {
+        destination: '/dashboard',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // Mock data - replace with real Supabase calls
+    const mockData = {
+      locations: {
+        provinces: [
+          { id: 1, name_th: 'กรุงเทพมหานคร' },
+          { id: 2, name_th: 'นนทบุรี' },
+          { id: 3, name_th: 'ปทุมธานี' },
+          { id: 4, name_th: 'สมุทรปราการ' },
+          { id: 5, name_th: 'เชียงใหม่' },
+          { id: 6, name_th: 'ภูเก็ต' },
+        ],
+        districts: [
+          { id: 1, name_th: 'บางรัก', province_id: 1 },
+          { id: 2, name_th: 'ปทุมวัน', province_id: 1 },
+          { id: 3, name_th: 'สาทร', province_id: 1 },
+          { id: 4, name_th: 'คลองเตย', province_id: 1 },
+          { id: 5, name_th: 'วัฒนา', province_id: 1 },
+        ],
+        subdistricts: [
+          { id: 1, name_th: 'บางรัก', district_id: 1 },
+          { id: 2, name_th: 'สีลม', district_id: 1 },
+          { id: 3, name_th: 'ปทุมวัน', district_id: 2 },
+          { id: 4, name_th: 'ลุมพินี', district_id: 2 },
+          { id: 5, name_th: 'สาทร', district_id: 3 },
+        ],
+      },
+      foodCategories: [
+        { id: 1, name_th: 'อาหารไทย', icon_url: '/images/categories/thai.png' },
+        { id: 2, name_th: 'อาหารจีน', icon_url: '/images/categories/chinese.png' },
+        { id: 3, name_th: 'อาหารญี่ปุ่น', icon_url: '/images/categories/japanese.png' },
+        { id: 4, name_th: 'อาหารเกาหลี', icon_url: '/images/categories/korean.png' },
+        { id: 5, name_th: 'อาหารฝรั่ง', icon_url: '/images/categories/western.png' },
+      ],
+      deliveryPlatforms: [
+        { id: 1, name: 'LINE MAN', logo_url: '/images/platforms/lineman.png' },
+        { id: 2, name: 'Grab Food', logo_url: '/images/platforms/grab.png' },
+        { id: 3, name: 'foodpanda', logo_url: '/images/platforms/foodpanda.png' },
+        { id: 4, name: 'Robinhood', logo_url: '/images/platforms/robinhood.png' },
+        { id: 5, name: 'GET Food', logo_url: '/images/platforms/get.png' },
+      ],
+    };
+
+    return {
+      props: mockData,
+    };
+  } catch (error) {
+    console.error('Shop setup data fetch error:', error);
+    
+    return {
+      props: {
+        locations: { provinces: [], districts: [], subdistricts: [] },
+        foodCategories: [],
+        deliveryPlatforms: [],
+      },
+    };
+  }
+};
