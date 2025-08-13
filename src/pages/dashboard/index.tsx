@@ -572,4 +572,161 @@ export default function Dashboard({ initialData }: DashboardProps) {
                               disabled={isUpgrading}
                               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                             >
-                              {isUpgrading ? 'กำลังอัพเกรด...' :
+                              {isUpgrading ? 'กำลังอัพเกรด...' : 'อัพเกรด'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Membership Benefits */}
+                  <div className="bg-white rounded-xl shadow-md p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">สิทธิประโยชน์</h2>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 border rounded-lg">
+                          <h3 className="font-semibold text-gray-900 mb-2">แพ็คเกจปัจจุบัน</h3>
+                          <div className="flex items-center space-x-2 mb-3">
+                            {getMembershipBadge(session.user.membership_type)}
+                            <Crown className="w-4 h-4 text-yellow-500" />
+                          </div>
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            <li>• รีวิวร้านอาหาร</li>
+                            <li>• เก็บร้านโปรด</li>
+                            <li>• ค้นหาขั้นสูง</li>
+                            {session.user.membership_type !== 'free' && (
+                              <>
+                                <li>• ไม่มีโฆษณา</li>
+                                <li>• สิทธิพิเศษ</li>
+                              </>
+                            )}
+                          </ul>
+                        </div>
+
+                        <div className="p-4 bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+                          <h3 className="font-semibold text-gray-900 mb-2">คะแนนสะสม</h3>
+                          <div className="text-3xl font-bold text-orange-600 mb-2">
+                            {dashboardData.userStats.points}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">
+                            รีวิวร้าน +10 คะแนน<br />
+                            เข้าชมร้าน +1 คะแนน
+                          </p>
+                          <Link
+                            href="/rewards"
+                            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                          >
+                            ดูของรางวัล →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'activity' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl shadow-md p-6"
+                >
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">กิจกรรมทั้งหมด</h2>
+                  {dashboardData.recentActivity.length > 0 ? (
+                    <div className="space-y-4">
+                      {dashboardData.recentActivity.map((activity) => (
+                        <div key={activity.id} className="flex items-start space-x-3 p-4 border-l-4 border-orange-500 bg-orange-50">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Zap className="w-4 h-4 text-orange-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-gray-900">{activity.message}</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {new Date(activity.date).toLocaleString('th-TH')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Eye className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        ยังไม่มีกิจกรรม
+                      </h3>
+                      <p className="text-gray-600">
+                        เริ่มใช้งาน ZabLink เพื่อดูกิจกรรมของคุณ
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </main>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin?callbackUrl=/dashboard',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // Mock data for now - replace with real API calls
+    const initialData: DashboardData = {
+      userStats: {
+        totalFavorites: 0,
+        totalReviews: 0,
+        totalShops: session.user.role === 'shop' ? 1 : 0,
+        points: 0,
+        membershipType: session.user.membership_type,
+      },
+      recentActivity: [
+        {
+          id: '1',
+          type: 'login',
+          message: 'เข้าสู่ระบบผ่าน ' + (session.user.provider || 'อีเมล'),
+          date: new Date().toISOString(),
+        },
+      ],
+      notifications: [],
+      favoriteShops: [],
+    };
+
+    return {
+      props: {
+        initialData,
+      },
+    };
+  } catch (error) {
+    console.error('Dashboard data fetch error:', error);
+    
+    return {
+      props: {
+        initialData: {
+          userStats: {
+            totalFavorites: 0,
+            totalReviews: 0,
+            totalShops: 0,
+            points: 0,
+            membershipType: 'free',
+          },
+          recentActivity: [],
+          notifications: [],
+          favoriteShops: [],
+        },
+      },
+    };
+  }
+};
