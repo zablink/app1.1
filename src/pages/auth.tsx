@@ -26,30 +26,10 @@ const ZabLinkAuth = () => {
     }));
   };
 
-  // สำหรับ select
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // สำหรับ textarea
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
   };
-
 
   type Provider = "Google" | "Facebook" | "Twitter" | "TikTok";
 
@@ -58,9 +38,9 @@ const ZabLinkAuth = () => {
     // Handle social login logic here
   };
 
-
   const SocialButton = ({ icon: Icon, provider, bgColor, hoverColor, textColor = "text-white" }) => (
     <button
+      type="button"
       onClick={() => handleSocialLogin(provider)}
       className={`w-full flex items-center justify-center gap-3 px-4 py-3 ${bgColor} ${textColor} rounded-lg font-medium transition-all duration-200 hover:${hoverColor} hover:scale-105 hover:shadow-md`}
     >
@@ -157,6 +137,7 @@ const ZabLinkAuth = () => {
                   hoverColor="bg-gray-800"
                 />
                 <button
+                  type="button"
                   onClick={() => handleSocialLogin('TikTok')}
                   className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-lg font-medium transition-all duration-200 hover:bg-gray-800 hover:scale-105 hover:shadow-md"
                 >
@@ -176,7 +157,7 @@ const ZabLinkAuth = () => {
             </div>
 
             {/* Form */}
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               
               {/* Sign Up Fields */}
               {currentView === 'signup' && (
