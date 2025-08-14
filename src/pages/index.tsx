@@ -246,13 +246,13 @@ export default function HomePage({
                 ) : (
                   <div className="flex items-center space-x-3">
                     <Link 
-                      href="/auth/signin"
+                      href="/auth?tab=signin"
                       className="text-gray-700 hover:text-orange-600 font-medium"
                     >
                       เข้าสู่ระบบ
                     </Link>
                     <Link 
-                      href="/auth/register"
+                      href="/auth?tab=signup"
                       className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                     >
                       สมัครสมาชิก
