@@ -1,9 +1,19 @@
 // pages/auth.tsx
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Facebook,
+  Chrome,
+  Twitter,
+} from "lucide-react";
 
-import React from "react";
-import { Chrome, Facebook, Twitter } from "lucide-react";
-
-// 🔹 TikTok Icon Component
+// TikTok Icon
 const TikTokIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   <svg
     width={size}
@@ -17,6 +27,7 @@ const TikTokIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
 );
 
 type Provider = "Google" | "Facebook" | "Twitter" | "TikTok";
+
 type SocialButtonProps = {
   icon: React.FC<{ size?: number }>;
   provider: Provider;
@@ -42,34 +53,23 @@ const SocialButton: React.FC<SocialButtonProps> = ({
   </button>
 );
 
-// ใช้ในหน้า Auth
-export default function AuthSocial() {
-  return (
-    <div className="space-y-3">
-      <SocialButton
-        icon={Chrome}
-        provider="Google"
-        bgColor="bg-red-500"
-        hoverColor="bg-red-600"
-      />
-      <SocialButton
-        icon={Facebook}
-        provider="Facebook"
-        bgColor="bg-blue-600"
-        hoverColor="bg-blue-700"
-      />
-      <SocialButton
-        icon={Twitter}
-        provider="Twitter"
-        bgColor="bg-sky-500"
-        hoverColor="bg-sky-600"
-      />
-      <SocialButton
-        icon={TikTokIcon}
-        provider="TikTok"
-        bgColor="bg-black"
-        hoverColor="bg-gray-800"
-      />
-    </div>
-  );
-}
+const ZabLinkAuth = () => {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "signup" ? "signup" : "signin";
+  const [currentView, setCurrentView] = useState<"signin" | "signup">(initialTab);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    agreeTerms: false,
+  });
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "signin" || tab === "signup") {
+      setCurrentView(tab);
