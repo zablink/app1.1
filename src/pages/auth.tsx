@@ -51,10 +51,13 @@ const ZabLinkAuth = () => {
   };
 
 
-  const handleSocialLogin = (provider) => {
+  type Provider = "Google" | "Facebook" | "Twitter" | "TikTok";
+
+  const handleSocialLogin = (provider: Provider) => {
     console.log(`Login with ${provider}`);
     // Handle social login logic here
   };
+
 
   const SocialButton = ({ icon: Icon, provider, bgColor, hoverColor, textColor = "text-white" }) => (
     <button
