@@ -44,11 +44,12 @@ const ZabLinkAuth = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic here
     console.log('Form submitted:', formData);
   };
+
 
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
