@@ -181,7 +181,7 @@ const ZabLinkAuth = () => {
       }
     }
 
-    // Sign up specific validations
+    // Sign up specific validations 
     if (currentView === 'signup') {
       if (!formData.firstName.trim()) {
         newErrors.firstName = 'กรุณากรอกชื่อ';
