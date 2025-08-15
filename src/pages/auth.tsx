@@ -360,7 +360,7 @@ const ZabLinkAuth = () => {
         {/* Right Side - Auth Form */}
         <div className="w-full max-w-md mx-auto">
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
-            {/* Mobile Branding */}
+            {/* Mobile Branding  */}
             <div className="lg:hidden text-center mb-6">
               <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
                 ZabLink
