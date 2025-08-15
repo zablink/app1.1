@@ -343,7 +343,7 @@ const ZabLinkAuth = () => {
             <div className="space-y-4 text-left max-w-md">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
-                <span className="text-gray-700">เชื่อมต่อกับ Line Man, Grab Food และอื่นๆ</span>
+                <span className="text-gray-700">เชื่อมต่อกับ Line Man, Grab Food และอื่น ๆ</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"></div>
