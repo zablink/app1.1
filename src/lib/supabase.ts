@@ -21,7 +21,7 @@ export interface AuthError {
   message: string
   code?: string
 }
-
+ 
 // lib/auth.ts
 import { supabase } from './supabase'
 import type { Provider, AuthFormData, AuthError } from '@/types/auth'
