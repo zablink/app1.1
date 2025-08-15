@@ -279,7 +279,7 @@ export default function HomePage({
                 รวมลิงก์ร้านอาหารจากทุกแพลตฟอร์ม LINE MAN, Grab Food, foodpanda
               </p>
 
-              {/* Search Bar */}
+              {/* Search Bar  */}
               <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-full p-2 shadow-lg">
                   <div className="flex items-center">
