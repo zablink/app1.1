@@ -9,6 +9,7 @@ export interface AuthFormData {
   agreeTerms: boolean
 }
 
+export type AuthFormErrors = Partial<Record<keyof AuthFormData, string>>;
 export type Provider = 'google' | 'facebook' | 'twitter' | 'github'
 export type AuthView = 'signin' | 'signup'
 
@@ -16,3 +17,5 @@ export interface AuthError {
   message: string
   code?: string
 }
+
+
