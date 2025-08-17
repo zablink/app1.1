@@ -20,7 +20,7 @@ import { signInWithEmail, signUpWithEmail, signInWithSocial } from '@/lib/auth';
 import { validateAuthForm } from '@/lib/validation';
 import type { AuthFormData, AuthFormErrors, Provider, AuthView } from '@/types/auth';
 
-// TikTok Icon (kept for potential future use as a visual, NOT a provider) 
+// TikTok Icon (kept for potential future use as a visual, NOT a provider)  
 const TikTokIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   <svg
     width={size}
