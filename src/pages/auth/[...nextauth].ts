@@ -62,133 +62,134 @@ export const authOptions: NextAuthOptions = {
     */
   ],
 
+
+
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      try {
-        if (!user.email) {
-          console.error("No email provided");
-          return false;
-        }
-
-        // ตรวจสอบว่า email นี้เคยใช้กับ provider อื่นหรือไม่
-        const { data: existingProviders } = await supabase.rpc('check_email_providers', { 
-          email_to_check: user.email 
-        });
-
-        if (existingProviders && existingProviders.length > 0) {
-          // หา provider ที่ใช้ล่าสุด
-          const latestProvider = existingProviders[0];
-          
-          // ถ้าไม่ใช่ provider เดียวกันกับที่กำลังจะ login
-          if (account?.provider !== latestProvider.provider) {
-            // เก็บข้อมูลใน session เพื่อแสดงข้อความแจ้งเตือน
-            return `/auth/existing-account?email=${encodeURIComponent(user.email)}&provider=${latestProvider.provider}`;
-          }
-        }
-
-        return true;
-      } catch (error) {
-        console.error("SignIn error:", error);
+  async signIn({ user, account }) {
+    try {
+      if (!user.email) {
+        console.error("No email provided");
         return false;
       }
-    },
 
-    async jwt({ token, user, account, profile, isNewUser }) {
-      if (user) {
-        // เมื่อมีการ sign in ครั้งแรก
-        token.id = user.id;
-        token.role = user.role || "user";
-        token.membership_type = user.membership_type || "free";
-        token.avatar_url = user.image;
-        token.isNewUser = isNewUser || false;
-        
-        if (account) {
-          token.provider = account.provider;
-          
-          // สร้างหรืออัพเดตข้อมูลใน users table
-          const { data: existingUser } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+      // ตรวจสอบว่า email นี้เคยใช้กับ provider อื่นหรือไม่
+      const { data: existingProviders } = await supabase.rpc("check_email_providers", { 
+        email_to_check: user.email 
+      });
 
-          if (!existingUser) {
-            // สร้าง user ใหม่
-            await supabase.from('users').insert({
-              id: user.id,
-              username: user.name?.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5),
-              role: 'user',
-              membership_type: 'free',
-              avatar_url: user.image,
-              points: 0,
-              is_active: true,
-              last_login_at: new Date().toISOString(),
-            });
-            
-            // สร้าง user settings
-            await supabase.from('user_settings').insert({
-              user_id: user.id,
-            });
-            
-            token.isNewUser = true;
-          } else {
-            // อัพเดต last_login_at
-            await supabase
-              .from('users')
-              .update({ 
-                last_login_at: new Date().toISOString(),
-                avatar_url: user.image // อัพเดต avatar ถ้ามีการเปลี่ยนแปลง
-              })
-              .eq('id', user.id);
-              
-            token.role = existingUser.role;
-            token.membership_type = existingUser.membership_type;
-          }
+      if (existingProviders && existingProviders.length > 0) {
+        const latestProvider = existingProviders[0];
+
+        if (account?.provider !== latestProvider.provider) {
+          return `/auth/existing-account?email=${encodeURIComponent(user.email)}&provider=${latestProvider.provider}`;
         }
       }
 
-      return token;
-    },
+      return true;
+    } catch (error) {
+      console.error("SignIn error:", error);
+      return false;
+    }
+  },
 
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "user" | "shop" | "admin";
-        session.user.membership_type = token.membership_type as "free" | "pro1" | "pro2" | "pro3" | "special";
-        session.user.provider = token.provider as string;
-        session.user.isNewUser = token.isNewUser as boolean;
-        
-        // ดึงข้อมูลล่าสุดจาก database
-        const { data: userData } = await supabase
-          .from('users')
-          .select('username, role, membership_type, avatar_url, points')
-          .eq('id', token.id)
+  async jwt({ token, user, account, isNewUser }) {
+    if (user) {
+      // ขยาย JWT ด้วยข้อมูลจาก user
+      token.id = user.id;
+      token.role = user.role ?? "user";
+      token.membership_type = user.membership_type ?? "free";
+      token.avatar_url = user.avatar_url ?? user.image ?? null;
+      token.isNewUser = isNewUser ?? false;
+
+      if (account) {
+        token.provider = account.provider;
+
+        // ตรวจสอบข้อมูลใน Supabase
+        const { data: existingUser } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
           .single();
 
-        if (userData) {
-          session.user.username = userData.username;
-          session.user.role = userData.role;
-          session.user.membership_type = userData.membership_type;
-          session.user.avatar_url = userData.avatar_url;
+        if (!existingUser) {
+          // สร้าง user ใหม่
+          await supabase.from("users").insert({
+            id: user.id,
+            username:
+              (user.name?.toLowerCase().replace(/\s+/g, "_") ?? "user") +
+              "_" +
+              Math.random().toString(36).substr(2, 5),
+            role: "user",
+            membership_type: "free",
+            avatar_url: user.image,
+            points: 0,
+            is_active: true,
+            last_login_at: new Date().toISOString(),
+          });
+
+          await supabase.from("user_settings").insert({
+            user_id: user.id,
+          });
+
+          token.isNewUser = true;
+        } else {
+          // อัพเดต last_login_at และ avatar
+          await supabase
+            .from("users")
+            .update({
+              last_login_at: new Date().toISOString(),
+              avatar_url: user.image,
+            })
+            .eq("id", user.id);
+
+          token.role = existingUser.role ?? "user";
+          token.membership_type = existingUser.membership_type ?? "free";
+          token.avatar_url = existingUser.avatar_url ?? user.image ?? null;
         }
       }
+    }
 
-      return session;
-    },
-
-    async redirect({ url, baseUrl }) {
-      // หากมีการส่งผู้ใช้ไปยังหน้าแจ้งเตือน existing account
-      if (url.startsWith('/auth/existing-account')) {
-        return url;
-      }
-      
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
+    return token;
   },
+
+  async session({ session, token }) {
+    if (session.user) {
+      session.user.id = token.id;
+      session.user.role = token.role ?? "user";
+      session.user.membership_type = token.membership_type ?? "free";
+      session.user.provider = token.provider ?? null;
+      session.user.isNewUser = token.isNewUser ?? false;
+      session.user.avatar_url = token.avatar_url ?? null;
+
+      // ดึงข้อมูลล่าสุดจาก DB
+      const { data: userData } = await supabase
+        .from("users")
+        .select("username, role, membership_type, avatar_url, points")
+        .eq("id", token.id)
+        .single();
+
+      if (userData) {
+        session.user.username = userData.username;
+        session.user.role = userData.role;
+        session.user.membership_type = userData.membership_type;
+        session.user.avatar_url = userData.avatar_url;
+      }
+    }
+
+    return session;
+  },
+
+  async redirect({ url, baseUrl }) {
+    if (url.startsWith("/auth/existing-account")) {
+      return url;
+    }
+    if (url.startsWith("/")) return `${baseUrl}${url}`;
+    if (new URL(url).origin === baseUrl) return url;
+    return baseUrl;
+  },
+},
+
+
 
   pages: {
     signIn: "/auth/signin",
