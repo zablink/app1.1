@@ -48,59 +48,32 @@ export async function middleware(req: NextRequest) {
   }
   */
 
-  // ✅ BLOCK user เข้า store/admin
-  if (token?.role === "user" && (pathname.startsWith("/store") || pathname.startsWith("/admin"))) {
+  
+
+
+  // ✅ BLOCK user เข้า shop/admin
+  if (token?.role === "user" && (pathname.startsWith("/shop") || pathname.startsWith("/admin"))) {
     console.log(`BLOCK: User role tried to access ${pathname}`);
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // ✅ BLOCK store เข้า admin
+  // ✅ BLOCK shop เข้า admin
   if (token?.role === "shop" && pathname.startsWith("/admin")) {
-    console.log(`BLOCK: Shop   role tried to access ${pathname}`);
+    console.log(`BLOCK: Shop role tried to access ${pathname}`);
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // ✅ BLOCK admin เข้า store
-  if (token?.role === "admin" && pathname.startsWith("/store")) {
+  // ✅ BLOCK admin เข้า shop
+  if (token?.role === "admin" && pathname.startsWith("/shop")) {
     console.log(`BLOCK: Admin role tried to access ${pathname}`);
     return NextResponse.redirect(new URL("/unauthorized", req.url));
-  } 
-
-  // ✅ user ต้องกรอก complete-profile ก่อน
-  /* อันนี้เป็น Logic ที่คุณคอมเมนต์ไว้เช่นกัน
-  // โปรดระวัง: การใช้ fetch ใน middleware อาจมี overhead
-  // พิจารณาการเก็บสถานะ isComplete ไว้ใน JWT หากเป็นไปได้เพื่อลดการ fetch DB
-  if (
-    token?.role === "user" &&
-    !publicRoutes.includes(pathname) && // ไม่ต้องเช็คซ้ำ login / ก็ใช้ publicRoutes
-    pathname !== "/complete-profile" &&
-    !pathname.startsWith("/api/check-profile") // ไม่ต้องเช็ค api/check-profile ซ้ำ เพราะเป็น API
-  ) {
-    try {
-      const checkProfile = await fetch(`${req.nextUrl.origin}/api/check-profile`, {
-        headers: {
-          cookie: req.headers.get("cookie") ?? "",
-        },
-      });
-
-      if (checkProfile.ok) { // ใช้ checkProfile.ok แทน status === 200
-        const { isComplete } = await checkProfile.json();
-        console.log("Check profile returned isComplete =", isComplete);
-        if (!isComplete) {
-          console.log("Redirecting to /complete-profile because profile is incomplete.");
-          return NextResponse.redirect(new URL("/complete-profile", req.url));
-        }
-      } else {
-        console.error("Check profile API call failed with status:", checkProfile.status);
-        // อาจจะต้อง redirect ไปยังหน้า error หรือ complete-profile
-        return NextResponse.redirect(new URL("/complete-profile", req.url));
-      }
-    } catch (e) {
-      console.error("Error calling check-profile API in middleware:", e);
-      return NextResponse.redirect(new URL("/complete-profile", req.url)); // Handle network/other errors
-    }
   }
-  */
+
+
+
+
+
+  
 
   const res = NextResponse.next();
   // ตั้งค่า Cache-Control สำหรับ API Routes หรือหน้าที่มีการเปลี่ยนแปลงบ่อย
