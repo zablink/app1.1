@@ -1,6 +1,6 @@
 // src/pages/api/auth/[...nextauth].ts
 import NextAuth, { NextAuthOptions, Account, Profile, User } from "next-auth";
-import { CustomSupabaseAdapter } from "@/lib/customSupabaseAdapter";
+//import { CustomSupabaseAdapter } from "@/lib/customSupabaseAdapter";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -14,10 +14,12 @@ const supabase = createClient(
 );
 
 export const authOptions: NextAuthOptions = {
+  /*
   adapter: CustomSupabaseAdapter({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     secret: process.env.SUPABASE_SECRET_KEY!,
   }),
+  */
 
   providers: [
     // Email Provider
