@@ -5,7 +5,7 @@ import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import TwitterProvider from "next-auth/providers/twitter";
-import TikTokProvider from "@/lib/tiktok-provider";
+//import TikTokProvider from "@/lib/tiktok-provider";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -55,10 +55,11 @@ export const authOptions: NextAuthOptions = {
     }),
 
     // TikTok Provider
-    TikTokProvider({
+    /*TikTokProvider({
       clientId: process.env.TIKTOK_CLIENT_ID!,
       clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
     }),
+    */
   ],
 
   callbacks: {
