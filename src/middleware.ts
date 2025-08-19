@@ -1,7 +1,15 @@
 // /src/middleware.ts
-import getToken from "next-auth/jwt";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+// ✅ RBAC Config
+// role ไหน "ห้ามเข้า" path อะไรบ้าง
+const roleRestrictions: Record<string, string[]> = {
+  user: ["/shop", "/admin"],
+  shop: ["/admin"],
+  admin: ["/shop"], // admin เข้าได้ทุกที่ ยกเว้น /shop (ปรับได้ตามจริง)
+};
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
@@ -15,7 +23,7 @@ export async function middleware(req: NextRequest) {
     "/auth/error",
   ];
 
-  // Skip static files & API
+  // Static files & API routes ไม่ต้องตรวจสอบ
   const isExcludedPath =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -36,23 +44,30 @@ export async function middleware(req: NextRequest) {
     pathname === "/robots.txt";
 
   // ถ้า public หรือ static ก็ปล่อยผ่าน
-  if (publicRoutes.includes(pathname) || isExcludedPath) return NextResponse.next();
+  if (publicRoutes.includes(pathname) || isExcludedPath) {
+    return NextResponse.next();
+  }
 
   // ดึง token จาก JWT
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // ถ้าไม่ login ให้ redirect ไป /login
-  if (!token) return NextResponse.redirect(new URL("/login", req.url));
+  // ถ้าไม่ login → redirect ไป /login
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 
-  // Role-based access control
-  if (token.role === "user" && pathname.startsWith("/shop")) {
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
-  if (token.role === "shop" && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
-  if (token.role === "admin" && pathname.startsWith("/shop")) {
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  // เช็ค role restrictions
+  const role = token?.role as string | undefined;
+
+  if (role && roleRestrictions[role]) {
+    const restrictedPaths = roleRestrictions[role];
+    const isRestricted = restrictedPaths.some((path) =>
+      pathname.startsWith(path)
+    );
+
+    if (isRestricted) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
   }
 
   return NextResponse.next();
