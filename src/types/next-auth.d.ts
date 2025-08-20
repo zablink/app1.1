@@ -8,7 +8,7 @@ declare module "next-auth" {
       membership_type?: string;
       avatar_url?: string | null; // 👈 เพิ่ม null
       isNewUser?: boolean;
-      provider?: string;
+      provider?: string | null ;
     } & DefaultSession["user"];
   }
 
@@ -19,7 +19,7 @@ declare module "next-auth/jwt" {
     membership_type?: string;
     avatar_url?: string | null;   // 👈 เพิ่ม null
     isNewUser?: boolean;
-    provider?: string;
+    provider?: string | null;
   }
 }
 
