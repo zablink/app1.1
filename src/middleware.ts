@@ -3,69 +3,44 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// ✅ RBAC Config
-// role ไหน "ห้ามเข้า" path อะไรบ้าง
+// Role-based access
 const roleRestrictions: Record<string, string[]> = {
   user: ["/shop", "/admin"],
   shop: ["/admin"],
-  admin: ["/shop"], // admin เข้าได้ทุกที่ ยกเว้น /shop (ปรับได้ตามจริง)
+  admin: [], // admin เข้าได้ทุกที่
 };
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Public routes ที่ไม่ต้อง login
   const publicRoutes = [
     "/",
     "/login",
     "/signup",
     "/complete-profile",
     "/auth/error",
+    "/auth/signin",
+    "/auth/welcome",
+    "/auth/verify",
   ];
 
-  // Static files & API routes ไม่ต้องตรวจสอบ
   const isExcludedPath =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
-    pathname.endsWith(".png") ||
-    pathname.endsWith(".jpg") ||
-    pathname.endsWith(".jpeg") ||
-    pathname.endsWith(".gif") ||
-    pathname.endsWith(".svg") ||
-    pathname.endsWith(".css") ||
-    pathname.endsWith(".js") ||
-    pathname.endsWith(".map") ||
-    pathname.endsWith(".woff") ||
-    pathname.endsWith(".woff2") ||
-    pathname.endsWith(".ttf") ||
-    pathname.endsWith(".otf") ||
-    pathname.endsWith(".json") ||
+    [".png", ".jpg", ".jpeg", ".gif", ".svg", ".css", ".js", ".map", ".woff", ".woff2", ".ttf", ".otf", ".json"].some(ext => pathname.endsWith(ext)) ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt";
 
-  // ถ้า public หรือ static ก็ปล่อยผ่าน
-  if (publicRoutes.includes(pathname) || isExcludedPath) {
-    return NextResponse.next();
-  }
+  if (publicRoutes.includes(pathname) || isExcludedPath) return NextResponse.next();
 
-  // ดึง token จาก JWT
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  // ถ้าไม่ login → redirect ไป /login
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  if (!token) return NextResponse.redirect(new URL("/login", req.url));
 
-  // เช็ค role restrictions
-  const role = token?.role as string | undefined;
-
+  const role = token.role as string | undefined;
   if (role && roleRestrictions[role]) {
     const restrictedPaths = roleRestrictions[role];
-    const isRestricted = restrictedPaths.some((path) =>
-      pathname.startsWith(path)
-    );
-
-    if (isRestricted) {
+    if (restrictedPaths.some(path => pathname.startsWith(path))) {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }
